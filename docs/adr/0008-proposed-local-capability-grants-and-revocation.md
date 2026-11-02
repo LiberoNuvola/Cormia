@@ -22,7 +22,7 @@ Use two distinct decisions:
 
 The local grant issuer is the **worker host authority**, not the model and not an untrusted task requester. The key resolver supplied by trusted Runtime code must bind a key ID to a public key, an issuer identity, the role `local-host-authority`, and active key status. An unknown, inactive, wrongly typed or mismatched key is denied.
 
-The local host policy is an upper bound. A grant can only narrow the host's allowed operation and path sets. A signed grant is still insufficient by itself: each invocation also checks the expected task and manifest digest, worker/runtime identity, expiry, current revocation feed, workspace binding, operation and exact path.
+The local host policy is an upper bound. It must explicitly pin the expected `issuerId`, workspace reference, allowed capability/path sets, active signing key and maximum grant lifetime. A grant can only narrow the host's allowed operation and path sets. A signed grant is still insufficient by itself: each invocation also checks the expected task and manifest digest, worker/runtime identity, expiry, current revocation feed, workspace binding, operation and exact path.
 
 ### 2.1 Key bootstrap remains unresolved
 
@@ -108,7 +108,7 @@ The helper:
 
 This helper is **not connected** to `agent.mjs`, `CodingWorkspace.callTool()`, the existing `APPROVO` workflow, a Task Manifest parser, a key store, or a persistent revocation journal. It does not issue grants automatically. The tests use ephemeral in-memory keys only.
 
-The GitHub Actions workflow is a contract test of this isolated helper, not proof of key custody, host policy provisioning, Agent integration, task isolation or AEP conformance.
+The dedicated [Local Runtime Capability Grant Contracts run #6](https://github.com/LiberoNuvola/Cormia/actions/runs/41474422554) completed **SUCCESS**: all 21 cryptographic and policy contract tests passed. It is a contract test of this isolated helper, not proof of key custody, host policy provisioning, operator consent, Agent integration, task isolation, durable revocation or AEP conformance.
 
 ## 8. Open decisions before any production integration
 
