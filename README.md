@@ -36,6 +36,8 @@ The name Cormia is a coined product name inspired by the biological term *cormid
 
 [`SPEC.md`](SPEC.md) is the current architecture baseline for IMMORTAL AEP. Runtime code, Cardano validators, schemas, and tests must derive from it. Implementations must not silently redefine normative semantics.
 
+For autonomous work on an existing project with its own governing specifications, [ADR-0011 — Project Normative Contract](docs/adr/0011-project-normative-contract.md) defines a source-pinned contract for normative sources, closed decisions, invariants, evidence classes and human-authority boundaries. The PNC is separate from the operational Project Mandate and grants no capabilities. See the [PNC schema](schemas/project-normative-contract-v0.1.schema.json) and the [IMMORTAL reference contract](examples/project-normative-contracts/immortal-protocol-v0.1.json). These are design drafts, not Runtime-enforced policy yet.
+
 ## Repository status
 
 The initial repository scaffold has been published to the public GitHub repository `LiberoNuvola/Cormia` on branch `main`. The published baseline retains its three original commits. This repository remains an architecture-first specification draft; publication does not imply implementation, audit, or production readiness.
