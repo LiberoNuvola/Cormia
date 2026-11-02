@@ -121,7 +121,7 @@ function isCanonicalRelativePath(value, { allowRoot = false } = {}) {
   if (!isWellFormedString(value)) return false;
   if (allowRoot && value === ".") return true;
   if (value === "." || value.includes("\\") || value.startsWith("/") ||
-      /^[A-Za-z]:/.test(value) || /[<>:"|?*\\u0000-\\u001f]/.test(value)) return false;
+      /^[A-Za-z]:/.test(value) || /[<>:"|?*\u0000-\u001f]/.test(value)) return false;
 
   const segments = value.split("/");
   if (segments.some(segment =>
@@ -130,7 +130,7 @@ function isCanonicalRelativePath(value, { allowRoot = false } = {}) {
     segment === ".." ||
     segment.endsWith(" ") ||
     segment.endsWith(".") ||
-    /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\\..*)?$/i.test(segment)
+    /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\..*)?$/i.test(segment)
   )) return false;
 
   return true;
@@ -280,6 +280,7 @@ function verifyCompactJws(token, { resolveKey, typ, validate }) {
     if (!keyInfo || typeof keyInfo !== "object" ||
         typeof keyInfo.issuerId !== "string" ||
         keyInfo.role !== "local-host-authority" ||
+        keyInfo.status !== "active" ||
         !keyInfo.publicKey) {
       return { valid: false, reason: "untrusted-signing-key" };
     }
@@ -425,16 +426,16 @@ export function authorizeLocalWorkspaceOperation({
 
   if (!Array.isArray(revocationTokens)) return { allowed: false, reason: "invalid-revocation-feed" };
   const revocations = [];
-  const sequences = new Set();
+  let previousSequence = 0;
   for (const token of revocationTokens) {
     const revocation = verifyLocalCapabilityRevocation(token, { resolveKey });
     if (!revocation.valid || revocation.issuerId !== grant.issuerId) {
       return { allowed: false, reason: "invalid-revocation-feed" };
     }
-    if (sequences.has(revocation.claims.sequence)) {
-      return { allowed: false, reason: "duplicate-revocation-sequence" };
+    if (revocation.claims.sequence <= previousSequence) {
+      return { allowed: false, reason: "non-monotonic-revocation-sequence" };
     }
-    sequences.add(revocation.claims.sequence);
+    previousSequence = revocation.claims.sequence;
     revocations.push(revocation.claims);
   }
 
