@@ -222,3 +222,15 @@ A read-only PowerShell probe, `scripts/probe-windows-cng-capabilities.ps1`, quer
 It does not create keys/certificates, read private key material, or change machine state. The dedicated [Windows CNG Capability Discovery run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41480382232) passed on a GitHub-hosted Windows runner. That hosted runner had no TPM; the Microsoft Platform Crypto Provider was unavailable, while the Software KSP listed `ECDSA_P256`, `ECDSA_P384`, `ECDSA_P521`, DSA, ML-DSA and RSA. This is not evidence about the user's physical Windows machine.
 
 The result reinforces the algorithm decision boundary: the current ADR-008 v0.1 grant helper supports Ed25519; ES256/P-256 is recorded only as a candidate for a separately versioned Windows CNG profile. The actual local provider inventory and a disposable-key end-to-end signing test are still required before selecting an operational key profile. No key has been created and no local Windows system has been queried by GitHub Actions.
+
+## 6M. Autonomous project mandate — target architecture and schema contracts
+
+[ADR-0010](../adr/0010-autonomous-project-delegation-and-runtime-authority.md) makes the intended local-AI objective explicit: one initial operator delegation for a standing project mandate, then autonomous planning, task creation, file changes, builds, tests, failure repair and evidence reporting inside a host-created isolated project worktree. The Runtime derives child grants automatically; there is no human approval for each edit, patch or test. The model is not given API keys, PATs, bearer credentials, signing keys or grant strings. Local Granite inference and offline repository work do not depend on cloud-provider API tokens.
+
+Two draft schemas are present:
+- `schemas/local-autonomous-project-mandate-claims-v0.1.schema.json`;
+- `schemas/local-project-mandate-consent-claims-v0.1.schema.json`.
+
+The dedicated [Local Runtime Capability Grant Contracts run #20](https://github.com/LiberoNuvola/Cormia/actions/runs/41482505720) passed 48 tests: 21 cryptographic/grant tests, 6 lifecycle-schema tests, 6 autonomous-project-mandate schema tests and 15 in-memory revocation-anchor tests (0 failures). These tests validate the draft policy shape and isolated state machines. They do not implement mandate signing/storage, OS credential brokering, autonomous task execution, or per-project worktree isolation.
+
+The current Agent `/code` + `APPROVO` path remains an interactive compatibility mode. The new autonomous Runtime path is not yet implemented or activated. Do not remove or bypass the legacy approval checks in isolation; implement the new Runtime authority boundary and prove an end-to-end multi-step task can edit, test, repair and finish with zero per-operation prompts before enabling it.
