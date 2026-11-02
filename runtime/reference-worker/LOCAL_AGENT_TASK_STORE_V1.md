@@ -117,4 +117,6 @@ The Agent uses a temporary file plus rename for task-store writes. This review d
 
 ## 7. Required next step
 
-The aggregate Windows probe has now validated the actual local `data/tasks.json` envelope in memory and reported only counts: 7 records, 0 schema errors and 6 warnings. It did not read or validate the referenced evidence-sidecar file contents, and it did not print task goals, results, IDs or evidence. The remaining local compatibility step is therefore narrower: validate representative evidence-sidecar JSON against the v1 sidecar schema using redacted fixtures or a local summary-only probe. The current adapter remains an inspector; no task execution or store mutation is authorized by this result.
+The aggregate Windows probe has validated the actual local `data/tasks.json` envelope in memory. A bounded sidecar check is now integrated: it reads only exact sidecar paths referenced by the valid Task Store snapshot, verifies task/attempt binding and structural fields in memory, rejects symlinks and skips files above 8 MiB. It prints aggregate counts only; raw tool outputs, identifiers and file names are never returned. See [LOCAL_ATTEMPT_EVIDENCE_SIDECAR_PROBE.md](./LOCAL_ATTEMPT_EVIDENCE_SIDECAR_PROBE.md).
+
+The local sidecar check has not yet been run on the user's Windows installation. The next compatibility step is to pull the updated Cormia `main` and rerun the aggregate probe. This remains an inspector only: it does not execute tasks, change the store or sidecars, or establish AEP Evidence Package conformance.
