@@ -188,7 +188,7 @@ The probe did not start Agent or Granite, run Docker or workspace tests, start a
 
 A new local-only helper, `runtime/reference-worker/local-evidence-sidecar-probe.mjs`, is integrated into `scripts/verify-local-runtime-adapters.mjs`. It inspects only exact sidecar paths referenced by a valid Task Store v1 snapshot; it does not scan the evidence directory or infer missing paths.
 
-For each reference it checks the exact task-bound filename, embedded task ID and attempt, directory/file symlink boundaries, JSON structure through `inspectAttemptEvidenceV1`, and a defensive 8 MiB per-file read limit. The limit belongs to this probe, not to the v1 evidence schema. It returns only aggregate counts; raw tool payloads, task identifiers and file names are never printed.
+For each reference it checks the exact task-bound filename, embedded task ID and attempt, directory/file symlink boundaries, JSON structure through `inspectAttemptEvidenceV1`, and a defensive 8 MiB per-file read limit. If any task is marked `running`, it skips all sidecar reads and fails the sidecar probe rather than inspect potentially changing evidence. The limit belongs to this probe, not to the v1 evidence schema. It returns only aggregate counts; raw tool payloads, task identifiers and file names are never printed.
 
 The dedicated GitHub Actions workflow `.github/workflows/local-agent-attempt-evidence-sidecar-compatibility.yml` runs syntax checks and contract tests for valid/empty, missing, unsafe, mismatched, malformed, oversized and symlink cases. Repository CI validates only synthetic fixtures; it cannot access the user's local sidecar files.
 
@@ -196,7 +196,7 @@ The dedicated GitHub Actions workflow `.github/workflows/local-agent-attempt-evi
 
 ### GitHub CI evidence for 6J
 
-- [Sidecar probe contract run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41469116933): **SUCCESS**, 9 tests passed, 0 failed, at `149d7439989f6a52fe47b5f7b59999502846851e`.
+- [Sidecar probe contract run #5](https://github.com/LiberoNuvola/Cormia/actions/runs/41470239168): **SUCCESS**, 10 tests passed, 0 failed, at `7e00e7aecd3bbf99535700d00ce22bbc6801c241`.
 - [Aggregate probe syntax/import run #8](https://github.com/LiberoNuvola/Cormia/actions/runs/41469547041): **SUCCESS**, at `945e86ed8d18f555fe7f8daabdb3f57a39bd7e3d`.
 
 The local sidecar check against `E:\AI\Immortal-Agent-v0.7\data\evidence` is still pending. GitHub Actions cannot access that path.
