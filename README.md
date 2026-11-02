@@ -66,7 +66,7 @@ The local IMMORTAL Agent v0.8.0 is a prototype and potential reference-worker st
 
 Existing Flux Point, JEV, and Mitsuro components are preserved as integration inputs; see [`docs/architecture/EXISTING_LOCAL_NUCLEUS.md`](docs/architecture/EXISTING_LOCAL_NUCLEUS.md) and [`docs/integration/ADAPTERS.md`](docs/integration/ADAPTERS.md). Their current prototypes are not automatically protocol authorities.
 
-The first local-source inventory and static review are recorded in [`LOCAL_NUCLEUS_SOURCE_REVIEW_2026-11-02.md`](docs/architecture/LOCAL_NUCLEUS_SOURCE_REVIEW_2026-11-02.md); no local runtime source has been migrated into Cormia.
+The first local-source inventory and static review are recorded in [`LOCAL_NUCLEUS_SOURCE_REVIEW_2026-11-02.md`](docs/architecture/LOCAL_NUCLEUS_SOURCE_REVIEW_2026-11-02.md); no local runtime source has been migrated into Cormia. The candidate task capability vocabulary and workspace scope are documented as a non-normative proposal in [ADR-0007](docs/adr/0007-proposed-task-capabilities-and-workspace-scope.md); the Task Manifest schema remains unchanged pending review.
 
 ## Development principles
 
