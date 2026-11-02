@@ -66,7 +66,7 @@ Document public functions, state formats, invariants, and existing tests before 
 
 ### I2 — local AEP contract
 
-Define a versioned local Task Manifest subset and deterministic capability mapping before enabling remote task intake. Start local-only. Do not connect a peer mesh, issue CRC, sign receipts, or use Cardano settlement until those contracts and positive/negative tests exist.
+Use [ADR-0007](../adr/0007-proposed-task-capabilities-and-workspace-scope.md) as the non-normative starting proposal for operation identifiers and exact workspace scopes. Resolve its open authority, signing, workspace-isolation, consent, test-selection and revocation decisions before changing `SPEC.md` or `schemas/task-manifest.schema.json`. Then define the versioned local Task Manifest subset and deterministic capability mapping before enabling remote task intake. Start local-only. Do not connect a peer mesh, issue CRC, sign receipts, or use Cardano settlement until those contracts and positive/negative tests exist.
 
 ### I3 — evidence adapters
 
