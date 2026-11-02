@@ -66,7 +66,7 @@ Document public functions, state formats, invariants, and existing tests before 
 
 ### I2 — local AEP contract
 
-Use [ADR-0007](../adr/0007-proposed-task-capabilities-and-workspace-scope.md) as the non-normative starting proposal for operation identifiers and exact workspace scopes. Resolve its open authority, signing, workspace-isolation, consent, test-selection and revocation decisions before changing `SPEC.md` or `schemas/task-manifest.schema.json`. Then define the versioned local Task Manifest subset and deterministic capability mapping before enabling remote task intake. Start local-only. Do not connect a peer mesh, issue CRC, sign receipts, or use Cardano settlement until those contracts and positive/negative tests exist.
+Use [ADR-0007](../adr/0007-proposed-task-capabilities-and-workspace-scope.md) as the non-normative starting proposal for operation identifiers and exact workspace scopes. [ADR-0008](../adr/0008-proposed-local-capability-grants-and-revocation.md) now provides an experimental signed local-grant and revocation contract with a host-pinned issuer. Resolve its key bootstrap, operator-consent and rollback-resistant revocation requirements, plus ADR-0007's workspace-isolation and test-selection decisions, before changing `SPEC.md` or `schemas/task-manifest.schema.json`. Then define the versioned local Task Manifest subset and deterministic capability mapping before enabling remote task intake. Start local-only. Do not connect a peer mesh, issue CRC, sign contribution receipts, or use Cardano settlement until those contracts and positive/negative tests exist.
 
 ### I3 — evidence adapters
 
@@ -200,3 +200,13 @@ The dedicated GitHub Actions workflow `.github/workflows/local-agent-attempt-evi
 - [Aggregate probe syntax/import run #10](https://github.com/LiberoNuvola/Cormia/actions/runs/41470239182): **SUCCESS**, at `7e00e7aecd3bbf99535700d00ce22bbc6801c241`.
 
 The local sidecar check against `E:\AI\Immortal-Agent-v0.7\data\evidence` completed successfully on the user's Windows host. GitHub Actions did not access that path; the `PASS` above comes from the user's local execution.
+
+## 6K. Experimental signed local capability grant contract
+
+The non-normative [ADR-0008](../adr/0008-proposed-local-capability-grants-and-revocation.md) and two draft claim schemas define a local host-issued grant and separate revocation statement. The testable helper uses JWS Compact Serialization, the fully specified JOSE `Ed25519` algorithm, and a restricted JCS payload profile. The grant binds one task, exact manifest digest, issuer, worker/runtime subject, capability, workspace/path scope and bounded time interval. The host policy pins the issuer identity, active signing key, capabilities, exact paths and maximum lifetime.
+
+The v0.1 evaluator allows only `workspace.list`, `workspace.read`, `workspace.diff` and `workspace.verify`. It rejects create/replace/test and all delegation. The current Agent's `APPROVO` flow is unchanged. The evaluator is not connected to `agent.mjs`, `CodingWorkspace.callTool()`, manifest verification or a real key store. Its revocation feed is caller-supplied; durable rollback-resistant feed storage and monotonic checkpointing remain unimplemented.
+
+The dedicated [Local Runtime Capability Grant Contracts run #6](https://github.com/LiberoNuvola/Cormia/actions/runs/41474422554) completed **SUCCESS** with 21 tests passed and 0 failed. Tests create ephemeral Ed25519 key pairs in memory and exercise signature verification, key/issuer trust, task/manifest/subject binding, expiry, exact host path intersection, denied mutation/delegation, and signed revocation. This is isolated contract evidence, not proof of real key custody, operator consent, production authorization, task isolation or AEP conformance.
+
+No private key, local Agent data or user workspace content was added to Cormia.
