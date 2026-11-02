@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:immortal-aep:schema:local-revocation-journal-event:0.1.0",
+  "title": "IMMORTAL Local Revocation Journal Event",
+  "description": "One append-only envelope around a separately signed revocation JWS. eventDigest is computed over canonical event contents and is not duplicated inside the hash preimage.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "sequence",
+    "previousEventDigest",
+    "revocationToken"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "previousEventDigest": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "revocationToken": {
+      "type": "string",
+      "minLength": 100,
+      "maxLength": 131072,
+      "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$"
+    }
+  }
+}
