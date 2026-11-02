@@ -55,3 +55,11 @@ node --test .\runtime\reference-worker\local-evidence-sidecar-probe.test.mjs
 The contract tests cover valid and empty sidecars, missing references, path escape, task/attempt mismatch, malformed JSON, size bounds, symlink rejection and the no-reference case.
 
 The aggregate Windows probe invokes this check automatically after a valid Task Store inspection. Only its aggregate counts are printed.
+
+## 6. CI evidence
+
+The dedicated [Local Agent Attempt Evidence Sidecar Compatibility run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41469116933) completed **SUCCESS** at commit `149d7439989f6a52fe47b5f7b59999502846851e`: syntax checks passed and all 9 sidecar probe contract tests passed.
+
+The aggregate probe's updated syntax/import workflow also completed **SUCCESS** in [run #8](https://github.com/LiberoNuvola/Cormia/actions/runs/41469547041) at commit `945e86ed8d18f555fe7f8daabdb3f57a39bd7e3d`.
+
+These runs use synthetic fixtures and repository code only. They do not inspect the user's local Windows sidecars.
