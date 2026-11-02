@@ -114,6 +114,10 @@ The inventory contains paths, extensions, sizes, SHA-256 digests and last-write 
 
 These are hash/path observations, not code-quality or semantic assessments. A matching digest establishes byte identity, not that either copy is correct or safe.
 
+## 6D. Resource Manager adapter implementation
+
+A separate Cormia-side adapter has been added at `runtime/reference-worker/immortal-resource-manager-adapter.mjs`. It maps only `agent-inference`, `workspace-test` and `evolution-docker-test` to fixed ResourceManager classes, fails closed on missing/invalid data and releases the lease in `finally`. The dedicated 11-test GitHub Actions workflow passed. This wrapper is not connected to the Agent and does not provide OS-level resource enforcement. See [LOCAL_RESOURCE_MANAGER_ADAPTER.md](../runtime/reference-worker/LOCAL_RESOURCE_MANAGER_ADAPTER.md).
+
 ## 6C. Coding Workspace capability mapping
 
 The local Coding Workspace tool surface, caller-side approval gates, resource lease for tests, root/path restrictions and unresolved task-specific isolation requirements are recorded in [CODING_WORKSPACE_CAPABILITY_MATRIX_2026-11-02.md](CODING_WORKSPACE_CAPABILITY_MATRIX_2026-11-02.md). The capability mapping is not yet canonical because AEP's current Task Manifest schema does not define operation identifiers or path-scope grammar.
