@@ -4,6 +4,8 @@
 **Version:** draft 0.1.0  
 **Goal:** user-accessible local AI and shared inference without mandatory subscriptions, API-token billing, or a customer-facing native crypto token.
 
+See also [`NO_MANDATORY_CASH_MODEL.md`](NO_MANDATORY_CASH_MODEL.md) for the explicit cost-bearer analysis, three access lanes, sponsorship model, no-per-prompt-chain-fee policy and MVP rollout.
+
 ## 1. Design objective
 
 A user can download IMMORTAL, run an open-weight model locally, and use the local assistant without a subscription or metered external API. If the user opts in to sharing spare CPU/GPU/RAM capacity with the network, the node can earn non-transferable **Compute Reciprocity Credits (CRC)**. Those credits provide a quota to consume shared network inference or other eligible compute services.

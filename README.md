@@ -1,6 +1,7 @@
-# IMMORTAL Autonomous Execution Protocol
+# IMMORTAL Hive — Autonomous Execution Protocol
 
-**Working name:** IMMORTAL-AEP
+**Working product name:** IMMORTAL Hive (proposed)
+**Normative protocol name:** IMMORTAL Autonomous Execution Protocol (AEP)
 **Status:** Architecture-first, specification draft v0.1.0
 **First settlement adapter proposed:** Cardano eUTXO
 **Repository proposal:** `LiberoNuvola/immortal-autonomous-execution-protocol`
@@ -80,7 +81,11 @@ The local IMMORTAL Agent v0.8.0 is a prototype and potential reference-worker st
 
 ## Local-first and compute reciprocity direction
 
-AEP's consumer model is local inference first, opt-in compute contribution, and optional shared inference using non-transferable Compute Reciprocity Credits. No hidden remote billing or silent cloud fallback is allowed. CRC are not a tradable crypto token. The exact accounting, benchmark and audit parameters remain open. See [`docs/economics/COMPUTE_RECIPROCITY.md`](docs/economics/COMPUTE_RECIPROCITY.md), [`docs/research/DECENTRALIZED_INFERENCE_PRIOR_ART.md`](docs/research/DECENTRALIZED_INFERENCE_PRIOR_ART.md), [`docs/research/REUSE_AND_COMPOSITION_MATRIX.md`](docs/research/REUSE_AND_COMPOSITION_MATRIX.md) and ADR-0004.
+AEP's consumer model is local inference first, opt-in compute contribution, and optional shared inference using non-transferable Compute Reciprocity Credits. No hidden remote billing or silent cloud fallback is allowed. CRC are not a tradable crypto token. The exact accounting, benchmark and audit parameters remain open. See [`docs/economics/COMPUTE_RECIPROCITY.md`](docs/economics/COMPUTE_RECIPROCITY.md) and [`docs/economics/NO_MANDATORY_CASH_MODEL.md`](docs/economics/NO_MANDATORY_CASH_MODEL.md), [`docs/research/DECENTRALIZED_INFERENCE_PRIOR_ART.md`](docs/research/DECENTRALIZED_INFERENCE_PRIOR_ART.md), [`docs/research/REUSE_AND_COMPOSITION_MATRIX.md`](docs/research/REUSE_AND_COMPOSITION_MATRIX.md) and ADR-0004.
+
+## Product identity
+
+The proposed user-facing name is **IMMORTAL Hive**. The protocol specification remains IMMORTAL AEP; the installable client/runtime is IMMORTAL Runtime and a participating device is a Hive Node. This is a working name only, not trademark-cleared. See [`docs/adr/0005-immortal-hive-working-name.md`](docs/adr/0005-immortal-hive-working-name.md).
 
 ## First milestone
 
