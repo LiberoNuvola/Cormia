@@ -1,6 +1,6 @@
 # Integration baseline — 2026-11-02
 
-**Status:** repository and local-source inventory verified; four-adapter Windows smoke test passed; bounded evidence-sidecar probe implemented, Windows check pending; AEP Runtime integration remains proposed  
+**Status:** repository and local-source inventory verified; five local compatibility boundaries passed Windows smoke testing; AEP Runtime integration remains proposed  
 **Cormia:** public repository, branch main; initial scaffold commit fdc3e868c032257323e341ba846d169f01f34939 (three-commit history preserved)  
 **IMMORTAL source branch inspected:** work/immortal-green-closure  
 **IMMORTAL source HEAD observed:** cabe00f1b7743e4335b5a140b32feb52e47f2be6  
@@ -184,7 +184,7 @@ The six Task Store warnings were recorded without treating them as errors. Earli
 
 The probe did not start Agent or Granite, run Docker or workspace tests, start a task/evolution, modify the task store, create or patch a candidate, or promote code. It is local compatibility evidence for the listed probe operations only.
 
-## 6J. Bounded attempt evidence sidecar probe — implemented; Windows check pending
+## 6J. Bounded attempt evidence sidecar probe — implemented; Windows check passed
 
 A new local-only helper, `runtime/reference-worker/local-evidence-sidecar-probe.mjs`, is integrated into `scripts/verify-local-runtime-adapters.mjs`. It inspects only exact sidecar paths referenced by a valid Task Store v1 snapshot; it does not scan the evidence directory or infer missing paths.
 
@@ -192,11 +192,11 @@ For each reference it checks the exact task-bound filename, embedded task ID and
 
 The dedicated GitHub Actions workflow `.github/workflows/local-agent-attempt-evidence-sidecar-compatibility.yml` runs syntax checks and contract tests for valid/empty, missing, unsafe, mismatched, malformed, oversized and symlink cases. Repository CI validates only synthetic fixtures; it cannot access the user's local sidecar files.
 
-**Next required local evidence:** pull the updated `main` and rerun the aggregate Windows probe. The new `evidenceSidecars` object must show the counts and `result` without exposing sidecar contents. A `PARTIAL_OR_FAIL` result stops the aggregate probe and requires investigation; do not copy or upload the raw sidecars.
+**Local Windows evidence — PASS:** the user fast-forwarded `main` from `45dd82c` to `f6dfb67` and ran the aggregate probe at `2026-11-02T15:22:04.248Z` with Node v22.15.0. It returned `PASS`, zero blockers. Six referenced sidecars were valid; one task had no evidence path. There were zero missing, unsafe, oversized, malformed-JSON, schema-invalid or unreadable sidecars; zero tasks were running. The 6 sidecars contained 24 structurally valid evidence items, of which 0 were marked `isError`. The probe read 79,924 bytes in total, within the 8 MiB per-file bound. It printed no task identifiers, file names or raw payloads. This proves sidecar structural compatibility and task/attempt binding, not truthfulness or semantic sufficiency of the recorded tool outputs.
 
 ### GitHub CI evidence for 6J
 
 - [Sidecar probe contract run #5](https://github.com/LiberoNuvola/Cormia/actions/runs/41470239168): **SUCCESS**, 10 tests passed, 0 failed, at `7e00e7aecd3bbf99535700d00ce22bbc6801c241`.
 - [Aggregate probe syntax/import run #10](https://github.com/LiberoNuvola/Cormia/actions/runs/41470239182): **SUCCESS**, at `7e00e7aecd3bbf99535700d00ce22bbc6801c241`.
 
-The local sidecar check against `E:\AI\Immortal-Agent-v0.7\data\evidence` is still pending. GitHub Actions cannot access that path.
+The local sidecar check against `E:\AI\Immortal-Agent-v0.7\data\evidence` completed successfully on the user's Windows host. GitHub Actions did not access that path; the `PASS` above comes from the user's local execution.
