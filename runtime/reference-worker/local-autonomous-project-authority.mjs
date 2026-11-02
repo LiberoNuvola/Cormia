@@ -109,6 +109,8 @@ function validateMandateClaims(claims) {
         "releaseTag", "autoPushFeatureBranch", "autoCreatePullRequest"
       ]) ||
       !exactKeys(claims.networkPolicy, ["mode", "allowedHttpsHosts"]) ||
+      !Array.isArray(claims.executionProfileIds) || claims.executionProfileIds.length < 1 ||
+      new Set(claims.executionProfileIds).size !== claims.executionProfileIds.length ||
       !exactKeys(claims.resourceBudget, [
         "maxConcurrentTasks", "maxAttemptsPerTask", "maxRuntimeMinutes",
         "maxCpuHeavyMinutes", "maxMemoryMiB"
@@ -137,7 +139,8 @@ function validateMandateClaims(claims) {
   }
 
   if (!claims.allowedOperations.every(operation => OPERATION_SET.has(operation)) ||
-      new Set(claims.allowedOperations).size !== claims.allowedOperations.length) {
+      new Set(claims.allowedOperations).size !== claims.allowedOperations.length ||
+      !claims.executionProfileIds.every(profile => typeof profile === "string" && profile.length > 0 && profile.length <= 128)) {
     return { valid: false, reason: "invalid-or-duplicate-mandate-operation" };
   }
 
@@ -195,7 +198,9 @@ export function deriveLocalProjectTaskAuthority({
     if (!exactKeys(trustedMandate, [
       "claims", "mandateDigest", "issuerId", "signatureVerified",
       "consentVerified", "revocationState"
-    ]) || trustedMandate.signatureVerified !== true ||
+    ]) || !isPlainObject(trustedMandate.claims) ||
+        trustedMandate.issuerId !== trustedMandate.claims.issuerId ||
+        trustedMandate.signatureVerified !== true ||
         trustedMandate.consentVerified !== true ||
         trustedMandate.revocationState !== "healthy" ||
         typeof trustedMandate.mandateDigest !== "string" ||
@@ -261,12 +266,14 @@ export function deriveLocalProjectTaskAuthority({
       .update("IMMORTAL-AEP|LOCAL-PROJECT-TASK-AUTHORITY|v0.1|" + canonicalizeLocalClaims(payload))
       .digest("hex");
 
-    return {
+    Object.freeze(payload.operations);
+    Object.freeze(payload);
+    return Object.freeze({
       authorized: true,
       kind: "internal-local-project-task-authority",
       childDigest,
-      authority: Object.freeze(payload)
-    };
+      authority: payload
+    });
   } catch {
     return { authorized: false, reason: "task-authority-derivation-failed" };
   }
@@ -282,6 +289,8 @@ export function authorizeLocalProjectOperation({
   childAuthority,
   trustedMandate,
   hostPolicy,
+  expectedTaskId,
+  expectedManifestDigest,
   operation,
   relativePath,
   executionProfileId,
@@ -290,8 +299,10 @@ export function authorizeLocalProjectOperation({
   now = new Date()
 } = {}) {
   try {
-    if (!childAuthority || childAuthority.authorized !== true ||
+    if (!exactKeys(childAuthority, ["authorized", "kind", "childDigest", "authority"]) ||
+        childAuthority.authorized !== true ||
         childAuthority.kind !== "internal-local-project-task-authority" ||
+        typeof childAuthority.childDigest !== "string" ||
         !exactKeys(childAuthority.authority, [
           "schemaVersion", "mandateId", "mandateDigest", "taskId",
           "manifestDigest", "issuerId", "workerId", "runtimeId", "projectRef",
@@ -302,11 +313,28 @@ export function authorizeLocalProjectOperation({
     if (!trustedMandate || trustedMandate.signatureVerified !== true ||
         trustedMandate.consentVerified !== true ||
         trustedMandate.revocationState !== "healthy" ||
+        !isPlainObject(trustedMandate.claims) ||
+        trustedMandate.issuerId !== trustedMandate.claims.issuerId ||
         !hostPolicy) {
       return { allowed: false, reason: "trusted-mandate-state-unavailable" };
     }
     const mandate = trustedMandate.claims;
+    const mandateVerdict = validateMandateClaims(mandate);
+    if (!mandateVerdict.valid) return { allowed: false, reason: mandateVerdict.reason };
     const authority = childAuthority.authority;
+    if (authority.mandateDigest !== trustedMandate.mandateDigest) {
+      return { allowed: false, reason: "child-mandate-digest-mismatch" };
+    }
+    const recomputedChildDigest = "sha256:" + createHash("sha256")
+      .update("IMMORTAL-AEP|LOCAL-PROJECT-TASK-AUTHORITY|v0.1|" + canonicalizeLocalClaims(authority))
+      .digest("hex");
+    if (recomputedChildDigest !== childAuthority.childDigest) {
+      return { allowed: false, reason: "child-authority-integrity-failure" };
+    }
+    if (authority.taskId !== expectedTaskId ||
+        authority.manifestDigest !== expectedManifestDigest) {
+      return { allowed: false, reason: "task-context-mismatch" };
+    }
     const bindingPairs = [
       [authority.mandateId, mandate.mandateId],
       [authority.mandateDigest, trustedMandate.mandateDigest],
@@ -361,6 +389,7 @@ export function authorizeLocalProjectOperation({
 
     if (operation === "workspace.test" || operation === "workspace.build") {
       if (typeof executionProfileId !== "string" ||
+          !mandate.executionProfileIds.includes(executionProfileId) ||
           !Array.isArray(hostPolicy.allowedExecutionProfiles) ||
           !hostPolicy.allowedExecutionProfiles.includes(executionProfileId)) {
         return { allowed: false, reason: "execution-profile-not-allowed" };
