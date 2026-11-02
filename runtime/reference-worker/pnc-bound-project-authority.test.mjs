@@ -162,6 +162,9 @@ test("draft PNC is rejected even when its identity digest is correct", () => {
   const draftBinding = { ...binding, digest: computePncContractDigest(source).digest };
   const result = derive({
     trustedMandate: mandate({ claims: claims({ normativeContractBinding: draftBinding }) }),
+    trustedConsent: consent({
+      claims: { ...consent().claims, normativeContractBinding: { ...draftBinding } }
+    }),
     trustedNormativeContract: pnc({ contract: source })
   });
   assert.equal(result.reason, "pnc-not-active");
@@ -182,7 +185,10 @@ test("PNC must be schema-validated, source-verified and owner-authorized by host
 test("digest mismatch is rejected", () => {
   const badBinding = { ...binding, digest: "sha256:" + "f".repeat(64) };
   const result = derive({
-    trustedMandate: mandate({ claims: claims({ normativeContractBinding: badBinding }) })
+    trustedMandate: mandate({ claims: claims({ normativeContractBinding: badBinding }) }),
+    trustedConsent: consent({
+      claims: { ...consent().claims, normativeContractBinding: { ...badBinding } }
+    })
   });
   assert.equal(result.reason, "pnc-digest-mismatch");
 });
@@ -193,6 +199,9 @@ test("PNC project/repository must match the mandate", () => {
   const otherBinding = { ...binding, digest: otherDigest };
   const result = derive({
     trustedMandate: mandate({ claims: claims({ normativeContractBinding: otherBinding }) }),
+    trustedConsent: consent({
+      claims: { ...consent().claims, normativeContractBinding: { ...otherBinding } }
+    }),
     trustedNormativeContract: pnc({ contract: other })
   });
   assert.equal(result.reason, "pnc-project-repository-mismatch");
