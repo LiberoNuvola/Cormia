@@ -133,3 +133,7 @@ This contract is **not connected** to the Agent or to the existing Coding Worksp
 [ADR-0009](../adr/0009-proposed-local-authority-bootstrap-consent-and-revocation-anchor.md) specifies a non-exportable host signing key, one-time consent over an exact grant-intent digest, and a signed/hash-linked revocation journal whose head is independently pinned by a monotonic anchor provider. Four draft schemas describe the public key descriptor, consent receipt, journal event and checkpoint.
 
 A pure in-memory reconciliation model and synthetic tests are now present in `runtime/reference-worker`. The tests verify rollback/fork/prefix conditions and compare-and-set failure behavior using injected fake providers. They do not implement durable file I/O, OS locking, key provisioning, an authenticated consent broker, or a real TPM/OS monotonic anchor. The local Agent and `APPROVO` path remain untouched.
+
+### Windows CNG key-provider discovery
+
+The read-only Windows CNG probe at `scripts/probe-windows-cng-capabilities.ps1` enumerates signature algorithms and reads TPM state only. Its [GitHub-hosted Windows run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41480382232) passed, but the runner had no TPM and cannot establish the user's local hardware capabilities. The existing Ed25519 grant helper remains unchanged; ES256/P-256 is only a candidate for a separately versioned CNG signing profile. See [ADR-0009](../adr/0009-proposed-local-authority-bootstrap-consent-and-revocation-anchor.md).
