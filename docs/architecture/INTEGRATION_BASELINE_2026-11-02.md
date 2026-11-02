@@ -114,6 +114,10 @@ The inventory contains paths, extensions, sizes, SHA-256 digests and last-write 
 
 These are hash/path observations, not code-quality or semantic assessments. A matching digest establishes byte identity, not that either copy is correct or safe.
 
+## 6C. Coding Workspace capability mapping
+
+The local Coding Workspace tool surface, caller-side approval gates, resource lease for tests, root/path restrictions and unresolved task-specific isolation requirements are recorded in [CODING_WORKSPACE_CAPABILITY_MATRIX_2026-11-02.md](CODING_WORKSPACE_CAPABILITY_MATRIX_2026-11-02.md). The capability mapping is not yet canonical because AEP's current Task Manifest schema does not define operation identifiers or path-scope grammar.
+
 ## 6B. Source-level review
 
 The selected local source archive has now been reviewed. Detailed file map, hash identities, security boundaries, syntax/unit-test results, test-fixture defects and migration sequence are recorded in [`LOCAL_NUCLEUS_SOURCE_REVIEW_2026-11-02.md`](LOCAL_NUCLEUS_SOURCE_REVIEW_2026-11-02.md). The next decision is no longer blocked on source discovery; it is blocked on adapter contracts and compatibility tests. No local source has been copied into Cormia.
