@@ -83,6 +83,12 @@ That extraction must preserve:
 
 No extraction is authorized by this ADR alone.
 
+## Coding Workspace mapping constraint recorded 2026-11-02
+
+The source-level tool/approval boundary is recorded in [CODING_WORKSPACE_CAPABILITY_MATRIX_2026-11-02.md](../architecture/CODING_WORKSPACE_CAPABILITY_MATRIX_2026-11-02.md).
+
+No canonical capability mapping is implemented yet because the current Task Manifest schema defines `capabilitySet` with generic `capability`, `scope` and optional `constraints`, but does not freeze operation identifiers or path-scope semantics. The existing Agent caller owns the `/code` and `APPROVO` gates; the CodingWorkspace class's `callTool()` method does not enforce them itself. A new adapter must not bypass those gates.
+
 ## First implementation slice recorded 2026-11-02
 
 The following compatibility artifacts have been added without modifying the local Agent or its store:
