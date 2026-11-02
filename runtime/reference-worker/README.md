@@ -8,7 +8,7 @@
 **Evolution Manager adapter:** [run-bound candidate lifecycle contract](./LOCAL_EVOLUTION_MANAGER_ADAPTER.md)  
 **Coding Workspace read-only adapter:** [host-scoped file and directory allowlist](./LOCAL_CODING_WORKSPACE_READONLY_ADAPTER.md)
 
-The local IMMORTAL Agent v0.8.0 is a prototype and potential starting point, not yet AEP-conformant. The review confirmed the component map and the current trust boundaries. The next work is adapter-contract definition and compatibility testing, not a greenfield rewrite.
+The local IMMORTAL Agent v0.8.0 is a prototype and potential starting point, not yet AEP-conformant. The component map and four narrow adapter compatibility slices have now been source-reviewed and smoke-tested. The next work is to freeze the local AEP Task Manifest/capability/evidence contract and recovery model before wiring any adapter into an Agent execution loop; this is not a greenfield rewrite.
 
 **First compatibility slice implemented:** a read-only Agent Task Store v1 inspector, evidence-sidecar validator, schemas and synthetic test vectors are now published. It never opens the local store, mutates records, launches tasks or claims AEP Task Manifest semantics. See [LOCAL_AGENT_TASK_STORE_V1.md](./LOCAL_AGENT_TASK_STORE_V1.md).
 
