@@ -21,7 +21,7 @@ const workspaceRef = "workspace-coding-main";
 
 const { publicKey, privateKey } = generateKeyPairSync("ed25519");
 const resolveKey = kid => kid === keyId
-  ? { publicKey, issuerId, role: "local-host-authority" }
+  ? { publicKey, issuerId, role: "local-host-authority", status: "active" }
   : null;
 
 function claims(overrides = {}) {
@@ -117,7 +117,11 @@ test("rejects signature algorithm and token type confusion", () => {
     reasonCode: "operator-request"
   }, { privateKey, keyId });
   assert.equal(verifyLocalCapabilityGrant(revocation, { resolveKey }).reason, "wrong-token-type");
-  assert.equal(verifyLocalCapabilityGrant(grant.replace("Ed25519", "EdDSA"), { resolveKey }).valid, false);
+  const parts = grant.split(".");
+  const protectedHeader = JSON.parse(Buffer.from(parts[0], "base64url").toString("utf8"));
+  protectedHeader.alg = "EdDSA";
+  parts[0] = Buffer.from(JSON.stringify(protectedHeader)).toString("base64url");
+  assert.equal(verifyLocalCapabilityGrant(parts.join("."), { resolveKey }).reason, "unsupported-signature-algorithm");
 });
 
 test("binds grants to the exact task and manifest digest", () => {
@@ -178,7 +182,7 @@ test("rejects unsupported mutating and test capabilities even when correctly sig
 
 test("rejects unsafe, non-canonical, duplicate and root file paths", () => {
   for (const badPath of ["../secret", "/absolute", "C:/drive", "src//x.mjs", "src/./x.mjs",
-    "src/../x.mjs", "src\\x.mjs", "src/NUL", "src/bad:name", "src/trailing."]) {
+    "src/../x.mjs", "src\\x.mjs", "src/NUL", "src/bad:name", "src/trailing.", "src/bad\u0001name"]) {
     assert.throws(() => signGrant({
       scope: { workspaceRef, files: [badPath] }
     }), /invalid-scope/);
@@ -245,7 +249,7 @@ test("fails closed on an invalid revocation feed", () => {
 test("rejects a grant whose signer key is not a local host authority", () => {
   const result = authorizeLocalWorkspaceOperation(context({
     resolveKey: kid => kid === keyId
-      ? { publicKey, issuerId, role: "worker" }
+      ? { publicKey, issuerId, role: "worker", status: "active" }
       : null
   }));
   assert.equal(result.reason, "untrusted-signing-key");
@@ -258,7 +262,7 @@ test("rejects an issuer ID that is not bound to the trusted key", () => {
     keyId: "other-key"
   });
   assert.equal(verifyLocalCapabilityGrant(token, {
-    resolveKey: () => ({ publicKey: otherPair.publicKey, issuerId, role: "local-host-authority" })
+    resolveKey: () => ({ publicKey: otherPair.publicKey, issuerId, role: "local-host-authority", status: "active" })
   }).reason, "issuer-key-mismatch");
 });
 
@@ -276,9 +280,19 @@ test("rejects a non-monotonic or duplicate revocation sequence", () => {
     sequence,
     reasonCode: "operator-request"
   });
-  const first = signLocalCapabilityRevocation(revocationClaims(2), { privateKey, keyId });
-  const second = signLocalCapabilityRevocation(revocationClaims(2), { privateKey, keyId });
-  const result = authorizeLocalWorkspaceOperation(context({ grantToken: token, revocationTokens: [first, second] }));
-  assert.equal(result.reason, "duplicate-revocation-sequence");
+  const sequence2 = signLocalCapabilityRevocation(revocationClaims(2), { privateKey, keyId });
+  const duplicate2 = signLocalCapabilityRevocation(revocationClaims(2), { privateKey, keyId });
+  const duplicateResult = authorizeLocalWorkspaceOperation(context({
+    grantToken: token,
+    revocationTokens: [sequence2, duplicate2]
+  }));
+  assert.equal(duplicateResult.reason, "non-monotonic-revocation-sequence");
+
+  const sequence3 = signLocalCapabilityRevocation(revocationClaims(3), { privateKey, keyId });
+  const outOfOrderResult = authorizeLocalWorkspaceOperation(context({
+    grantToken: token,
+    revocationTokens: [sequence3, sequence2]
+  }));
+  assert.equal(outOfOrderResult.reason, "non-monotonic-revocation-sequence");
   assert.match(grant.grantDigest, /^sha256:/);
 });
