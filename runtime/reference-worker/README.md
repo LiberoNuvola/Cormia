@@ -4,13 +4,16 @@
 **Source review:** [LOCAL_NUCLEUS_SOURCE_REVIEW_2026-11-02.md](../../docs/architecture/LOCAL_NUCLEUS_SOURCE_REVIEW_2026-11-02.md)  
 **Integration proposal:** [ADR-0006 — bounded Local Runtime adapter](../../docs/adr/0006-local-runtime-adapter-boundary.md)  
 **Coding Workspace boundary:** [capability and approval matrix](../../docs/architecture/CODING_WORKSPACE_CAPABILITY_MATRIX_2026-11-02.md)  
-**Resource Manager adapter:** [local lease wrapper contract](./LOCAL_RESOURCE_MANAGER_ADAPTER.md)
+**Resource Manager adapter:** [local lease wrapper contract](./LOCAL_RESOURCE_MANAGER_ADAPTER.md)  
+**Evolution Manager adapter:** [run-bound candidate lifecycle contract](./LOCAL_EVOLUTION_MANAGER_ADAPTER.md)
 
 The local IMMORTAL Agent v0.8.0 is a prototype and potential starting point, not yet AEP-conformant. The review confirmed the component map and the current trust boundaries. The next work is adapter-contract definition and compatibility testing, not a greenfield rewrite.
 
 **First compatibility slice implemented:** a read-only Agent Task Store v1 inspector, evidence-sidecar validator, schemas and synthetic test vectors are now published. It never opens the local store, mutates records, launches tasks or claims AEP Task Manifest semantics. See [LOCAL_AGENT_TASK_STORE_V1.md](./LOCAL_AGENT_TASK_STORE_V1.md).
 
 A second slice wraps the current Resource Manager with a trusted fixed-operation map, fail-closed snapshot/acquisition handling, and `finally`-based lease release. It is not yet connected to `agent.mjs` or any network task intake. See [LOCAL_RESOURCE_MANAGER_ADAPTER.md](./LOCAL_RESOURCE_MANAGER_ADAPTER.md).
+
+A third slice wraps the Evolution Manager around one trusted run ID and a fixed source map. It restricts candidate paths, preserves immutable baseline tests, checks hash and anchor preconditions, accepts only host-produced verification evidence and never promotes runtime code. See [LOCAL_EVOLUTION_MANAGER_ADAPTER.md](./LOCAL_EVOLUTION_MANAGER_ADAPTER.md).
 
 ## Existing source map
 
