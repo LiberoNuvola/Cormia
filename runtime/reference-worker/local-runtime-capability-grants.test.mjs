@@ -87,6 +87,21 @@ test("canonicalizes the restricted JCS claim subset deterministically", () => {
     get() { return "not-json-data"; }
   });
   assert.throws(() => canonicalizeLocalClaims(accessor), /Accessors/);
+
+  let getterCalls = 0;
+  const accessorClaims = claims();
+  Object.defineProperty(accessorClaims, "issuerId", {
+    enumerable: true,
+    get() {
+      getterCalls++;
+      return issuerId;
+    }
+  });
+  assert.throws(
+    () => signLocalCapabilityGrant(accessorClaims, { privateKey, keyId }),
+    /Accessors/
+  );
+  assert.equal(getterCalls, 0);
 });
 
 test("signs and verifies a compact JWS Ed25519 grant", () => {
