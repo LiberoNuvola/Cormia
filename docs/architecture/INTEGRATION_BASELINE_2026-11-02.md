@@ -158,11 +158,28 @@ This is a successful local compatibility smoke test for the three adapters on th
 
 ## 6F. Aggregate local verification
 
-The read-only Windows verification entry point is `scripts/verify-local-runtime-adapters.mjs`. It validates the live local Task Store format in memory, performs a no-op Resource Manager lease probe, checks the existing Evolution Manager run registry and reads one candidate line only if a valid open run exists. It never prints task text or evidence bodies. It must not be interpreted as a test of Granite, Docker candidate execution, or AEP conformance.
+The read-only Windows verification entry point is `scripts/verify-local-runtime-adapters.mjs`. It now checks four compatibility boundaries against the selected local installation: Task Store v1, Resource Manager, Coding Workspace read-only operations, and Evolution Manager. The probe validates the task-store envelope in memory, performs a no-op lease acquire/release, lists only root-level Coding Workspace metadata through the read-only adapter, and checks the existing Evolution Manager run registry with a bounded candidate read. It prints aggregate counts and a short digest prefix only; it does not expose task text, entry names, source contents or evidence bodies.
+
+The successful local result is a compatibility smoke test, not a test of Agent/Granite inference, Docker candidate execution, task execution, AEP conformance, or approval to promote an open candidate.
 
 
 ## 6H. Coding Workspace read-only adapter implementation
 
 A separate wrapper exposes exactly four non-mutating operations and requires exact readable-file/listable-directory allowlists injected by trusted host code. The model cannot expand these sets. Write/patch/test are not exposed. Its 10 contract tests passed in [GitHub Actions run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41466372070).
 
-The local probe has been expanded to import the real `CodingWorkspace` class and call only root `workspace_list` through the new adapter. It prints the total entry count and truncation flag, not the entry names. This expanded Windows probe has not yet been executed by the user.
+The expanded Windows probe imported the real `CodingWorkspace` class and called only root `workspace_list` through the new adapter. On 2026-11-02 at 14:59:32.825Z it passed and reported `totalEntries: 5`, `truncated: false`; no entry names were printed. This confirms the local read-only list path against the existing workspace root, not the other three operations or any write/patch/test path.
+
+## 6I. Aggregate Windows probe result — 2026-11-02
+
+The user ran the updated probe from the local Cormia checkout after a fast-forward pull from `9f1ad98` to `45dd82c69c89a0ed4e037a4939400a7769487bb1`. The probe generated at `2026-11-02T14:59:32.825Z` returned `PASS` with zero blockers:
+
+| Boundary | Local result |
+|---|---|
+| Task Store v1 | Present and valid; 7 tasks (6 completed, 1 paused), 0 errors, 6 warnings |
+| Resource Manager | Imported; no-op `agent-inference` lease probe passed; resource mode `interactive` |
+| Coding Workspace | Imported; read-only root listing passed; 5 entries, not truncated |
+| Evolution Manager | Imported; 1 existing run (`candidate_open`); bounded candidate read passed; digest prefix `a8ab76ea9eaa` |
+
+The six Task Store warnings were recorded without treating them as errors. Earlier review found that this warning count is consistent with the adapter's completion-integrity warnings on completed records; the aggregate output does not independently certify the correctness of those records.
+
+The probe did not start Agent or Granite, run Docker or workspace tests, start a task/evolution, modify the task store, create or patch a candidate, or promote code. It is local compatibility evidence for the listed probe operations only.
