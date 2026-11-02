@@ -14,6 +14,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { inspectTaskStoreV1 } from "../runtime/reference-worker/immortal-agent-task-store-v1-adapter.mjs";
+import { inspectReferencedAttemptEvidence } from "../runtime/reference-worker/local-evidence-sidecar-probe.mjs";
 import { withLocalResourceLease } from "../runtime/reference-worker/immortal-resource-manager-adapter.mjs";
 import { bindEvolutionRun, listEvolutionRuns } from "../runtime/reference-worker/immortal-evolution-manager-adapter.mjs";
 import { createReadOnlyCodingWorkspaceAdapter } from "../runtime/reference-worker/immortal-coding-workspace-readonly-adapter.mjs";
@@ -69,12 +70,14 @@ async function main() {
     agentRootPresent: false,
     codingRootPresent: false,
     taskStore: { present: false, valid: null, taskCount: 0, statusCounts: {}, errorCount: 0, warningCount: 0 },
+    evidenceSidecars: { checked: false, result: "not-run", valid: null, referencedCount: 0, validCount: 0, missingCount: 0, unsafeCount: 0, tooLargeCount: 0, invalidJsonCount: 0, invalidSchemaCount: 0, readErrorCount: 0, evidenceItemCount: 0, errorItemCount: 0, emptySidecarCount: 0, bytesRead: 0, withoutEvidencePathCount: 0, maxFileBytes: 8388608 },
     resourceManager: { importOk: false, leaseProbe: "not-run", reason: null, operation: "agent-inference" },
     codingWorkspace: { importOk: false, readOnlyListProbe: "not-run", totalEntries: null, truncated: null, reason: null },
     evolutionManager: { importOk: false, runCount: 0, statusCounts: {}, openCandidateRead: "not-run", readSha256Prefix: null },
     limitations: [
       "No Agent process or Granite model was started.",
       "No task-store file was changed; only aggregate fields are printed.",
+      "Only task-referenced evidence sidecars are read in memory under an 8 MiB per-file bound; raw payload content and identifiers are never printed.",
       "No candidate was created, patched, evaluated or promoted.",
       "No Docker container or workspace test was run.",
       "No source, prompt, result, task goal, evidence body, credential or wallet material is printed."
@@ -103,7 +106,25 @@ async function main() {
       errorCount: inspected.errors.length,
       warningCount: inspected.warnings.length
     };
-    if (!inspected.valid) summary.taskStore.errors = inspected.errors;
+    if (!inspected.valid) {
+      summary.taskStore.errors = inspected.errors;
+    } else {
+      try {
+        summary.evidenceSidecars = await inspectReferencedAttemptEvidence({
+          agentRoot,
+          tasks: inspected.tasks
+        });
+      } catch {
+        summary.evidenceSidecars = {
+          ...summary.evidenceSidecars,
+          checked: true,
+          result: "PARTIAL_OR_FAIL",
+          valid: false,
+          readErrorCount: 1,
+          reason: "sidecar-probe-exception"
+        };
+      }
+    }
   } catch (error) {
     summary.taskStore = {
       present: taskStoreFound,
@@ -214,6 +235,7 @@ async function main() {
 
   const fatal = [];
   if (!summary.taskStore.present || summary.taskStore.valid !== true) fatal.push("task-store");
+  if (summary.evidenceSidecars.result === "PARTIAL_OR_FAIL") fatal.push("evidence-sidecars");
   if (!summary.codingWorkspace.importOk) fatal.push("coding-workspace-import");
   if (summary.codingWorkspace.readOnlyListProbe !== "passed") fatal.push("coding-workspace-read-only-list");
   if (!summary.resourceManager.importOk) fatal.push("resource-manager-import");
