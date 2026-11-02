@@ -61,19 +61,41 @@ export function canonicalizeLocalClaims(value) {
     return JSON.stringify(value);
   }
   if (Array.isArray(value)) {
-    return "[" + value.map(item => canonicalizeLocalClaims(item)).join(",") + "]";
+    const ownKeys = Reflect.ownKeys(value);
+    if (ownKeys.length !== value.length + 1 || ownKeys.some(key =>
+      key !== "length" && !/^(0|[1-9][0-9]*)$/.test(key)
+    )) {
+      throw new TypeError("Arrays with holes or extra properties are not valid in local signed claims.");
+    }
+    const items = [];
+    for (let index = 0; index < value.length; index++) {
+      if (!Object.hasOwn(value, index)) {
+        throw new TypeError("Sparse arrays are not valid in local signed claims.");
+      }
+      const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
+      if (!descriptor || !descriptor.enumerable || !Object.hasOwn(descriptor, "value")) {
+        throw new TypeError("Array accessors are not valid in local signed claims.");
+      }
+      items.push(canonicalizeLocalClaims(descriptor.value));
+    }
+    return "[" + items.join(",") + "]";
   }
   if (isPlainObject(value)) {
     const ownKeys = Reflect.ownKeys(value);
     if (ownKeys.some(key => typeof key !== "string")) {
       throw new TypeError("Symbol properties are not valid in local signed claims.");
     }
+    const descriptors = Object.getOwnPropertyDescriptors(value);
     const keys = ownKeys.sort();
     for (const key of keys) {
+      const descriptor = descriptors[key];
       if (!isWellFormedString(key)) throw new TypeError("Ill-formed Unicode property name.");
+      if (!descriptor || !descriptor.enumerable || !Object.hasOwn(descriptor, "value")) {
+        throw new TypeError("Accessors and non-enumerable properties are not valid in local signed claims.");
+      }
     }
     return "{" + keys.map(key =>
-      JSON.stringify(key) + ":" + canonicalizeLocalClaims(value[key])
+      JSON.stringify(key) + ":" + canonicalizeLocalClaims(descriptors[key].value)
     ).join(",") + "}";
   }
   throw new TypeError("Unsupported value in local signed claims.");
