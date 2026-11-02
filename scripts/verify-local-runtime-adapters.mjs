@@ -16,6 +16,7 @@ import { pathToFileURL } from "node:url";
 import { inspectTaskStoreV1 } from "../runtime/reference-worker/immortal-agent-task-store-v1-adapter.mjs";
 import { withLocalResourceLease } from "../runtime/reference-worker/immortal-resource-manager-adapter.mjs";
 import { bindEvolutionRun, listEvolutionRuns } from "../runtime/reference-worker/immortal-evolution-manager-adapter.mjs";
+import { createReadOnlyCodingWorkspaceAdapter } from "../runtime/reference-worker/immortal-coding-workspace-readonly-adapter.mjs";
 
 function parseArgs(argv) {
   const result = {};
@@ -69,6 +70,7 @@ async function main() {
     codingRootPresent: false,
     taskStore: { present: false, valid: null, taskCount: 0, statusCounts: {}, errorCount: 0, warningCount: 0 },
     resourceManager: { importOk: false, leaseProbe: "not-run", reason: null, operation: "agent-inference" },
+    codingWorkspace: { importOk: false, readOnlyListProbe: "not-run", totalEntries: null, truncated: null, reason: null },
     evolutionManager: { importOk: false, runCount: 0, statusCounts: {}, openCandidateRead: "not-run", readSha256Prefix: null },
     limitations: [
       "No Agent process or Granite model was started.",
@@ -80,6 +82,7 @@ async function main() {
   };
 
   const taskStorePath = path.join(agentRoot, "data", "tasks.json");
+  const codingWorkspaceModulePath = path.join(agentRoot, "coding-workspace.mjs");
   const resourceModulePath = path.join(codingRoot, "self-improvement", "resource-manager.mjs");
   const evolutionModulePath = path.join(codingRoot, "self-improvement", "evolution-manager.mjs");
   const selfImprovementTestPath = path.join(codingRoot, "self-improvement", "self-improvement.test.mjs");
@@ -111,6 +114,37 @@ async function main() {
       warningCount: 0,
       reason: String(error?.message ?? error)
     };
+  }
+
+  try {
+    await requireDirectory(agentRoot, "Agent root");
+    await requireDirectory(codingRoot, "Coding Workspace root");
+    await requireRegularFile(codingWorkspaceModulePath, "Coding Workspace module");
+    const { CodingWorkspace } = await import(pathToFileURL(codingWorkspaceModulePath).href);
+    summary.codingWorkspace.importOk = typeof CodingWorkspace === "function";
+    if (summary.codingWorkspace.importOk) {
+      const codingWorkspace = new CodingWorkspace({
+        root: codingRoot,
+        protectedRoots: [
+          agentRoot,
+          "E:\\AI\\Immortal-Control-Room",
+          "E:\\AI\\Immortal-MCP"
+        ]
+      });
+      await codingWorkspace.initialize();
+      const adapter = createReadOnlyCodingWorkspaceAdapter({
+        codingWorkspace,
+        readableFiles: [],
+        listableDirectories: ["."]
+      });
+      const listing = await adapter.list();
+      summary.codingWorkspace.readOnlyListProbe = listing?.ok === true ? "passed" : "blocked";
+      summary.codingWorkspace.totalEntries = Number.isInteger(listing?.totalEntries) ? listing.totalEntries : null;
+      summary.codingWorkspace.truncated = listing?.truncated === true;
+    }
+  } catch (error) {
+    summary.codingWorkspace.readOnlyListProbe = "error";
+    summary.codingWorkspace.reason = String(error?.message ?? error);
   }
 
   try {
@@ -180,6 +214,8 @@ async function main() {
 
   const fatal = [];
   if (!summary.taskStore.present || summary.taskStore.valid !== true) fatal.push("task-store");
+  if (!summary.codingWorkspace.importOk) fatal.push("coding-workspace-import");
+  if (summary.codingWorkspace.readOnlyListProbe === "error") fatal.push("coding-workspace-read-only-list");
   if (!summary.resourceManager.importOk) fatal.push("resource-manager-import");
   if (summary.resourceManager.leaseProbe === "error") fatal.push("resource-manager-runtime");
   if (!summary.evolutionManager.importOk) fatal.push("evolution-manager-import");
