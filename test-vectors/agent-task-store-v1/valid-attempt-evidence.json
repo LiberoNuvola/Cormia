@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "taskId": "TASK-20261102134028-a1b2c3d4",
+  "attempt": 1,
+  "updatedAt": "2026-11-02T13:41:28.038Z",
+  "evidence": [
+    {
+      "observedAt": "2026-11-02T13:40:58.038Z",
+      "tool": "get_branch_head",
+      "arguments": {},
+      "isError": false,
+      "rawResultText": "{\"branch\":\"work/immortal-green-closure\",\"commitSha\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}"
+    }
+  ]
+}
