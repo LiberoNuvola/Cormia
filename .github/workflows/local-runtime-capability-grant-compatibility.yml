@@ -13,6 +13,8 @@ on:
       - "schemas/local-autonomous-project-mandate-claims-v0.1.schema.json"
       - "schemas/local-project-mandate-consent-claims-v0.1.schema.json"
       - "runtime/reference-worker/local-autonomous-project-mandate-schema.test.mjs"
+      - "runtime/reference-worker/local-autonomous-project-authority.mjs"
+      - "runtime/reference-worker/local-autonomous-project-authority.test.mjs"
       - "runtime/reference-worker/local-authority-lifecycle-schema.test.mjs"
       - "runtime/reference-worker/local-revocation-anchor-model.mjs"
       - "runtime/reference-worker/local-revocation-anchor-model.test.mjs"
@@ -31,6 +33,8 @@ on:
       - "schemas/local-autonomous-project-mandate-claims-v0.1.schema.json"
       - "schemas/local-project-mandate-consent-claims-v0.1.schema.json"
       - "runtime/reference-worker/local-autonomous-project-mandate-schema.test.mjs"
+      - "runtime/reference-worker/local-autonomous-project-authority.mjs"
+      - "runtime/reference-worker/local-autonomous-project-authority.test.mjs"
       - "runtime/reference-worker/local-authority-lifecycle-schema.test.mjs"
       - "runtime/reference-worker/local-revocation-anchor-model.mjs"
       - "runtime/reference-worker/local-revocation-anchor-model.test.mjs"
@@ -62,6 +66,8 @@ jobs:
           node --check runtime/reference-worker/local-runtime-capability-grants.test.mjs
           node --check runtime/reference-worker/local-authority-lifecycle-schema.test.mjs
           node --check runtime/reference-worker/local-autonomous-project-mandate-schema.test.mjs
+          node --check runtime/reference-worker/local-autonomous-project-authority.mjs
+          node --check runtime/reference-worker/local-autonomous-project-authority.test.mjs
           node --check runtime/reference-worker/local-revocation-anchor-model.mjs
           node --check runtime/reference-worker/local-revocation-anchor-model.test.mjs
 
@@ -84,6 +90,9 @@ jobs:
 
       - name: Run autonomous project mandate schema contracts
         run: node --test runtime/reference-worker/local-autonomous-project-mandate-schema.test.mjs
+
+      - name: Run autonomous project authority contracts
+        run: node --test runtime/reference-worker/local-autonomous-project-authority.test.mjs
 
       - name: Run revocation journal anchor state-machine tests
         run: node --test runtime/reference-worker/local-revocation-anchor-model.test.mjs
