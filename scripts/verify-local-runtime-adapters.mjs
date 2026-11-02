@@ -182,6 +182,7 @@ async function main() {
   if (summary.resourceManager.leaseProbe === "error") fatal.push("resource-manager-runtime");
   if (!summary.evolutionManager.importOk) fatal.push("evolution-manager-import");
   if (summary.evolutionManager.openCandidateRead === "error") fatal.push("evolution-candidate-read");
+  if ((summary.evolutionManager.statusCounts.integrity_error ?? 0) > 0) fatal.push("evolution-integrity");
 
   summary.result = fatal.length === 0 ? "PASS" : "PARTIAL_OR_FAIL";
   summary.blockers = fatal;
