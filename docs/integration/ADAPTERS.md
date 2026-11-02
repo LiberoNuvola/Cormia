@@ -36,6 +36,14 @@ The existing bridge is intentionally fixed to `LiberoNuvola/Immortal-Protocol` /
 
 The v0.8.0 local agent, Granite/llama.cpp backend, task-store lineage, Resource Manager, Evolution Manager, Coding Workspace and Docker test path are the initial implementation nucleus. AEP conformance requires adapters and test vectors; v0.8.0 is not declared conformant today.
 
+### Local Evolution Manager adapter
+
+A Cormia-side wrapper is implemented at `runtime/reference-worker/immortal-evolution-manager-adapter.mjs`. It checks the fixed four-entry source map (two implementation modules plus two immutable baseline-test aliases), starts and binds candidate runs to a trusted run ID, and exposes only allowlisted reads, candidate-test creation, SHA-preconditioned patches and a human review packet.
+
+Baseline tests cannot be patched; candidate test creation is limited to `candidate-*.test.mjs`; secret-pattern screening is retained. Evaluation is a trusted-host-only method and accepts only successful syntax evidence for both implementation modules plus successful Docker evidence for the fixed candidate-only, read-only, no-network profile. Automatic promotion remains prohibited.
+
+This wrapper does not replace the Agent's explicit `/evolve` entry, create a peer scheduler, or write live runtime files. See [LOCAL_EVOLUTION_MANAGER_ADAPTER.md](../runtime/reference-worker/LOCAL_EVOLUTION_MANAGER_ADAPTER.md).
+
 ### Local Resource Manager adapter
 
 A Cormia-side trusted-orchestrator wrapper is implemented at `runtime/reference-worker/immortal-resource-manager-adapter.mjs`. It maps only three fixed operation identifiers to the existing manager's `model-inference` or `cpu-heavy` lease class, samples a fresh snapshot, fails closed on unavailable/invalid telemetry or denied lease, and releases in `finally`.
