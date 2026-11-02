@@ -5,7 +5,8 @@
 **Integration proposal:** [ADR-0006 — bounded Local Runtime adapter](../../docs/adr/0006-local-runtime-adapter-boundary.md)  
 **Coding Workspace boundary:** [capability and approval matrix](../../docs/architecture/CODING_WORKSPACE_CAPABILITY_MATRIX_2026-11-02.md)  
 **Resource Manager adapter:** [local lease wrapper contract](./LOCAL_RESOURCE_MANAGER_ADAPTER.md)  
-**Evolution Manager adapter:** [run-bound candidate lifecycle contract](./LOCAL_EVOLUTION_MANAGER_ADAPTER.md)
+**Evolution Manager adapter:** [run-bound candidate lifecycle contract](./LOCAL_EVOLUTION_MANAGER_ADAPTER.md)  
+**Coding Workspace read-only adapter:** [host-scoped file and directory allowlist](./LOCAL_CODING_WORKSPACE_READONLY_ADAPTER.md)
 
 The local IMMORTAL Agent v0.8.0 is a prototype and potential starting point, not yet AEP-conformant. The review confirmed the component map and the current trust boundaries. The next work is adapter-contract definition and compatibility testing, not a greenfield rewrite.
 
@@ -66,8 +67,8 @@ After pulling `main`, run from the Cormia checkout:
 node .\scripts\verify-local-runtime-adapters.mjs --agent-root "E:\AI\Immortal-Agent-v0.7" --coding-root "E:\AI\Immortal-CodingLab\workspace"
 ```
 
-The probe checks the local `data/tasks.json` in memory and prints only total/status counts and schema error counts; it never prints task goals, result text, or evidence. It samples the real Resource Manager through a short acquire/release lease with a no-op callback. It imports the real SelfImprovementManager, validates existing run journals through its list operation, and if an open candidate exists reads only the first line of `resource-manager.mjs` and reports a short SHA prefix.
+The probe checks the local `data/tasks.json` in memory and prints only total/status counts and schema error counts; it never prints task goals, result text, or evidence. It samples the real Resource Manager through a short acquire/release lease with a no-op callback. It imports the real SelfImprovementManager, validates existing run journals through its list operation, and if an open candidate exists reads only the first line of `resource-manager.mjs` and reports a short SHA prefix. It also imports the real CodingWorkspace class, initializes it against the already-existing root and calls only root `workspace_list` through the host-scoped read-only adapter; only `totalEntries` and `truncated` are printed, never entry names.
 
 The probe's syntax/import checks passed in [GitHub Actions run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41465447870) at commit `06d87dfdc8818a7c74094d9692f45f50f6ffcfcc`. GitHub CI does not have access to the user's local Windows paths; the local invocation below remains required.
 
-It refuses to create missing roots, source files, or `self-improvement/runs` directories. It does not start an evolution, call Granite, run Docker, write the Agent task store, create/patch a candidate, or promote code. A resource lease may report `blocked` when the host policy says the machine is busy; this is an availability result, not a corruption error.
+It refuses to create missing roots, source files, or `self-improvement/runs` directories. The CodingWorkspace root is checked before initialization; the probe does not create files or directories. It does not start an evolution, call Granite, run Docker, write the Agent task store, create/patch a candidate, or promote code. A resource lease may report `blocked` when the host policy says the machine is busy; this is an availability result, not a corruption error.
