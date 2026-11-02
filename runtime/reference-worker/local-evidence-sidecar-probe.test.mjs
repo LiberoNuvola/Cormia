@@ -145,6 +145,23 @@ test("does not follow an evidence directory symlink", async t => {
   assert.equal(result.bytesRead, 0);
 });
 
+test("does not read any sidecar while a task is marked running", async t => {
+  const root = await fixture(t);
+  await writeFile(
+    path.join(root, "data", "evidence", taskId + "-attempt-1.json"),
+    JSON.stringify(sidecar())
+  );
+
+  const result = await inspectReferencedAttemptEvidence({
+    agentRoot: root,
+    tasks: [task({ status: "running" })]
+  });
+  assert.equal(result.result, "PARTIAL_OR_FAIL");
+  assert.equal(result.runningTaskCount, 1);
+  assert.equal(result.bytesRead, 0);
+  assert.equal(result.validCount, 0);
+});
+
 test("reports when no tasks reference an evidence sidecar", async t => {
   const root = await fixture(t);
   const result = await inspectReferencedAttemptEvidence({
