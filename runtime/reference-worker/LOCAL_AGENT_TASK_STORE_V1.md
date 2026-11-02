@@ -117,4 +117,4 @@ The Agent uses a temporary file plus rename for task-store writes. This review d
 
 ## 7. Required next step
 
-The next safe step is a separate compatibility test that compares representative real v1 records and evidence sidecars against these contracts on the user's Windows installation. It must use redacted copies and must not expose the live task store. Only after that should a local Cormia adapter be allowed to consume this format.
+The aggregate Windows probe has now validated the actual local `data/tasks.json` envelope in memory and reported only counts: 7 records, 0 schema errors and 6 warnings. It did not read or validate the referenced evidence-sidecar file contents, and it did not print task goals, results, IDs or evidence. The remaining local compatibility step is therefore narrower: validate representative evidence-sidecar JSON against the v1 sidecar schema using redacted fixtures or a local summary-only probe. The current adapter remains an inspector; no task execution or store mutation is authorized by this result.
