@@ -83,6 +83,18 @@ That extraction must preserve:
 
 No extraction is authorized by this ADR alone.
 
+## First implementation slice recorded 2026-11-02
+
+The following compatibility artifacts have been added without modifying the local Agent or its store:
+
+- `schemas/immortal-agent-task-store-v1.schema.json`;
+- `schemas/immortal-agent-attempt-evidence-v1.schema.json`;
+- `runtime/reference-worker/immortal-agent-task-store-v1-adapter.mjs`;
+- Node-native adapter contract tests and synthetic test vectors;
+- [LOCAL_AGENT_TASK_STORE_V1.md](../runtime/reference-worker/LOCAL_AGENT_TASK_STORE_V1.md).
+
+This slice is **read-only**. It does not implement the durable AEP adapter task record described in section 2, does not write the v1 store, does not run/resume tasks, and does not claim instruction-level checkpoint recovery. It establishes the observed v1 compatibility contract before any runtime orchestration is added. The tests are run independently in the Cormia repository and still need a Windows-side compatibility check against a redacted copy of the user's actual store.
+
 ## Alternatives considered
 
 ### A. Import \`agent.mjs\` directly
