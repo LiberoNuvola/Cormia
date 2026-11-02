@@ -234,3 +234,16 @@ Two draft schemas are present:
 The [Local Runtime Capability Grant Contracts run #25](https://github.com/LiberoNuvola/Cormia/actions/runs/41484097123) passed 65 tests: 21 cryptographic/grant tests, 6 lifecycle-schema tests, 6 autonomous-project-mandate schema tests, 17 autonomous authority policy tests and 15 in-memory revocation-anchor tests (0 failures). A pure project authority evaluator now derives one internal task child authority and authorizes repeated in-scope edits/tests/builds without per-operation approval callbacks. It checks exact task/manifest/worktree binding, exclusions, host-policy intersection, named test profiles, branch/remote policy and expiry.
 
 The current Agent `/code` + `APPROVO` path remains an interactive compatibility mode. The new policy helper is not yet integrated into Agent execution and does not verify signatures or persist mandates. The new autonomous Runtime path is therefore not yet implemented or activated. Do not remove or bypass legacy approval checks in isolation; implement the verified mandate store, isolated worktree, credential broker, workspace I/O enforcement and autonomous task loop, then prove an end-to-end multi-step task can edit, test, repair and finish with zero per-operation prompts before enabling it.
+
+
+## 6N. IMMORTAL EXP generalization crosswalk — research coordination
+
+The cross-domain mapping of IMMORTAL EXP-01…EXP-12 against Cormia AEP and its Runtime is recorded in [IMMORTAL–Cormia EXP Generalization Crosswalk v1.0](../research/IMMORTAL_CORMIA_EXP_GENERALIZATION_CROSSWALK_v1.0.md).
+
+The crosswalk classifies each EXP as partial, architectural, open or dependent on an explicit cross-domain decision. It distinguishes authority/action composition (Cormia Runtime), economic/resource composition (IMMORTAL kernel and any explicit AEP economic adapter), and governance/jurisdiction composition (Governance Framework and profiles). It does not assume these are already one proven algorithm or theorem.
+
+Coordination notes:
+- Cormia `main` baseline is unchanged by the draft PNC work; ADR-0011 is proposed on [PR #1](https://github.com/LiberoNuvola/Cormia/pull/1), not yet merged.
+- The crosswalk is maintained on a separate branch/PR and does not alter PR #1 or its PNC-bound mandate work.
+- The AEP-to-IMMORTAL economic jurisdiction question remains OPEN: no duplicate or conflicting solvency/protection accounting may be created for the same resource.
+- No PRE-RICH constants, V3, Reveal, Issue semantics, AEP economic parameters or Runtime authority are changed by this research mapping.
