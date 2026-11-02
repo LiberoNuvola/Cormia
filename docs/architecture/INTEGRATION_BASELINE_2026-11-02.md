@@ -114,6 +114,10 @@ The inventory contains paths, extensions, sizes, SHA-256 digests and last-write 
 
 These are hash/path observations, not code-quality or semantic assessments. A matching digest establishes byte identity, not that either copy is correct or safe.
 
+## 6E. Evolution Manager adapter implementation
+
+A separate run-bound wrapper has been added at `runtime/reference-worker/immortal-evolution-manager-adapter.mjs`. It enforces the fixed four-entry source map, candidate-only test creation, immutable baseline tests, SHA/anchor preconditions, trusted-host verification evidence and disabled promotion. Its adapter CI is separate from running a real local evolution. See [LOCAL_EVOLUTION_MANAGER_ADAPTER.md](../runtime/reference-worker/LOCAL_EVOLUTION_MANAGER_ADAPTER.md).
+
 ## 6D. Resource Manager adapter implementation
 
 A separate Cormia-side adapter has been added at `runtime/reference-worker/immortal-resource-manager-adapter.mjs`. It maps only `agent-inference`, `workspace-test` and `evolution-docker-test` to fixed ResourceManager classes, fails closed on missing/invalid data and releases the lease in `finally`. The dedicated 11-test GitHub Actions workflow passed. This wrapper is not connected to the Agent and does not provide OS-level resource enforcement. See [LOCAL_RESOURCE_MANAGER_ADAPTER.md](../runtime/reference-worker/LOCAL_RESOURCE_MANAGER_ADAPTER.md).
