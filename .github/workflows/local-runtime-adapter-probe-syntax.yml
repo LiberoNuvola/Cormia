@@ -44,7 +44,8 @@ jobs:
           node --check runtime/reference-worker/immortal-agent-task-store-v1-adapter.mjs
           node --check runtime/reference-worker/immortal-resource-manager-adapter.mjs
           node --check runtime/reference-worker/immortal-evolution-manager-adapter.mjs
+          node --check runtime/reference-worker/immortal-coding-workspace-readonly-adapter.mjs
 
       - name: Import local adapters without executing a task
         run: |
-          node --input-type=module -e "await import('./runtime/reference-worker/immortal-agent-task-store-v1-adapter.mjs'); await import('./runtime/reference-worker/immortal-resource-manager-adapter.mjs'); await import('./runtime/reference-worker/immortal-evolution-manager-adapter.mjs'); console.log('All local adapters imported successfully.');"
+          node --input-type=module -e "await import('./runtime/reference-worker/immortal-agent-task-store-v1-adapter.mjs'); await import('./runtime/reference-worker/immortal-resource-manager-adapter.mjs'); await import('./runtime/reference-worker/immortal-evolution-manager-adapter.mjs'); await import('./runtime/reference-worker/immortal-coding-workspace-readonly-adapter.mjs'); console.log('All local adapters imported successfully.');"
