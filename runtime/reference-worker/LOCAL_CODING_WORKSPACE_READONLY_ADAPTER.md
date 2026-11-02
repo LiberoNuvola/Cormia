@@ -34,6 +34,12 @@ The wrapper rejects absolute, drive, UNC and traversal paths, non-canonical path
 - This wrapper does not invoke the Resource Manager; verification is a bounded parser operation in the existing class.
 - It does not start the local Agent, invoke Granite, start Docker, mutate files, handle peer tasks, issue CRC or perform Cardano actions.
 
+## Verification evidence
+
+The dedicated [GitHub Actions run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41466372070) completed **SUCCESS** at commit `6d7629537ef7d7fbb2a37cd143cd770c1bc3d90b`; all 10 read-only adapter contract tests passed.
+
+The expanded Windows probe now imports the real local CodingWorkspace class and calls only `workspace_list` for the already-existing root directory. It reports only the total entry count and truncation flag, never entry names. This local check is pending execution on the user's Windows installation; CI does not access that machine.
+
 ## Tests
 
 Run from this directory:
