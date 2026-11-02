@@ -91,3 +91,9 @@ The local evaluator verifies compact JWS Ed25519 signatures through a trusted ho
 Only `workspace.list`, `workspace.read`, `workspace.diff` and `workspace.verify` can be authorized by this v0.1 evaluator. Create, replace, test and delegation remain denied. The current Agent `APPROVO` path is unchanged.
 
 This is not a production key-management or revocation service. There is no real local key provisioned, no durable rollback-resistant revocation journal/checkpoint, no persistent grant store, and no integration with `agent.mjs` or `CodingWorkspace.callTool()`. Tests use ephemeral in-memory Ed25519 key pairs only. See ADR-0008 before using this contract in any Runtime.
+
+## Local host authority lifecycle — design only
+
+[ADR-0009](../../docs/adr/0009-proposed-local-authority-bootstrap-consent-and-revocation-anchor.md) and four schemas now describe the next trust boundaries: a host-pinned non-exportable signing key, one-time operator consent bound to an exact canonical grant intent, and a signed/hash-linked revocation journal reconciled against an independent monotonic anchor.
+
+This is design and schema work only. No provider, key store, consent broker, journal writer or anchor is implemented or activated. The current `APPROVO` behavior and the read-only adapter remain unchanged. A file-only hash chain is explicitly not considered rollback protection.
