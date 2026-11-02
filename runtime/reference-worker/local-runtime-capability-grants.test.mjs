@@ -80,7 +80,7 @@ test("canonicalizes the restricted JCS claim subset deterministically", () => {
   );
   assert.throws(() => canonicalizeLocalClaims({ fractional: 1.5 }), /safe integer/);
   assert.throws(() => canonicalizeLocalClaims({ tooLarge: Number.MAX_SAFE_INTEGER + 1 }), /safe integer/);
-  assert.throws(() => canonicalizeLocalClaims(new Array(1)), /Sparse arrays/);
+  assert.throws(() => canonicalizeLocalClaims(new Array(1)), /Arrays with holes/);
   const accessor = {};
   Object.defineProperty(accessor, "value", {
     enumerable: true,
@@ -105,8 +105,11 @@ test("authorizes one exact path only when task, manifest, subject, host and time
 
 test("rejects a tampered signature and an unknown signing key", () => {
   const token = signGrant();
-  const last = token.at(-1);
-  const tampered = token.slice(0, -1) + (last === "A" ? "B" : "A");
+  const tokenParts = token.split(".");
+  const signatureBytes = Buffer.from(tokenParts[2], "base64url");
+  signatureBytes[0] ^= 1;
+  tokenParts[2] = signatureBytes.toString("base64url");
+  const tampered = tokenParts.join(".");
   assert.equal(verifyLocalCapabilityGrant(tampered, { resolveKey }).reason, "invalid-signature");
   assert.equal(verifyLocalCapabilityGrant(token, { resolveKey: () => null }).reason, "untrusted-signing-key");
 });
