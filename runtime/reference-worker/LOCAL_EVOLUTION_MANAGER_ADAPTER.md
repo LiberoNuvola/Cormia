@@ -56,3 +56,10 @@ This wrapper does not:
 - create CRC, receipts, on-chain commitments or wallet actions.
 
 The current evolution manager remains a local prototype whose journal and candidate tree are stored on the local filesystem. A future networked adapter must preserve these boundaries and add its own manifest, authorization, persistence and evidence protocol.
+
+
+## Verification evidence
+
+Thirteen Node-native adapter contract tests pass in the isolated review environment. A dedicated GitHub Actions workflow now checks syntax and all adapter contracts. The workflow result is recorded after it completes.
+
+These are adapter-boundary tests using a fake manager. They do not claim that a real run was started, that candidate code was evaluated, or that the local Windows/Docker environment was exercised.
