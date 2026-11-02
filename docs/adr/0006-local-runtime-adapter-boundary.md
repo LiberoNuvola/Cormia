@@ -83,6 +83,12 @@ That extraction must preserve:
 
 No extraction is authorized by this ADR alone.
 
+## Evolution Manager adapter slice recorded 2026-11-02
+
+A run-bound wrapper has been added around the existing candidate lifecycle. It verifies the fixed source map, binds every candidate operation to one host-selected run ID, limits reads and writes, keeps the two baseline-test copies immutable, preserves SHA-preconditioned patching, screens candidate text for high-confidence credential patterns, and accepts evaluation only from host-produced syntax plus fixed Docker evidence. The wrapper exposes a review packet but always refuses promotion. See [LOCAL_EVOLUTION_MANAGER_ADAPTER.md](../runtime/reference-worker/LOCAL_EVOLUTION_MANAGER_ADAPTER.md).
+
+The wrapper is not wired into the existing Agent, and no local source or candidate has been copied into Cormia. Its dedicated CI workflow is a compatibility-contract check, not an actual evolution run or production approval.
+
 ## Resource Manager adapter slice recorded 2026-11-02
 
 A separate Cormia-side wrapper now maps three trusted Runtime operations onto the existing ResourceManager classes and guarantees lease release in `finally`. Its 11 isolated contract tests pass, and the dedicated GitHub Actions run completed successfully. The implementation and limitations are documented in [LOCAL_RESOURCE_MANAGER_ADAPTER.md](../runtime/reference-worker/LOCAL_RESOURCE_MANAGER_ADAPTER.md).
