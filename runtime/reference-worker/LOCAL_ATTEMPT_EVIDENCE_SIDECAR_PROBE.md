@@ -58,8 +58,8 @@ The aggregate Windows probe invokes this check automatically after a valid Task 
 
 ## 6. CI evidence
 
-The dedicated [Local Agent Attempt Evidence Sidecar Compatibility run #3](https://github.com/LiberoNuvola/Cormia/actions/runs/41470228540) completed **SUCCESS** at commit `66cf29e0444040f578df4967f77cd842283c9092`: syntax checks passed and all 10 sidecar probe contract tests passed, including the active-task no-read guard. Earlier run #2 also passed its original 9-test suite.
+The dedicated [Local Agent Attempt Evidence Sidecar Compatibility run #5](https://github.com/LiberoNuvola/Cormia/actions/runs/41470239168) completed **SUCCESS** at commit `7e00e7aecd3bbf99535700d00ce22bbc6801c241`: syntax checks passed and all 10 sidecar probe contract tests passed, including the active-task no-read guard. Earlier runs #2 and #3 also passed their respective suites.
 
-The aggregate probe's updated syntax/import workflow also completed **SUCCESS** in [run #8](https://github.com/LiberoNuvola/Cormia/actions/runs/41469547041) at commit `945e86ed8d18f555fe7f8daabdb3f57a39bd7e3d`.
+The aggregate probe's updated syntax/import workflow also completed **SUCCESS** in [run #10](https://github.com/LiberoNuvola/Cormia/actions/runs/41470239182) at commit `7e00e7aecd3bbf99535700d00ce22bbc6801c241`.
 
 These runs use synthetic fixtures and repository code only. They do not inspect the user's local Windows sidecars.
