@@ -1,6 +1,6 @@
 # Integration baseline — 2026-11-02
 
-**Status:** verified repository inventory; local-source inventory pending  
+**Status:** repository and local-source inventory verified; four-adapter Windows smoke test passed; AEP Runtime integration remains proposed  
 **Cormia:** public repository, branch main; initial scaffold commit fdc3e868c032257323e341ba846d169f01f34939 (three-commit history preserved)  
 **IMMORTAL source branch inspected:** work/immortal-green-closure  
 **IMMORTAL source HEAD observed:** cabe00f1b7743e4335b5a140b32feb52e47f2be6  
