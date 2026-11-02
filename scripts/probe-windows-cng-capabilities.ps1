@@ -81,7 +81,7 @@ $providerResults = foreach ($providerName in $providerNames) {
         [uint32]$algorithmCount = 0
         $enumStatus = [CormiaCngProbeNative]::NCryptEnumAlgorithms(
             $providerHandle,
-            0,
+            0x10,
             [ref]$algorithmCount,
             [ref]$algorithmBuffer,
             0
