@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/LiberoNuvola/Cormia/blob/main/schemas/immortal-agent-attempt-evidence-v1.schema.json",
+  "title": "IMMORTAL Local Agent Attempt Evidence v1",
+  "description": "Compatibility schema for one data/evidence/<task-id>-attempt-<n>.json sidecar written by the existing local Agent. It is not a canonical AEP Evidence Package.",
+  "type": "object",
+  "required": ["version", "taskId", "attempt", "evidence"],
+  "properties": {
+    "version": { "const": 1 },
+    "taskId": { "type": "string", "pattern": "^TASK-[0-9]{14}-[0-9a-f]{8}$" },
+    "attempt": { "type": "integer", "minimum": 1 },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["observedAt", "tool", "arguments", "isError", "rawResultText"],
+        "properties": {
+          "observedAt": { "type": "string", "format": "date-time" },
+          "tool": { "type": "string", "minLength": 1 },
+          "arguments": { "type": "object" },
+          "isError": { "type": "boolean" },
+          "rawResultText": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}
