@@ -86,6 +86,17 @@ test("rejects evidence paths outside data/evidence or mismatched attempt files",
   }
 });
 
+test("allows a task record to retain a prior attempt evidence path during a new attempt transition", () => {
+  const previousAttemptTask = task({
+    status: "running",
+    attempts: 2,
+    evidencePath: "data/evidence/" + taskId + "-attempt-1.json"
+  });
+  const result = inspectTaskStoreV1({ version: 1, tasks: [previousAttemptTask] });
+  assert.equal(result.valid, true);
+  assert.equal(result.tasks[0].evidencePath, previousAttemptTask.evidencePath);
+});
+
 test("validates an attempt evidence sidecar linked to the exact task and attempt", () => {
   const sidecar = {
     version: 1,
