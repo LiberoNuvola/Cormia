@@ -6,8 +6,8 @@
  * counts. It never prints goals, task results, evidence content, secrets or
  * candidate source. It does not write to the Agent or candidate trees.
  *
- * The SelfImprovementManager initialize/list path may create the empty
- * self-improvement/runs directory if it does not already exist.
+ * Existing data, self-improvement and runs directories are required. The
+ * probe refuses to create them, so a missing path is reported as a blocker.
  */
 import { lstat, readFile } from "node:fs/promises";
 import path from "node:path";
