@@ -149,6 +149,10 @@ Observed:
 
 **Integration disposition:** keep this bridge fixed and read-only. A Cormia observer must be a separate versioned adapter, not a broadening of this bridge.
 
+### 3.7 Cormia Evolution Manager adapter (post-review implementation)
+
+The new wrapper at `runtime/reference-worker/immortal-evolution-manager-adapter.mjs` binds candidate work to a trusted run ID and fixed source map, enforces candidate-only test creation, prevents baseline test patches, uses exact SHA and anchor-count preconditions, validates host-produced syntax/Docker evidence before evaluation, and permanently denies runtime promotion. Its tests use a fake manager to check boundary logic; they do not run the local SelfImprovementManager against the user's workspace. See [LOCAL_EVOLUTION_MANAGER_ADAPTER.md](../runtime/reference-worker/LOCAL_EVOLUTION_MANAGER_ADAPTER.md).
+
 ## 4. Prior evolution run: no candidate delta
 
 The metadata inventory for `EVOL-20261102072415-46c24ca0` shows identical hashes between active source, baseline copies and candidate copies for both manager modules. The same combined test file was copied under the two manager test names in baseline and candidate.
