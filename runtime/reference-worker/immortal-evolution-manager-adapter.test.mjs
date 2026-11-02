@@ -127,7 +127,7 @@ test("reads allowlisted source and baseline files with a 120-line maximum", asyn
   const result = await adapter.readCandidate({ runId, path: "resource-manager.mjs" });
   assert.equal(result.sha256, await sha(source["resource-manager.mjs"]));
   await assert.rejects(() => adapter.readCandidate({ runId, path: "../secrets.json" }), /allowlist/);
-  await assert.rejects(() => adapter.readCandidate({ runId, path: "candidate-any.test.mjs", startLine: 1, endLine: 121 }), /120 lines/);
+  await assert.rejects(() => adapter.readCandidate({ runId, path: "resource-manager.mjs", startLine: 1, endLine: 121 }), /120 lines/);
 });
 
 test("creates only bounded candidate-specific test files and scans credential patterns", async () => {
