@@ -313,6 +313,8 @@ export function authorizeLocalProjectOperation({
     if (!trustedMandate || trustedMandate.signatureVerified !== true ||
         trustedMandate.consentVerified !== true ||
         trustedMandate.revocationState !== "healthy" ||
+        typeof trustedMandate.mandateDigest !== "string" ||
+        !/^sha256:[a-f0-9]{64}$/.test(trustedMandate.mandateDigest) ||
         !isPlainObject(trustedMandate.claims) ||
         trustedMandate.issuerId !== trustedMandate.claims.issuerId ||
         !hostPolicy) {
@@ -359,6 +361,9 @@ export function authorizeLocalProjectOperation({
       typeof now === "string" ? Date.parse(now) :
       typeof now === "number" ? now : NaN;
     if (!Number.isFinite(nowMs)) return { allowed: false, reason: "invalid-runtime-clock" };
+    if (parseTime(mandate.notBefore) > nowMs) {
+      return { allowed: false, reason: "mandate-not-yet-valid" };
+    }
     if (parseTime(authority.expiresAt) <= nowMs ||
         parseTime(mandate.expiresAt) <= nowMs) {
       return { allowed: false, reason: "project-task-authority-expired" };
