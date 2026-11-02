@@ -76,3 +76,18 @@ It samples the real Resource Manager through a short acquire/release lease with 
 The probe's expanded syntax/import checks passed in [GitHub Actions run #4](https://github.com/LiberoNuvola/Cormia/actions/runs/41466699401) at commit `0ce597fd1d8193a04682a3d4f8adf3580b2124be`, including the new CodingWorkspace adapter import. The separate CodingWorkspace adapter tests passed in [run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41466372070). GitHub CI does not access the user's local Windows paths. The user completed the aggregate local probe on 2026-11-02 at 15:22:04.248Z: `PASS`, zero blockers; Task Store 7 records (0 errors, 6 warnings); 6/6 referenced evidence sidecars valid (24 evidence items, 0 marked `isError`, 0 unsafe/missing/invalid); Resource Manager lease passed; Coding Workspace root listing passed (5 entries, not truncated); Evolution Manager registry and bounded candidate read passed. No raw sidecar content was printed.
 
 It refuses to create missing roots, source files, or `self-improvement/runs` directories. The CodingWorkspace root is checked before initialization; the probe does not create files or directories. It does not start an evolution, call Granite, run Docker, write the Agent task store, create/patch a candidate, or promote code. A resource lease may report `blocked` when the host policy says the machine is busy; this is an availability result, not a corruption error.
+
+## Experimental signed local capability grant contract
+
+A separate, non-integrated contract now exists at [ADR-0008](../../docs/adr/0008-proposed-local-capability-grants-and-revocation.md), with claim schemas and a test-only local evaluator:
+
+- [grant claims schema](../../schemas/local-runtime-capability-grant-claims-v0.1.schema.json);
+- [revocation claims schema](../../schemas/local-runtime-capability-revocation-claims-v0.1.schema.json);
+- [verifier/evaluator](./local-runtime-capability-grants.mjs);
+- [contract tests](./local-runtime-capability-grants.test.mjs).
+
+The local evaluator verifies compact JWS Ed25519 signatures through a trusted host key resolver, binds one grant to the exact task/manifest/worker/runtime/workspace, intersects its exact file/directory paths with host policy, applies the host's maximum grant lifetime, and checks a supplied signed revocation feed. The host policy must pin the expected `issuerId`, active signer key, workspace reference, allowed capability/path sets and lifetime.
+
+Only `workspace.list`, `workspace.read`, `workspace.diff` and `workspace.verify` can be authorized by this v0.1 evaluator. Create, replace, test and delegation remain denied. The current Agent `APPROVO` path is unchanged.
+
+This is not a production key-management or revocation service. There is no real local key provisioned, no durable rollback-resistant revocation journal/checkpoint, no persistent grant store, and no integration with `agent.mjs` or `CodingWorkspace.callTool()`. Tests use ephemeral in-memory Ed25519 key pairs only. See ADR-0008 before using this contract in any Runtime.
