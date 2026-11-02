@@ -87,7 +87,7 @@ class PncRuntimeTests(unittest.TestCase):
         self.assertEqual(self.evaluate(drift=drift)["action"], "ALLOW")
 
     def test_normative_source_change_escalates(self):
-        drift = classify_source_drift(self.contract, self.set_id, ["docs/00-normative/01_CONSTITUTION.md"])
+        drift = classify_source_drift(self.contract, self.set_id, ["docs/00-normative/01_CONSTITUTION_FINAL.md"])
         result = self.evaluate(drift=drift)
         self.assertEqual(drift["kind"], "normative-source-change")
         self.assertEqual(result["action"], "ESCALATE")
