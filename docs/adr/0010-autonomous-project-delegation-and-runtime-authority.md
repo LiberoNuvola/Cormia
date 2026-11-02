@@ -174,3 +174,10 @@ This is a pure authorization-policy prototype, not an Agent integration. It does
 The v0.2 mandate and consent schemas require an exact PNC identity tuple. The isolated PNC-bound authority adapter verifies the host-supplied PNC status, schema/source-integrity/owner-authority assertions, recomputed digest, and project/repository binding before deriving a child authority. The child payload includes the same tuple under its own integrity digest, and every operation rechecks the current PNC before delegating to the existing operation policy.
 
 This does not alter mandate v0.1 or its legacy prototype. It does not activate the IMMORTAL draft, create a trusted PNC store, sign/persist mandates, create consent UI, build a worktree, or connect to the Agent. The new v0.2 schemas and adapter are an isolated reference contract pending review and integration.
+
+
+### 10.3 Non-circular v0.2 mandate consent binding
+
+The v0.2 reference schemas align with ADR-0009 §4.4. The operator approves a canonical consent intent that includes the complete authority and PNC binding but excludes only consentIntentDigest and operatorConsentDigest. The receipt binds that intent digest and confirms the digest-derived challenge. The mandate then embeds the receipt-claims digest and the intent digest before its final digest/signature is computed.
+
+The consent receipt therefore does not embed a final mandate digest that depends on the receipt itself. The PNC-bound reference adapter recomputes all three digests and checks the challenge and expiry. This is still a schema/policy reference slice; a real signed envelope, authenticated broker, key provider and persistent host store remain necessary.

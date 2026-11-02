@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:immortal-aep:schema:local-project-mandate-consent:0.2.0",
   "title": "IMMORTAL Local Project Mandate Consent with PNC Binding",
-  "description": "One authenticated operator decision over the mandate digest and the exact PNC identity displayed with that mandate.",
+  "description": "One authenticated operator decision over the canonical mandate intent digest and the exact PNC identity displayed with that intent.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -12,7 +12,6 @@
     "operatorPrincipalId",
     "consentBrokerId",
     "mandateId",
-    "mandateDigest",
     "projectRef",
     "workspaceRef",
     "decision",
@@ -24,7 +23,8 @@
     "expiresAt",
     "nonce",
     "sequence",
-    "normativeContractBinding"
+    "normativeContractBinding",
+    "consentIntentDigest"
   ],
   "properties": {
     "schemaVersion": {
@@ -53,10 +53,6 @@
     "mandateId": {
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
-    },
-    "mandateDigest": {
-      "type": "string",
-      "pattern": "^sha256:[a-f0-9]{64}$"
     },
     "projectRef": {
       "type": "string",
@@ -135,6 +131,11 @@
           "pattern": "^sha256:[a-f0-9]{64}$"
         }
       }
+    },
+    "consentIntentDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Domain-separated digest of canonical mandate intent excluding both consent digest fields."
     }
   }
 }

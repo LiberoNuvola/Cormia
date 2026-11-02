@@ -204,3 +204,14 @@ The new v0.2 mandate and consent schemas require the same PNC identity tuple (co
 The isolated PNC-bound authority adapter refuses v0.1 mandates, untrusted or inactive PNCs, source-integrity failures, digest mismatch and project/repository mismatch. It carries the tuple into the derived task child authority and rechecks it at every operation boundary before reusing the existing operational policy engine.
 
 This is a reference integration test, not production authority. PNC verification flags must originate from a trusted host store, not model input. The repository does not yet provide the authenticated PNC store, signing/consent lifecycle, local Agent integration or task worktree isolation. The IMMORTAL PNC fixture remains draft and is intentionally rejected by the v0.2 authority adapter.
+
+
+## 11C. Non-circular PNC-bound consent construction
+
+The PNC-bound mandate v0.2 reference now uses a non-circular consent graph aligned with ADR-0009 §4.4:
+- consentIntentDigest is computed from the full mandate intent with consentIntentDigest and operatorConsentDigest omitted;
+- the consent receipt repeats that intent digest, confirms its displayed eight-hex challenge and carries the exact PNC identity tuple;
+- operatorConsentDigest commits to the canonical receipt claims;
+- the final mandate digest is computed only after both receipt-related fields have been included.
+
+This closes the prior schema-level circularity without changing v0.1. It does not create a signature, owner-authorized store, consent broker or active PNC. The PNC fixture remains draft.

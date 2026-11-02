@@ -15,7 +15,9 @@ on:
       - "schemas/local-autonomous-project-mandate-claims-v0.2.schema.json"
       - "schemas/local-project-mandate-consent-claims-v0.2.schema.json"
       - "runtime/reference-worker/pnc-bound-project-authority.mjs"
+      - "runtime/reference-worker/project-mandate-consent-identity.mjs"
       - "runtime/reference-worker/pnc-bound-project-authority.test.mjs"
+      - "runtime/reference-worker/project-mandate-consent-identity.test.mjs"
       - "tests/test_pnc_bound_mandate.py"
       - "docs/identity/pnc-bound-mandate-v0.2.md"
       - "docs/adr/0010-autonomous-project-delegation-and-runtime-authority.md"
@@ -25,7 +27,9 @@ on:
       - "schemas/local-autonomous-project-mandate-claims-v0.2.schema.json"
       - "schemas/local-project-mandate-consent-claims-v0.2.schema.json"
       - "runtime/reference-worker/pnc-bound-project-authority.mjs"
+      - "runtime/reference-worker/project-mandate-consent-identity.mjs"
       - "runtime/reference-worker/pnc-bound-project-authority.test.mjs"
+      - "runtime/reference-worker/project-mandate-consent-identity.test.mjs"
       - "tests/test_pnc_bound_mandate.py"
       - "docs/identity/pnc-bound-mandate-v0.2.md"
       - "docs/adr/0010-autonomous-project-delegation-and-runtime-authority.md"
@@ -44,7 +48,9 @@ on:
       - "schemas/local-autonomous-project-mandate-claims-v0.2.schema.json"
       - "schemas/local-project-mandate-consent-claims-v0.2.schema.json"
       - "runtime/reference-worker/pnc-bound-project-authority.mjs"
+      - "runtime/reference-worker/project-mandate-consent-identity.mjs"
       - "runtime/reference-worker/pnc-bound-project-authority.test.mjs"
+      - "runtime/reference-worker/project-mandate-consent-identity.test.mjs"
       - "tests/test_pnc_bound_mandate.py"
       - "docs/identity/pnc-bound-mandate-v0.2.md"
       - "docs/adr/0010-autonomous-project-delegation-and-runtime-authority.md"
@@ -54,7 +60,9 @@ on:
       - "schemas/local-autonomous-project-mandate-claims-v0.2.schema.json"
       - "schemas/local-project-mandate-consent-claims-v0.2.schema.json"
       - "runtime/reference-worker/pnc-bound-project-authority.mjs"
+      - "runtime/reference-worker/project-mandate-consent-identity.mjs"
       - "runtime/reference-worker/pnc-bound-project-authority.test.mjs"
+      - "runtime/reference-worker/project-mandate-consent-identity.test.mjs"
       - "tests/test_pnc_bound_mandate.py"
       - "docs/identity/pnc-bound-mandate-v0.2.md"
       - "docs/adr/0010-autonomous-project-delegation-and-runtime-authority.md"
@@ -86,6 +94,9 @@ jobs:
 
       - name: Test PNC-bound mandate and consent schemas
         run: python -m unittest discover -s tests -p 'test_pnc_bound_mandate.py' -v
+
+      - name: Test non-circular mandate and consent digests
+        run: node --test runtime/reference-worker/project-mandate-consent-identity.test.mjs
 
       - name: Test deterministic PNC loader, source drift and policy
         run: python -m unittest discover -s tests -p 'test_pnc_runtime.py' -v

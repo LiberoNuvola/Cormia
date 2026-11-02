@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:immortal-aep:schema:local-autonomous-project-mandate:0.2.0",
   "title": "IMMORTAL Local Autonomous Project Mandate with PNC Binding",
-  "description": "Standing project authority whose v0.2 claims bind one exact source-verified PNC identity. The PNC itself grants no operational capabilities.",
+  "description": "A standing operator-authorized project policy. v0.2 binds one exact PNC identity and a non-circular consent-intent/receipt digest pair.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -25,7 +25,8 @@
     "delegable",
     "operatorConsentDigest",
     "executionProfileIds",
-    "normativeContractBinding"
+    "normativeContractBinding",
+    "consentIntentDigest"
   ],
   "properties": {
     "schemaVersion": {
@@ -369,6 +370,11 @@
           "pattern": "^sha256:[a-f0-9]{64}$"
         }
       }
+    },
+    "consentIntentDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Digest of canonical mandate intent with consentIntentDigest and operatorConsentDigest omitted."
     }
   }
 }

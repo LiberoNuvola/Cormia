@@ -1,6 +1,11 @@
 import { createHash } from "node:crypto";
 import { canonicalizeLocalClaims } from "./local-runtime-capability-grants.mjs";
 import { computePncContractDigest, PNC_IDENTITY_PROFILE } from "./pnc-contract-identity.mjs";
+import {
+  computeProjectMandateClaimsDigest,
+  computeProjectMandateConsentIntentDigest,
+  computeProjectMandateConsentReceiptDigest
+} from "./project-mandate-consent-identity.mjs";
 import { authorizeLocalProjectOperation, deriveLocalProjectTaskAuthority } from "./local-autonomous-project-authority.mjs";
 
 const BINDING_KEYS = ["contractId", "schemaVersion", "identityProfile", "digest"];
@@ -100,7 +105,7 @@ function validateTrustedConsent(trustedConsent, trustedMandate, now) {
       c.decision !== "approve" ||
       c.interactionMode !== "local-interactive-project-mandate" ||
       c.mandateId !== m.mandateId ||
-      c.mandateDigest !== trustedMandate.mandateDigest ||
+      c.consentIntentDigest !== m.consentIntentDigest ||
       c.issuerId !== m.issuerId ||
       c.operatorPrincipalId !== m.operatorPrincipalId ||
       c.displayedChallenge !== c.confirmedChallenge ||
@@ -110,6 +115,16 @@ function validateTrustedConsent(trustedConsent, trustedMandate, now) {
       c.workspaceRef !== m.workspace.workspaceRef ||
       !sameBinding(c.normativeContractBinding, m.normativeContractBinding)) {
     return { valid: false, reason: "project-mandate-consent-binding-mismatch" };
+  }
+  try {
+    const intentDigest = computeProjectMandateConsentIntentDigest(m);
+    if (intentDigest !== m.consentIntentDigest ||
+        intentDigest !== c.consentIntentDigest ||
+        computeProjectMandateConsentReceiptDigest(c) !== m.operatorConsentDigest) {
+      return { valid: false, reason: "project-mandate-consent-digest-mismatch" };
+    }
+  } catch {
+    return { valid: false, reason: "project-mandate-consent-digest-invalid" };
   }
   const nowMs = now instanceof Date ? now.getTime() :
     typeof now === "string" ? Date.parse(now) :
@@ -136,6 +151,7 @@ function normalizeMandateV2(trustedMandate) {
       !exactKeys(trustedMandate.claims.normativeContractBinding, BINDING_KEYS)) return null;
   try {
     canonicalizeLocalClaims(trustedMandate.claims);
+    if (computeProjectMandateClaimsDigest(trustedMandate.claims) !== trustedMandate.mandateDigest) return null;
   } catch {
     return null;
   }
