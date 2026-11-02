@@ -56,7 +56,8 @@ def consent():
     return {
         "schemaVersion": "0.2.0", "consentId": "22222222-2222-4222-8222-222222222222",
         "issuerId": "local-host:operator-1", "operatorPrincipalId": "os-principal:operator-1",
-        "consentBrokerId": "os-consent-broker:1", "consentIntentDigest": "sha256:" + "c" * 64,
+        "consentBrokerId": "os-consent-broker:1", "mandateId": "11111111-1111-4111-8111-111111111111",
+        "consentIntentDigest": "sha256:" + "c" * 64,
         "projectRef": "immortal-protocol", "workspaceRef": "worktree-1", "decision": "approve",
         "interactionMode": "local-interactive-project-mandate",
         "interactionId": "33333333-3333-4333-8333-333333333333",
