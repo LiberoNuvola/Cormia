@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/LiberoNuvola/Cormia/blob/main/schemas/immortal-agent-task-store-v1.schema.json",
+  "title": "IMMORTAL Local Agent Task Store v1 (compatibility snapshot)",
+  "description": "Compatibility schema for the existing local IMMORTAL Agent tasks.json envelope. This is not the canonical IMMORTAL-AEP Task Manifest.",
+  "type": "object",
+  "required": ["version", "tasks"],
+  "properties": {
+    "version": { "const": 1 },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "tasks": { "type": "array", "items": { "$ref": "#/$defs/task" } }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "task": {
+      "type": "object",
+      "required": ["id", "goal", "status"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^TASK-[0-9]{14}-[0-9a-f]{8}$" },
+        "goal": { "type": "string", "minLength": 1, "maxLength": 5000 },
+        "expectedTools": { "type": "array", "items": { "type": "string" } },
+        "status": { "enum": ["pending", "running", "paused", "failed", "completed"] },
+        "attempts": { "type": "integer", "minimum": 0 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "lastStartedAt": { "type": "string", "format": "date-time" },
+        "lastFinishedAt": { "type": "string", "format": "date-time" },
+        "interruptedAt": { "type": "string", "format": "date-time" },
+        "toolsUsed": { "type": "array", "items": { "type": "string" } },
+        "lastResult": { "type": ["string", "null"] },
+        "lastError": { "type": ["string", "null"] },
+        "evidencePath": { "type": "string", "minLength": 1 },
+        "source": { "type": "string" },
+        "serviceValidation": { "type": ["object", "null"] }
+      },
+      "additionalProperties": true
+    }
+  }
+}
