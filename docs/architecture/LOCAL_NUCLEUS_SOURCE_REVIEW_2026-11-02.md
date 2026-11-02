@@ -94,6 +94,10 @@ Observed behavior:
 
 **Integration disposition:** retain as the first local policy adapter. Treat its decision as host admission evidence, not as an enforceable remote protocol guarantee.
 
+### 3.3A Cormia Resource Manager compatibility wrapper (added after source review)
+
+The separate Cormia-side wrapper at `runtime/reference-worker/immortal-resource-manager-adapter.mjs` maps trusted operations to fixed existing manager lease classes, fails closed on missing/invalid snapshots or denied acquisition, and releases leases in `finally`. Eleven unit contracts and the GitHub Actions workflow pass. It is not connected to the existing Agent and does not claim OS-level enforcement. See [LOCAL_RESOURCE_MANAGER_ADAPTER.md](../runtime/reference-worker/LOCAL_RESOURCE_MANAGER_ADAPTER.md).
+
 ### 3.4 Evolution Manager
 
 **Role:** isolated candidate lifecycle for two source modules.
