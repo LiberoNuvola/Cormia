@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:immortal-aep:schema:local-runtime-capability-revocation-claims:0.1.0",
+  "title": "IMMORTAL Local Runtime Capability Revocation Claims",
+  "description": "Non-normative signed revocation statement for one local capability grant. Durable rollback-resistant feed storage is a separate requirement.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "revocationId",
+    "grantId",
+    "grantDigest",
+    "taskId",
+    "issuerId",
+    "revokedAt",
+    "sequence",
+    "reasonCode"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "revocationId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "grantId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "grantDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "taskId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "issuerId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "revokedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "reasonCode": {
+      "type": "string",
+      "enum": [
+        "operator-request",
+        "task-cancelled",
+        "key-compromised",
+        "policy-change"
+      ]
+    }
+  }
+}
