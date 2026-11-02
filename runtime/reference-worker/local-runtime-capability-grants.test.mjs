@@ -84,14 +84,14 @@ test("canonicalizes the restricted JCS claim subset deterministically", () => {
 test("signs and verifies a compact JWS Ed25519 grant", () => {
   const token = signGrant();
   const result = verifyLocalCapabilityGrant(token, { resolveKey });
-  assert.equal(result.valid, true);
+  assert.equal(result.valid, true, result.reason ?? "grant verification returned false");
   assert.equal(result.claims.capability, "workspace.read");
   assert.match(result.grantDigest, /^sha256:[a-f0-9]{64}$/);
 });
 
 test("authorizes one exact path only when task, manifest, subject, host and time all match", () => {
   const result = authorizeLocalWorkspaceOperation(context());
-  assert.equal(result.allowed, true);
+  assert.equal(result.allowed, true, result.reason ?? "local operation authorization denied");
   assert.equal(result.reason, "authorized-read-only-operation");
 });
 
