@@ -110,7 +110,11 @@ This helper is **not connected** to `agent.mjs`, `CodingWorkspace.callTool()`, t
 
 The dedicated [Local Runtime Capability Grant Contracts run #11](https://github.com/LiberoNuvola/Cormia/actions/runs/41475593197) completed **SUCCESS**: all 21 cryptographic and policy contract tests passed. The final suite also checks that sparse arrays and accessor properties are rejected before validation reads them. It is a contract test of this isolated helper, not proof of key custody, host policy provisioning, operator consent, Agent integration, task isolation, durable revocation or AEP conformance.
 
-## 8. Open decisions before any production integration
+## 8. Follow-on authority lifecycle design
+
+The next non-normative design step is recorded in [ADR-0009 — local authority bootstrap, operator consent and revocation anchor](./0009-proposed-local-authority-bootstrap-consent-and-revocation-anchor.md). ADR-0008 v0.1 remains an isolated grant-verification contract and must not be treated as production-ready until that lifecycle design is implemented and reviewed.
+
+## 9. Open decisions before any production integration
 
 1. How is the local host authority identity and first public key established, protected, recovered, rotated and revoked?
 2. What exact operator-consent action causes a host grant to be signed, and how is that consent bound to the displayed digest and scope?
@@ -120,7 +124,7 @@ The dedicated [Local Runtime Capability Grant Contracts run #11](https://github.
 6. How will a task-specific workspace root/worktree be created and cleaned up before enabling unattended mutation or testing?
 7. What delegation chain and attenuation proof are required before `delegable` can ever become true?
 
-## 9. Non-regression and non-goals
+## 10. Non-regression and non-goals
 
 - Do not change `SPEC.md`, `schemas/task-manifest.schema.json`, current local task-store formats, or PRE-RICH/IMMORTAL-Protocol semantics through this ADR.
 - Do not bypass or replace the existing Agent `/code` and `APPROVO` workflow.
