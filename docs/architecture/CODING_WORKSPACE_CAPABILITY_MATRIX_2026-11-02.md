@@ -98,7 +98,7 @@ The command runs Node's test discovery across the entire configured workspace ro
 
 The Agent obtains a `cpu-heavy` Resource Manager lease only for `workspace_test`; it releases the lease in a `finally` block. This is local admission control, not an OS-level CPU quota.
 
-The approval is operation-scoped, not a durable signed task consent. It is not currently suitable as an unattended peer-task authorization. AEP tasks requiring unattended mutation or testing must remain unsupported by this adapter until an explicit task-scoped consent and revocation model is designed and tested.
+The approval is operation-scoped, not a durable project mandate. It is not suitable as unattended project authorization. Mutation/test remain unsupported by this current read-only adapter until the autonomous project mandate, isolated worktree and Runtime child-grant path in ADR-0010 are implemented and tested. The target is one project-level delegation, not one prompt per edit.
 
 ## 7. AEP mapping status
 
@@ -110,7 +110,7 @@ The proposal does **not** freeze a canonical AEP vocabulary or signed grant form
 
 Until a normative decision and enforcement tests exist, the safe local disposition remains:
 - retain `/code` as the explicit entry gate;
-- preserve `APPROVO` for write, replace and test in the existing Agent path;
+- preserve APPROVO for write, replace and test in the existing legacy Agent path; the autonomous Runtime must use the separate project mandate and must not recreate per-operation prompts;
 - expose only list/read/diff/verify through the separate read-only adapter;
 - reject unsupported remote/peer capability requests;
 - never call `callTool()` from a new adapter without independently enforcing the approval contract.
