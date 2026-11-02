@@ -11,6 +11,8 @@ on:
       - "schemas/local-revocation-journal-event-v0.1.schema.json"
       - "schemas/local-revocation-checkpoint-claims-v0.1.schema.json"
       - "runtime/reference-worker/local-authority-lifecycle-schema.test.mjs"
+      - "runtime/reference-worker/local-revocation-anchor-model.mjs"
+      - "runtime/reference-worker/local-revocation-anchor-model.test.mjs"
       - "runtime/reference-worker/local-runtime-capability-grants.mjs"
       - "runtime/reference-worker/local-runtime-capability-grants.test.mjs"
       - ".github/workflows/local-runtime-capability-grant-compatibility.yml"
@@ -24,6 +26,8 @@ on:
       - "schemas/local-revocation-journal-event-v0.1.schema.json"
       - "schemas/local-revocation-checkpoint-claims-v0.1.schema.json"
       - "runtime/reference-worker/local-authority-lifecycle-schema.test.mjs"
+      - "runtime/reference-worker/local-revocation-anchor-model.mjs"
+      - "runtime/reference-worker/local-revocation-anchor-model.test.mjs"
       - "runtime/reference-worker/local-runtime-capability-grants.mjs"
       - "runtime/reference-worker/local-runtime-capability-grants.test.mjs"
       - ".github/workflows/local-runtime-capability-grant-compatibility.yml"
@@ -51,6 +55,8 @@ jobs:
           node --check runtime/reference-worker/local-runtime-capability-grants.mjs
           node --check runtime/reference-worker/local-runtime-capability-grants.test.mjs
           node --check runtime/reference-worker/local-authority-lifecycle-schema.test.mjs
+          node --check runtime/reference-worker/local-revocation-anchor-model.mjs
+          node --check runtime/reference-worker/local-revocation-anchor-model.test.mjs
 
       - name: Parse claim schemas
         run: |
@@ -66,3 +72,6 @@ jobs:
 
       - name: Run local authority lifecycle schema contracts
         run: node --test runtime/reference-worker/local-authority-lifecycle-schema.test.mjs
+
+      - name: Run revocation journal anchor state-machine tests
+        run: node --test runtime/reference-worker/local-revocation-anchor-model.test.mjs
