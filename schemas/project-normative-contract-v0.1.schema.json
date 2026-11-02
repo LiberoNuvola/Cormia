@@ -1,0 +1,689 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cormia:schema:project-normative-contract:0.1.0",
+  "title": "Cormia Project Normative Contract",
+  "description": "A source-pinned project policy record. It declares normative sources, closed decisions, invariants, evidence semantics and human-authority boundaries. It grants no operational capabilities.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "contractId",
+    "status",
+    "project",
+    "sourceSnapshots",
+    "sources",
+    "closedDecisions",
+    "invariants",
+    "openObligations",
+    "evidencePolicy",
+    "humanAuthority",
+    "executionPolicy",
+    "conflictPolicy"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "contractId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "reviewed",
+        "active",
+        "superseded",
+        "suspended"
+      ]
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "projectRef",
+        "name",
+        "repository"
+      ],
+      "properties": {
+        "projectRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "repository": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "provider",
+            "fullName",
+            "url",
+            "baseRef"
+          ],
+          "properties": {
+            "provider": {
+              "type": "string",
+              "const": "github"
+            },
+            "fullName": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "baseRef": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          }
+        },
+        "governedScopes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        }
+      }
+    },
+    "sourceSnapshots": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sourceSetId",
+          "repositoryFullName",
+          "repositoryUrl",
+          "commitSha",
+          "gitObjectFormat",
+          "resolvedAt"
+        ],
+        "properties": {
+          "sourceSetId": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+          },
+          "repositoryFullName": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+          },
+          "repositoryUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "commitSha": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{40}$"
+          },
+          "gitObjectFormat": {
+            "type": "string",
+            "const": "sha1"
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "observedRef": {
+            "type": "string",
+            "description": "Informational only; never a substitute for commitSha."
+          }
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sourceId",
+          "sourceSetId",
+          "path",
+          "blobSha",
+          "authorityClass",
+          "scope",
+          "lifecycleStatus",
+          "title",
+          "version",
+          "changePolicy"
+        ],
+        "properties": {
+          "sourceId": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+          },
+          "sourceSetId": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+          },
+          "blobSha": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{40}$"
+          },
+          "authorityClass": {
+            "type": "string",
+            "enum": [
+              "root-normative",
+              "universal-normative-specification",
+              "application-normative-policy",
+              "governance-decision-record",
+              "proof-evidence-registry",
+              "audit-status-record",
+              "informative"
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "lifecycleStatus": {
+            "type": "string",
+            "enum": [
+              "current",
+              "closed",
+              "proposed",
+              "historical",
+              "informative"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "sectionRefs": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          "changePolicy": {
+            "type": "string",
+            "enum": [
+              "human-authorized-normative-change",
+              "evidence-refresh-only",
+              "informative-update-only"
+            ]
+          },
+          "supersedes": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+            }
+          }
+        }
+      }
+    },
+    "closedDecisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "decisionId",
+          "title",
+          "scope",
+          "statement",
+          "sourceRefs",
+          "status",
+          "reopenRequiresHumanAuthority"
+        ],
+        "properties": {
+          "decisionId": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "scope": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "sourceRefs": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+            }
+          },
+          "status": {
+            "type": "string",
+            "const": "closed"
+          },
+          "reopenRequiresHumanAuthority": {
+            "type": "boolean",
+            "const": true
+          },
+          "parameterBoundary": {
+            "type": "string",
+            "enum": [
+              "universal-constant",
+              "application-constant",
+              "deployment-parameter",
+              "mechanism-closed-value-open",
+              "not-applicable"
+            ]
+          }
+        }
+      }
+    },
+    "invariants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "invariantId",
+          "statement",
+          "sourceRefs",
+          "protection",
+          "enforcement"
+        ],
+        "properties": {
+          "invariantId": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "sourceRefs": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+            }
+          },
+          "protection": {
+            "type": "string",
+            "enum": [
+              "must-preserve",
+              "must-not-weaken",
+              "must-not-bypass",
+              "must-not-promote-evidence"
+            ]
+          },
+          "enforcement": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "runtime-guard",
+                "static-policy-check",
+                "conformance-test",
+                "evidence-classifier",
+                "human-review-gate"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "openObligations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "obligationId",
+          "category",
+          "status",
+          "description",
+          "sourceRefs"
+        ],
+        "properties": {
+          "obligationId": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9-]{1,31}$"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "implementation-conformance",
+              "deployment-certification",
+              "adapter-evidence",
+              "environment-or-substrate",
+              "governance-execution",
+              "composition-certification",
+              "application-profile-economics",
+              "profile-non-vacuity",
+              "oracle-or-valuation"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "partially-discharged",
+              "evidence-required",
+              "closed",
+              "refuted",
+              "unknown"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "requiredEvidence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 1000
+            }
+          },
+          "sourceRefs": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+            }
+          }
+        }
+      }
+    },
+    "evidencePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "classificationSourceRefs",
+        "evidenceClasses",
+        "nonPromotionRules"
+      ],
+      "properties": {
+        "classificationSourceRefs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+          }
+        },
+        "evidenceClasses": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "mathematical-proof",
+              "conditional-proof",
+              "normative-requirement",
+              "conformance-obligation",
+              "profile-or-adapter-obligation",
+              "mechanical-evidence",
+              "implementation-evidence",
+              "deployment-evidence",
+              "audit-finding",
+              "evidence-required",
+              "refuted",
+              "not-claimed"
+            ]
+          }
+        },
+        "nonPromotionRules": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        }
+      }
+    },
+    "humanAuthority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "defaultEscalationScope",
+        "triggers"
+      ],
+      "properties": {
+        "defaultEscalationScope": {
+          "type": "string",
+          "enum": [
+            "affected-task",
+            "dependent-subgraph",
+            "project-wide"
+          ]
+        },
+        "triggers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "triggerId",
+              "category",
+              "description",
+              "requiresHumanAuthority",
+              "defaultAction",
+              "escalationScope"
+            ],
+            "properties": {
+              "triggerId": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+              },
+              "category": {
+                "type": "string",
+                "enum": [
+                  "normative-amendment",
+                  "closed-decision-reopening",
+                  "material-source-conflict",
+                  "structural-architecture-change",
+                  "trust-root-or-signer-change",
+                  "governance-authority-change",
+                  "protected-external-action",
+                  "mandate-widening",
+                  "resource-budget-expansion",
+                  "source-baseline-adoption"
+                ]
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "requiresHumanAuthority": {
+                "type": "boolean",
+                "const": true
+              },
+              "defaultAction": {
+                "type": "string",
+                "enum": [
+                  "prepare-options-and-escalate",
+                  "deny-protected-action",
+                  "suspend-affected-work-and-escalate",
+                  "quarantine-on-trust-failure"
+                ]
+              },
+              "escalationScope": {
+                "type": "string",
+                "enum": [
+                  "affected-task",
+                  "dependent-subgraph",
+                  "project-wide"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "executionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "autonomousActivities",
+        "forbiddenSemanticActions",
+        "humanApprovalPerOperation",
+        "continueIndependentTasksOnBlock",
+        "codeMayImplementExistingNormativeRules",
+        "normativeSourceEditsRequireHumanAuthority",
+        "evidencePromotionByModelAllowed",
+        "stopOnSourceIntegrityFailure"
+      ],
+      "properties": {
+        "autonomousActivities": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "specification-implementation",
+              "bug-fix",
+              "refactor",
+              "test-authoring",
+              "build-and-test",
+              "simulation",
+              "evidence-collection",
+              "evidence-classification",
+              "feature-branch-commit",
+              "draft-normative-change-proposal"
+            ]
+          }
+        },
+        "forbiddenSemanticActions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "weaken-invariant",
+              "narrow-authoritative-uncertainty-envelope",
+              "change-closed-economic-parameter",
+              "reopen-closed-decision",
+              "suppress-failed-evidence",
+              "promote-evidence-class",
+              "invent-missing-normative-rule",
+              "self-approve-normative-change",
+              "change-trust-root"
+            ]
+          }
+        },
+        "humanApprovalPerOperation": {
+          "type": "boolean",
+          "const": false
+        },
+        "continueIndependentTasksOnBlock": {
+          "type": "boolean",
+          "const": true
+        },
+        "codeMayImplementExistingNormativeRules": {
+          "type": "boolean",
+          "const": true
+        },
+        "normativeSourceEditsRequireHumanAuthority": {
+          "type": "boolean",
+          "const": true
+        },
+        "evidencePromotionByModelAllowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "stopOnSourceIntegrityFailure": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "conflictPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "higherAuthorityPrevails",
+        "unresolvedSameClassConflict",
+        "evidenceCreatesNormativeAuthority",
+        "statusRecordCanWaiveObligation",
+        "floatingSourceRefsAllowed"
+      ],
+      "properties": {
+        "higherAuthorityPrevails": {
+          "type": "boolean",
+          "const": true
+        },
+        "unresolvedSameClassConflict": {
+          "type": "string",
+          "const": "escalate"
+        },
+        "evidenceCreatesNormativeAuthority": {
+          "type": "boolean",
+          "const": false
+        },
+        "statusRecordCanWaiveObligation": {
+          "type": "boolean",
+          "const": false
+        },
+        "floatingSourceRefsAllowed": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    }
+  }
+}

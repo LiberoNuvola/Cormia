@@ -1,0 +1,670 @@
+{
+  "schemaVersion": "0.1.0",
+  "contractId": "immortal-protocol.normative-contract.v0.1",
+  "status": "draft",
+  "project": {
+    "projectRef": "immortal-protocol",
+    "name": "IMMORTAL Protocol",
+    "description": "Chain-neutral economic protocol with Cardano adapter and PRE-RICH as first application. This contract records the observed normative and evidence baseline; it does not certify implementation or deployment.",
+    "repository": {
+      "provider": "github",
+      "fullName": "LiberoNuvola/Immortal-Protocol",
+      "url": "https://github.com/LiberoNuvola/Immortal-Protocol",
+      "baseRef": "main"
+    },
+    "governedScopes": [
+      "protocol:universal",
+      "adapter:cardano",
+      "application:pre-rich",
+      "deployment:cardano-preprod"
+    ]
+  },
+  "sourceSnapshots": [
+    {
+      "sourceSetId": "immortal-main-snapshot-2026-11-02",
+      "repositoryFullName": "LiberoNuvola/Immortal-Protocol",
+      "repositoryUrl": "https://github.com/LiberoNuvola/Immortal-Protocol",
+      "commitSha": "97b09a38742098f17a61eb07734c401aeedccc06",
+      "gitObjectFormat": "sha1",
+      "resolvedAt": "2026-11-02T17:47:00+01:00",
+      "observedRef": "main"
+    }
+  ],
+  "sources": [
+    {
+      "sourceId": "immortal.constitution",
+      "sourceSetId": "immortal-main-snapshot-2026-11-02",
+      "path": "docs/00-normative/01_CONSTITUTION_FINAL.md",
+      "blobSha": "744357df17bd07972dcbeeadbd752fb2e740e196",
+      "authorityClass": "root-normative",
+      "scope": "protocol:universal",
+      "lifecycleStatus": "current",
+      "title": "IMMORTAL Constitution — Hardened Crystallization",
+      "version": "3.0.0",
+      "sectionRefs": [
+        "§2",
+        "§3",
+        "§4",
+        "§5a",
+        "§6",
+        "§8",
+        "§9",
+        "§10",
+        "§11",
+        "§14",
+        "§15"
+      ],
+      "changePolicy": "human-authorized-normative-change"
+    },
+    {
+      "sourceId": "immortal.economic-kernel",
+      "sourceSetId": "immortal-main-snapshot-2026-11-02",
+      "path": "docs/00-normative/03_ECONOMIC_KERNEL_FINAL.md",
+      "blobSha": "535274985e822c32854236520ef4b68b88cb77d8",
+      "authorityClass": "universal-normative-specification",
+      "scope": "protocol:universal",
+      "lifecycleStatus": "current",
+      "title": "IMMORTAL Economic Kernel — Hardened",
+      "version": "3.0.0",
+      "sectionRefs": [
+        "§1",
+        "§4",
+        "§4.4",
+        "§8"
+      ],
+      "changePolicy": "human-authorized-normative-change"
+    },
+    {
+      "sourceId": "immortal.state-transitions",
+      "sourceSetId": "immortal-main-snapshot-2026-11-02",
+      "path": "docs/00-normative/04_STATE_TRANSITION_SPECIFICATION.md",
+      "blobSha": "a549e35855509aa32ce6462d638aa17d54cd1e6a",
+      "authorityClass": "universal-normative-specification",
+      "scope": "protocol:universal",
+      "lifecycleStatus": "current",
+      "title": "IMMORTAL State & Transition Specification",
+      "version": "3.0.0",
+      "sectionRefs": [
+        "§1",
+        "§2",
+        "§3",
+        "§4",
+        "§5",
+        "§6"
+      ],
+      "changePolicy": "human-authorized-normative-change"
+    },
+    {
+      "sourceId": "immortal.invariants",
+      "sourceSetId": "immortal-main-snapshot-2026-11-02",
+      "path": "docs/00-normative/05_INVARIANTS_CONSERVATION_FINAL.md",
+      "blobSha": "e78a1e9584966d18498a385a0c2da6edae06ef7c",
+      "authorityClass": "universal-normative-specification",
+      "scope": "protocol:universal",
+      "lifecycleStatus": "current",
+      "title": "IMMORTAL Economic Invariants & Conservation",
+      "version": "3.0.0",
+      "sectionRefs": [
+        "§1",
+        "§2",
+        "§3"
+      ],
+      "changePolicy": "human-authorized-normative-change"
+    },
+    {
+      "sourceId": "immortal.conformance",
+      "sourceSetId": "immortal-main-snapshot-2026-11-02",
+      "path": "docs/00-normative/07_CONFORMANCE_SPECIFICATION_FINAL.md",
+      "blobSha": "269dd421aaeebdb9b9176d7d0957914976bb77f8",
+      "authorityClass": "universal-normative-specification",
+      "scope": "protocol:universal",
+      "lifecycleStatus": "current",
+      "title": "IMMORTAL Conformance Specification",
+      "version": "3.0.0",
+      "sectionRefs": [
+        "§1",
+        "§2",
+        "§3",
+        "§4"
+      ],
+      "changePolicy": "human-authorized-normative-change"
+    },
+    {
+      "sourceId": "prerich.game-economy",
+      "sourceSetId": "immortal-main-snapshot-2026-11-02",
+      "path": "PRE-RICH/docs/GAME-ECONOMY.md",
+      "blobSha": "3431169896aea420e7f8bff3c1932abed2c358ac",
+      "authorityClass": "application-normative-policy",
+      "scope": "application:pre-rich",
+      "lifecycleStatus": "closed",
+      "title": "PRE-RICH Game Economy",
+      "version": "closed-baseline",
+      "sectionRefs": [
+        "§1",
+        "§5",
+        "§6",
+        "§7",
+        "§10",
+        "§11",
+        "§16",
+        "§17"
+      ],
+      "changePolicy": "human-authorized-normative-change"
+    },
+    {
+      "sourceId": "immortal.formal-proof-register",
+      "sourceSetId": "immortal-main-snapshot-2026-11-02",
+      "path": "docs/01-formal-records/08_FORMAL_PROOF_REGISTER_FINAL.md",
+      "blobSha": "3cda86558f5a70950fbc52e2354d3970d7eb22e6",
+      "authorityClass": "proof-evidence-registry",
+      "scope": "protocol:universal",
+      "lifecycleStatus": "current",
+      "title": "IMMORTAL Formal Proof Register — Rebuilt (v3.0.0)",
+      "version": "3.0.0",
+      "sectionRefs": [
+        "§1",
+        "§2",
+        "§3",
+        "§4",
+        "§5",
+        "§7",
+        "§8"
+      ],
+      "changePolicy": "evidence-refresh-only"
+    },
+    {
+      "sourceId": "immortal.verification-status",
+      "sourceSetId": "immortal-main-snapshot-2026-11-02",
+      "path": "docs/03-audit/VERIFICATION_STATUS.md",
+      "blobSha": "ad94cd3dcef678a3101556362d15f103f21975d4",
+      "authorityClass": "audit-status-record",
+      "scope": "protocol:universal",
+      "lifecycleStatus": "current",
+      "title": "IMMORTAL — Verification Status",
+      "version": "3.0.0",
+      "sectionRefs": [
+        "§1",
+        "§4",
+        "§5",
+        "§6",
+        "§7"
+      ],
+      "changePolicy": "evidence-refresh-only"
+    },
+    {
+      "sourceId": "immortal.residual-obligations",
+      "sourceSetId": "immortal-main-snapshot-2026-11-02",
+      "path": "docs/03-audit/RESIDUAL_OBLIGATION_REGISTER.md",
+      "blobSha": "882fe7c64166ca1e394bf6e96bec9ebf90f7e6f8",
+      "authorityClass": "audit-status-record",
+      "scope": "protocol:universal",
+      "lifecycleStatus": "current",
+      "title": "Residual Obligation Register — R1–R9, discharge attempt",
+      "version": "3.0.0",
+      "sectionRefs": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6",
+        "R7",
+        "R8",
+        "R9"
+      ],
+      "changePolicy": "evidence-refresh-only"
+    },
+    {
+      "sourceId": "immortal.audit-closure-matrix",
+      "sourceSetId": "immortal-main-snapshot-2026-11-02",
+      "path": "docs/01-formal-records/10_FINAL_AUDIT_CLOSURE_MATRIX.md",
+      "blobSha": "aef619695dda73599a9eb67e0195388e44913f68",
+      "authorityClass": "audit-status-record",
+      "scope": "protocol:universal+application:pre-rich",
+      "lifecycleStatus": "current",
+      "title": "IMMORTAL Final Audit & Closure Matrix",
+      "version": "3.0.0",
+      "sectionRefs": [
+        "§1",
+        "§3",
+        "§4"
+      ],
+      "changePolicy": "evidence-refresh-only"
+    }
+  ],
+  "closedDecisions": [
+    {
+      "decisionId": "prerich.class-ladder-and-bootstrap",
+      "title": "PRE-RICH class ladder and Genesis baseline",
+      "scope": "application:pre-rich",
+      "statement": "KA=8, KC=4, KD=4; ticket ladder 1/2/3/5/10/25/50/100 USDM; Genesis ticket 1 USDM; verified PRE Treasury bootstrap >=4000 USDM; maximum normal payout 500×P. These are application-level frozen semantics, not universal IMMORTAL constants.",
+      "sourceRefs": [
+        "prerich.game-economy"
+      ],
+      "status": "closed",
+      "reopenRequiresHumanAuthority": true,
+      "parameterBoundary": "application-constant"
+    },
+    {
+      "decisionId": "prerich.classic6-two-row-model",
+      "title": "Canonical Classic-6 two-row model",
+      "scope": "application:pre-rich",
+      "statement": "Classic-6 has two independent rows over a uniform 20,000-slot domain; ticket payout is the sum of row payouts, capped at 500×P. Implementation must conform to this closed model.",
+      "sourceRefs": [
+        "prerich.game-economy"
+      ],
+      "status": "closed",
+      "reopenRequiresHumanAuthority": true,
+      "parameterBoundary": "application-constant"
+    },
+    {
+      "decisionId": "prerich.jackpot-policy",
+      "title": "Jackpot activation, funding and payout semantics",
+      "scope": "application:pre-rich",
+      "statement": "Jackpot activation/funding is state-derived and deterministic; payout is the full current locked balance exactly once; there is no fixed canonical allocation percentage.",
+      "sourceRefs": [
+        "prerich.game-economy"
+      ],
+      "status": "closed",
+      "reopenRequiresHumanAuthority": true,
+      "parameterBoundary": "application-constant"
+    },
+    {
+      "decisionId": "prerich.expiry-mechanism",
+      "title": "Ticket expiry mechanism",
+      "scope": "application:pre-rich",
+      "statement": "Expiry is state-derived and crystallized at issuance. The exact numeric lifetime remains an application/deployment parameter and is not a universal IMMORTAL constant.",
+      "sourceRefs": [
+        "prerich.game-economy"
+      ],
+      "status": "closed",
+      "reopenRequiresHumanAuthority": true,
+      "parameterBoundary": "mechanism-closed-value-open"
+    }
+  ],
+  "invariants": [
+    {
+      "invariantId": "immortal.no-discretionary-economic-authority",
+      "statement": "No founder, developer, administrator, operator, relayer, publisher, adapter or frontend obtains discretionary economic authority merely by operating infrastructure.",
+      "sourceRefs": [
+        "immortal.constitution"
+      ],
+      "protection": "must-not-bypass",
+      "enforcement": [
+        "static-policy-check",
+        "conformance-test",
+        "human-review-gate"
+      ]
+    },
+    {
+      "invariantId": "immortal.obligations-before-execution",
+      "statement": "Accepted obligations and economically material unresolved exposure must be represented before the action creating or accepting them becomes executable.",
+      "sourceRefs": [
+        "immortal.constitution"
+      ],
+      "protection": "must-preserve",
+      "enforcement": [
+        "runtime-guard",
+        "conformance-test"
+      ]
+    },
+    {
+      "invariantId": "immortal.protected-capital",
+      "statement": "Protected capital cannot become discretionary surplus merely because current liquidity is positive; RawSurplus=max(0, EEV−ProtectedCapital).",
+      "sourceRefs": [
+        "immortal.constitution",
+        "immortal.economic-kernel"
+      ],
+      "protection": "must-not-weaken",
+      "enforcement": [
+        "runtime-guard",
+        "conformance-test",
+        "human-review-gate"
+      ]
+    },
+    {
+      "invariantId": "immortal.certified-concrete-kernel",
+      "statement": "Economic execution is gated on a declared certified concrete kernel K_c; implementation must not claim runtime membership in an uncomputed K*.",
+      "sourceRefs": [
+        "immortal.constitution",
+        "immortal.economic-kernel",
+        "immortal.conformance"
+      ],
+      "protection": "must-preserve",
+      "enforcement": [
+        "runtime-guard",
+        "conformance-test",
+        "evidence-classifier"
+      ]
+    },
+    {
+      "invariantId": "immortal.omega-no-narrowing",
+      "statement": "The authoritative uncertainty envelope Ω cannot be narrowed by an actor, caller, adapter or operator; enlargement is conservative, narrowing is unsound.",
+      "sourceRefs": [
+        "immortal.constitution",
+        "immortal.economic-kernel",
+        "immortal.state-transitions"
+      ],
+      "protection": "must-not-weaken",
+      "enforcement": [
+        "static-policy-check",
+        "conformance-test",
+        "human-review-gate"
+      ]
+    },
+    {
+      "invariantId": "immortal.atomic-transitions",
+      "statement": "Canonical coupled economic deltas commit atomically or not at all.",
+      "sourceRefs": [
+        "immortal.constitution",
+        "immortal.state-transitions",
+        "immortal.conformance"
+      ],
+      "protection": "must-preserve",
+      "enforcement": [
+        "runtime-guard",
+        "conformance-test"
+      ]
+    },
+    {
+      "invariantId": "immortal.expiry-finality",
+      "statement": "Expiry cannot be reversed and late reveal cannot restore claimability or create a new liability.",
+      "sourceRefs": [
+        "immortal.constitution",
+        "immortal.state-transitions",
+        "prerich.game-economy"
+      ],
+      "protection": "must-not-bypass",
+      "enforcement": [
+        "conformance-test",
+        "human-review-gate"
+      ]
+    },
+    {
+      "invariantId": "immortal.evidence-non-promotion",
+      "statement": "Mechanical evidence is not a mathematical proof, and implementation conformance evidence is not a theorem about the abstract model or normative authority.",
+      "sourceRefs": [
+        "immortal.conformance",
+        "immortal.formal-proof-register",
+        "immortal.verification-status"
+      ],
+      "protection": "must-not-promote-evidence",
+      "enforcement": [
+        "evidence-classifier",
+        "static-policy-check"
+      ]
+    }
+  ],
+  "openObligations": [
+    {
+      "obligationId": "R1",
+      "category": "deployment-certification",
+      "status": "partially-discharged",
+      "description": "Certified concrete kernel K_c: theory and certificate structure are established, but the deployment-specific profile instantiation and evidence are missing.",
+      "requiredEvidence": [
+        "E1 profile instantiation",
+        "E2–E8 deployment-specific certificate evidence"
+      ],
+      "sourceRefs": [
+        "immortal.economic-kernel",
+        "immortal.residual-obligations",
+        "immortal.audit-closure-matrix"
+      ]
+    },
+    {
+      "obligationId": "R2",
+      "category": "implementation-conformance",
+      "status": "evidence-required",
+      "description": "Implementation refinement and execution-gate conformance remain unproven for the concrete deployment.",
+      "requiredEvidence": [
+        "RF1–RF11 implementation-conformance evidence, especially RF8 no-side-door"
+      ],
+      "sourceRefs": [
+        "immortal.conformance",
+        "immortal.residual-obligations",
+        "immortal.audit-closure-matrix"
+      ]
+    },
+    {
+      "obligationId": "R3",
+      "category": "adapter-evidence",
+      "status": "partially-discharged",
+      "description": "A concrete environment perimeter and Ω completeness evidence are required for the adapter profile.",
+      "requiredEvidence": [
+        "P1–P8 evidence for the real environment perimeter"
+      ],
+      "sourceRefs": [
+        "immortal.constitution",
+        "immortal.residual-obligations"
+      ]
+    },
+    {
+      "obligationId": "R4",
+      "category": "environment-or-substrate",
+      "status": "partially-discharged",
+      "description": "Liveness remains conditional on substrate and actor assumptions; safety does not imply progress.",
+      "requiredEvidence": [
+        "L-E1 and L-E4 environment evidence"
+      ],
+      "sourceRefs": [
+        "immortal.verification-status",
+        "immortal.residual-obligations"
+      ]
+    },
+    {
+      "obligationId": "R5",
+      "category": "governance-execution",
+      "status": "partially-discharged",
+      "description": "Upgrade admissibility theory is specified, but a concrete governance act and migration package are not established.",
+      "requiredEvidence": [
+        "M_new, migration μ, K_c,new and UC1–UC10 package"
+      ],
+      "sourceRefs": [
+        "immortal.residual-obligations",
+        "immortal.audit-closure-matrix"
+      ]
+    },
+    {
+      "obligationId": "R6",
+      "category": "composition-certification",
+      "status": "partially-discharged",
+      "description": "Composition theory is conditional; no second system and joint certificate are supplied.",
+      "requiredEvidence": [
+        "Concrete M_AB, joint certificate and joint execution gate"
+      ],
+      "sourceRefs": [
+        "immortal.residual-obligations",
+        "immortal.audit-closure-matrix"
+      ]
+    },
+    {
+      "obligationId": "R7",
+      "category": "application-profile-economics",
+      "status": "partially-discharged",
+      "description": "The profile accounting partition still needs exhaustiveness enumeration and adversarial omission review.",
+      "requiredEvidence": [
+        "PA2 exhaustiveness enumeration",
+        "PA7 adversarial omission review"
+      ],
+      "sourceRefs": [
+        "immortal.residual-obligations"
+      ]
+    },
+    {
+      "obligationId": "R8",
+      "category": "profile-non-vacuity",
+      "status": "partially-discharged",
+      "description": "A deployment-specific initial-state witness S0 and its profile evidence remain required.",
+      "requiredEvidence": [
+        "NV1–NV5 profile values and witness evidence"
+      ],
+      "sourceRefs": [
+        "immortal.residual-obligations"
+      ]
+    },
+    {
+      "obligationId": "R9",
+      "category": "oracle-or-valuation",
+      "status": "partially-discharged",
+      "description": "EEV correctness is relative to the supplied valuation; a concrete adapter/oracle contract and its evidence remain required.",
+      "requiredEvidence": [
+        "EV1–EV7 adapter/oracle evidence"
+      ],
+      "sourceRefs": [
+        "immortal.residual-obligations",
+        "immortal.audit-closure-matrix"
+      ]
+    }
+  ],
+  "evidencePolicy": {
+    "classificationSourceRefs": [
+      "immortal.formal-proof-register",
+      "immortal.conformance",
+      "immortal.verification-status"
+    ],
+    "evidenceClasses": [
+      "mathematical-proof",
+      "conditional-proof",
+      "normative-requirement",
+      "conformance-obligation",
+      "profile-or-adapter-obligation",
+      "mechanical-evidence",
+      "implementation-evidence",
+      "deployment-evidence",
+      "audit-finding",
+      "evidence-required",
+      "refuted",
+      "not-claimed"
+    ],
+    "nonPromotionRules": [
+      "A green CI run is evidence about that run; it is not universal certification.",
+      "A finite mechanical test is not a mathematical proof about the general model.",
+      "A conformance obligation is not discharged by restating the specification.",
+      "A theorem about an abstract model does not establish that a concrete implementation conforms.",
+      "An audit or verification-status record cannot waive a normative requirement or create authority."
+    ]
+  },
+  "humanAuthority": {
+    "defaultEscalationScope": "dependent-subgraph",
+    "triggers": [
+      {
+        "triggerId": "human.normative-amendment",
+        "category": "normative-amendment",
+        "description": "Any amendment, weakening, replacement or withdrawal of the IMMORTAL Constitution or canonical normative semantics.",
+        "requiresHumanAuthority": true,
+        "defaultAction": "prepare-options-and-escalate",
+        "escalationScope": "project-wide"
+      },
+      {
+        "triggerId": "human.closed-decision-reopen",
+        "category": "closed-decision-reopening",
+        "description": "Reopening a closed PRE-RICH application decision or changing frozen parameters.",
+        "requiresHumanAuthority": true,
+        "defaultAction": "prepare-options-and-escalate",
+        "escalationScope": "dependent-subgraph"
+      },
+      {
+        "triggerId": "human.source-conflict",
+        "category": "material-source-conflict",
+        "description": "Two authoritative sources conflict and no explicit precedence or supersession rule resolves the conflict.",
+        "requiresHumanAuthority": true,
+        "defaultAction": "suspend-affected-work-and-escalate",
+        "escalationScope": "dependent-subgraph"
+      },
+      {
+        "triggerId": "human.structural-change",
+        "category": "structural-architecture-change",
+        "description": "Changing the protocol/application/adapter boundary, trust assumptions or project architecture in a way that alters normative semantics.",
+        "requiresHumanAuthority": true,
+        "defaultAction": "prepare-options-and-escalate",
+        "escalationScope": "project-wide"
+      },
+      {
+        "triggerId": "human.signer-trust-root",
+        "category": "trust-root-or-signer-change",
+        "description": "Adding, replacing or changing signer identities, trust roots or deployment authorities.",
+        "requiresHumanAuthority": true,
+        "defaultAction": "quarantine-on-trust-failure",
+        "escalationScope": "project-wide"
+      },
+      {
+        "triggerId": "human.governance-authority",
+        "category": "governance-authority-change",
+        "description": "Changing governance authority or accepting an upgrade/migration decision that requires governance execution.",
+        "requiresHumanAuthority": true,
+        "defaultAction": "prepare-options-and-escalate",
+        "escalationScope": "project-wide"
+      },
+      {
+        "triggerId": "human.protected-external-action",
+        "category": "protected-external-action",
+        "description": "Wallet signing, fund transfer, Cardano settlement, protected merge, release or production deployment not separately delegated.",
+        "requiresHumanAuthority": true,
+        "defaultAction": "deny-protected-action",
+        "escalationScope": "affected-task"
+      },
+      {
+        "triggerId": "human.mandate-widening",
+        "category": "mandate-widening",
+        "description": "Widening repository/workspace scope, allowed operations, network destinations or protected-action set.",
+        "requiresHumanAuthority": true,
+        "defaultAction": "prepare-options-and-escalate",
+        "escalationScope": "project-wide"
+      },
+      {
+        "triggerId": "human.resource-expansion",
+        "category": "resource-budget-expansion",
+        "description": "Increasing the approved compute, memory, concurrency, attempt or execution-time budget.",
+        "requiresHumanAuthority": true,
+        "defaultAction": "prepare-options-and-escalate",
+        "escalationScope": "affected-task"
+      },
+      {
+        "triggerId": "human.source-baseline-adoption",
+        "category": "source-baseline-adoption",
+        "description": "Adopting a new commit that changes normative sources, closed decisions, protected invariants, source authority classes or escalation policy.",
+        "requiresHumanAuthority": true,
+        "defaultAction": "prepare-options-and-escalate",
+        "escalationScope": "project-wide"
+      }
+    ]
+  },
+  "executionPolicy": {
+    "autonomousActivities": [
+      "specification-implementation",
+      "bug-fix",
+      "refactor",
+      "test-authoring",
+      "build-and-test",
+      "simulation",
+      "evidence-collection",
+      "evidence-classification",
+      "feature-branch-commit",
+      "draft-normative-change-proposal"
+    ],
+    "forbiddenSemanticActions": [
+      "weaken-invariant",
+      "narrow-authoritative-uncertainty-envelope",
+      "change-closed-economic-parameter",
+      "reopen-closed-decision",
+      "suppress-failed-evidence",
+      "promote-evidence-class",
+      "invent-missing-normative-rule",
+      "self-approve-normative-change",
+      "change-trust-root"
+    ],
+    "humanApprovalPerOperation": false,
+    "continueIndependentTasksOnBlock": true,
+    "codeMayImplementExistingNormativeRules": true,
+    "normativeSourceEditsRequireHumanAuthority": true,
+    "evidencePromotionByModelAllowed": false,
+    "stopOnSourceIntegrityFailure": true
+  },
+  "conflictPolicy": {
+    "higherAuthorityPrevails": true,
+    "unresolvedSameClassConflict": "escalate",
+    "evidenceCreatesNormativeAuthority": false,
+    "statusRecordCanWaiveObligation": false,
+    "floatingSourceRefsAllowed": false
+  }
+}

@@ -43,3 +43,20 @@ The host key descriptor permits `Ed25519` (the current isolated ADR-008 v0.1 pro
 - [local-project-mandate-consent-claims-v0.1.schema.json](local-project-mandate-consent-claims-v0.1.schema.json): one interactive operator consent receipt over the complete mandate digest.
 
 The intended interaction is one initial project delegation, not approval for every edit, patch or test. The Runtime loads the mandate and derives internal child grants automatically. The schema files do not yet implement mandate signing, storage, Agent integration or credential brokering.
+
+## Project Normative Contract
+
+[ADR-0011](../docs/adr/0011-project-normative-contract.md) defines the Project Normative Contract (PNC), a source-pinned project policy record distinct from the operational project mandate. Its v0.1 interface is:
+
+- [project-normative-contract-v0.1.schema.json](project-normative-contract-v0.1.schema.json): declares pinned source snapshots, source authority classes, closed decisions, protected invariants, open obligations, evidence classification rules and human-authority triggers.
+- [IMMORTAL example contract](../examples/project-normative-contracts/immortal-protocol-v0.1.json): a draft fixture pinned to one observed IMMORTAL repository commit and the Git blob SHA of each listed source document.
+
+A PNC grants no capabilities and is not a signature, consent receipt or authorization token. JSON Schema checks shape only; the Runtime must independently verify repository/commit/path/blob bindings, source precedence, references, semantic consistency and authenticated project-owner activation. The proposed PNC Identity Profile v0.1 (docs/identity/project-normative-contract-identity-profile-v0.1.md) defines a tested JCS/SHA-256 fingerprint, but does not authenticate or activate a contract. The current Project Mandate v0.1 and authority prototype do not yet bind or enforce a PNC identity.
+
+
+## PNC-bound Project Mandate v0.2
+
+- [local-autonomous-project-mandate-claims-v0.2.schema.json](local-autonomous-project-mandate-claims-v0.2.schema.json): a new mandate format requiring the complete PNC identity tuple.
+- [local-project-mandate-consent-claims-v0.2.schema.json](local-project-mandate-consent-claims-v0.2.schema.json): consent receipt repeats the same PNC identity tuple as well as the mandate digest.
+
+Version 0.1 remains unchanged. The isolated reference adapter is in runtime/reference-worker/pnc-bound-project-authority.mjs; it requires an active, source-verified, owner-authorized PNC and binds the same tuple into each derived child authority. It is not wired into the Agent or an authenticated local PNC store.

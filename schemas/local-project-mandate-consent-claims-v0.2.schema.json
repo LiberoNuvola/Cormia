@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:immortal-aep:schema:local-project-mandate-consent:0.2.0",
+  "title": "IMMORTAL Local Project Mandate Consent with PNC Binding",
+  "description": "One authenticated operator decision over the canonical mandate intent digest and the exact PNC identity displayed with that intent.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "consentId",
+    "issuerId",
+    "operatorPrincipalId",
+    "consentBrokerId",
+    "mandateId",
+    "projectRef",
+    "workspaceRef",
+    "decision",
+    "interactionMode",
+    "interactionId",
+    "displayedChallenge",
+    "confirmedChallenge",
+    "issuedAt",
+    "expiresAt",
+    "nonce",
+    "sequence",
+    "normativeContractBinding",
+    "consentIntentDigest"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.2.0"
+    },
+    "consentId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "issuerId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "operatorPrincipalId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "consentBrokerId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "mandateId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "projectRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "workspaceRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "approve",
+        "deny"
+      ]
+    },
+    "interactionMode": {
+      "type": "string",
+      "const": "local-interactive-project-mandate"
+    },
+    "interactionId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "displayedChallenge": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{8}$"
+    },
+    "confirmedChallenge": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{8}$"
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "nonce": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "normativeContractBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractId",
+        "schemaVersion",
+        "identityProfile",
+        "digest"
+      ],
+      "properties": {
+        "contractId": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+        },
+        "schemaVersion": {
+          "type": "string",
+          "const": "0.1.0"
+        },
+        "identityProfile": {
+          "type": "string",
+          "const": "RFC8785-JCS-SHA256-DOMAIN-SEPARATED-v0.1"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    },
+    "consentIntentDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Domain-separated digest of canonical mandate intent excluding both consent digest fields."
+    }
+  }
+}

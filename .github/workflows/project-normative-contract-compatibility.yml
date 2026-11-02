@@ -1,0 +1,113 @@
+name: Project Normative Contract
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "schemas/project-normative-contract-v0.1.schema.json"
+      - "examples/project-normative-contracts/immortal-protocol-v0.1.json"
+      - "scripts/validate-project-normative-contract.py"
+      - "scripts/pnc_runtime.py"
+      - "runtime/reference-worker/local-runtime-capability-grants.mjs"
+      - "runtime/reference-worker/pnc-contract-identity.mjs"
+      - "runtime/reference-worker/pnc-contract-identity.test.mjs"
+      - "docs/identity/project-normative-contract-identity-profile-v0.1.md"
+      - "schemas/local-autonomous-project-mandate-claims-v0.2.schema.json"
+      - "schemas/local-project-mandate-consent-claims-v0.2.schema.json"
+      - "runtime/reference-worker/pnc-bound-project-authority.mjs"
+      - "runtime/reference-worker/project-mandate-consent-identity.mjs"
+      - "runtime/reference-worker/pnc-bound-project-authority.test.mjs"
+      - "runtime/reference-worker/project-mandate-consent-identity.test.mjs"
+      - "tests/test_pnc_bound_mandate.py"
+      - "docs/identity/pnc-bound-mandate-v0.2.md"
+      - "docs/adr/0010-autonomous-project-delegation-and-runtime-authority.md"
+      - "schemas/README.md"
+      - "tests/test_pnc_runtime.py"
+      - "docs/adr/0011-project-normative-contract.md"
+      - "schemas/local-autonomous-project-mandate-claims-v0.2.schema.json"
+      - "schemas/local-project-mandate-consent-claims-v0.2.schema.json"
+      - "runtime/reference-worker/pnc-bound-project-authority.mjs"
+      - "runtime/reference-worker/project-mandate-consent-identity.mjs"
+      - "runtime/reference-worker/pnc-bound-project-authority.test.mjs"
+      - "runtime/reference-worker/project-mandate-consent-identity.test.mjs"
+      - "tests/test_pnc_bound_mandate.py"
+      - "docs/identity/pnc-bound-mandate-v0.2.md"
+      - "docs/adr/0010-autonomous-project-delegation-and-runtime-authority.md"
+      - ".github/workflows/project-normative-contract-compatibility.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "schemas/project-normative-contract-v0.1.schema.json"
+      - "examples/project-normative-contracts/immortal-protocol-v0.1.json"
+      - "scripts/validate-project-normative-contract.py"
+      - "scripts/pnc_runtime.py"
+      - "runtime/reference-worker/local-runtime-capability-grants.mjs"
+      - "runtime/reference-worker/pnc-contract-identity.mjs"
+      - "runtime/reference-worker/pnc-contract-identity.test.mjs"
+      - "docs/identity/project-normative-contract-identity-profile-v0.1.md"
+      - "schemas/local-autonomous-project-mandate-claims-v0.2.schema.json"
+      - "schemas/local-project-mandate-consent-claims-v0.2.schema.json"
+      - "runtime/reference-worker/pnc-bound-project-authority.mjs"
+      - "runtime/reference-worker/project-mandate-consent-identity.mjs"
+      - "runtime/reference-worker/pnc-bound-project-authority.test.mjs"
+      - "runtime/reference-worker/project-mandate-consent-identity.test.mjs"
+      - "tests/test_pnc_bound_mandate.py"
+      - "docs/identity/pnc-bound-mandate-v0.2.md"
+      - "docs/adr/0010-autonomous-project-delegation-and-runtime-authority.md"
+      - "schemas/README.md"
+      - "tests/test_pnc_runtime.py"
+      - "docs/adr/0011-project-normative-contract.md"
+      - "schemas/local-autonomous-project-mandate-claims-v0.2.schema.json"
+      - "schemas/local-project-mandate-consent-claims-v0.2.schema.json"
+      - "runtime/reference-worker/pnc-bound-project-authority.mjs"
+      - "runtime/reference-worker/project-mandate-consent-identity.mjs"
+      - "runtime/reference-worker/pnc-bound-project-authority.test.mjs"
+      - "runtime/reference-worker/project-mandate-consent-identity.test.mjs"
+      - "tests/test_pnc_bound_mandate.py"
+      - "docs/identity/pnc-bound-mandate-v0.2.md"
+      - "docs/adr/0010-autonomous-project-delegation-and-runtime-authority.md"
+      - ".github/workflows/project-normative-contract-compatibility.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate PNC contract and reference runtime
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned JSON Schema validator
+        run: python -m pip install --disable-pip-version-check jsonschema==4.23.0
+
+      - name: Validate schema, fixture and fail-closed cases
+        run: python scripts/validate-project-normative-contract.py
+
+      - name: Test PNC-bound mandate and consent schemas
+        run: python -m unittest discover -s tests -p 'test_pnc_bound_mandate.py' -v
+
+      - name: Test non-circular mandate and consent digests
+        run: node --test runtime/reference-worker/project-mandate-consent-identity.test.mjs
+
+      - name: Test deterministic PNC loader, source drift and policy
+        run: python -m unittest discover -s tests -p 'test_pnc_runtime.py' -v
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Test deterministic PNC identity profile
+        run: node --test runtime/reference-worker/pnc-contract-identity.test.mjs
+
+      - name: Test PNC-bound project task authority
+        run: node --test runtime/reference-worker/pnc-bound-project-authority.test.mjs
