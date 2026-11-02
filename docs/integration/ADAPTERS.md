@@ -36,6 +36,12 @@ The existing bridge is intentionally fixed to `LiberoNuvola/Immortal-Protocol` /
 
 The v0.8.0 local agent, Granite/llama.cpp backend, task-store lineage, Resource Manager, Evolution Manager, Coding Workspace and Docker test path are the initial implementation nucleus. AEP conformance requires adapters and test vectors; v0.8.0 is not declared conformant today.
 
+### Local Resource Manager adapter
+
+A Cormia-side trusted-orchestrator wrapper is implemented at `runtime/reference-worker/immortal-resource-manager-adapter.mjs`. It maps only three fixed operation identifiers to the existing manager's `model-inference` or `cpu-heavy` lease class, samples a fresh snapshot, fails closed on unavailable/invalid telemetry or denied lease, and releases in `finally`.
+
+The operation identifier must come from trusted Runtime code; model/task text cannot choose a ResourceManager class. The wrapper returns only a bounded resource summary and does not claim OS-level throttling, process termination, persistence, scheduling or remote enforcement. It is not wired into the local Agent yet. See [LOCAL_RESOURCE_MANAGER_ADAPTER.md](../runtime/reference-worker/LOCAL_RESOURCE_MANAGER_ADAPTER.md).
+
 ### Coding Workspace capability boundary
 
 The local Coding Workspace exposes seven tools and enforces path/root safety in its class. However, the existing Agent orchestrator—not `CodingWorkspace.callTool()`—enforces the `/code` turn gate, the single-operation `APPROVO` confirmation for `workspace_write`, `workspace_patch` and `workspace_test`, and the `cpu-heavy` lease for tests.
