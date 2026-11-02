@@ -1,0 +1,46 @@
+name: Local Agent Attempt Evidence Sidecar Compatibility
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "runtime/reference-worker/local-evidence-sidecar-probe.mjs"
+      - "runtime/reference-worker/local-evidence-sidecar-probe.test.mjs"
+      - "runtime/reference-worker/immortal-agent-task-store-v1-adapter.mjs"
+      - "scripts/verify-local-runtime-adapters.mjs"
+      - ".github/workflows/local-agent-attempt-evidence-sidecar-compatibility.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "runtime/reference-worker/local-evidence-sidecar-probe.mjs"
+      - "runtime/reference-worker/local-evidence-sidecar-probe.test.mjs"
+      - "runtime/reference-worker/immortal-agent-task-store-v1-adapter.mjs"
+      - "scripts/verify-local-runtime-adapters.mjs"
+      - ".github/workflows/local-agent-attempt-evidence-sidecar-compatibility.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compatibility:
+    name: Attempt evidence sidecar read-only contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check probe and adapter syntax
+        run: |
+          node --check runtime/reference-worker/local-evidence-sidecar-probe.mjs
+          node --check runtime/reference-worker/immortal-agent-task-store-v1-adapter.mjs
+          node --check scripts/verify-local-runtime-adapters.mjs
+
+      - name: Run sidecar probe contract tests
+        run: node --test runtime/reference-worker/local-evidence-sidecar-probe.test.mjs
