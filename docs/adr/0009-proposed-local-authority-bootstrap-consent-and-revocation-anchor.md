@@ -48,7 +48,7 @@ No silent trust-on-first-use is proposed. A cloned repository or restored task b
 
 Use an injected platform provider interface, not a PEM private key file:
 
-- `createNonExportableSigningKey({ algorithm: "Ed25519" })`;
+- `createNonExportableSigningKey({ algorithm: "Ed25519" | "ES256" })`;
 - `getPublicKey(keyRef)`;
 - `sign(keyRef, signingInput)`;
 - `resolvePublicKey(keyId)`;
@@ -59,10 +59,28 @@ The first interface is a design contract, not a claim that all operating systems
 
 No private key, seed, recovery phrase, provider secret or hardware credential may be placed in the repository, a GitHub secret, Agent task data, audit log, evidence sidecar or workspace.
 
+### 3.2.1 Windows CNG compatibility — discovery only
+
+Microsoft's current CNG provider documentation lists ECDSA P-256/P-384/P-521 and RSA among the documented Microsoft Software Key Storage Provider algorithms. It identifies the Microsoft Platform Crypto Provider as the TPM-backed KSP, but the provider page does not promise one universal algorithm list for every TPM/device. The CNG algorithm identifiers page also notes that third-party providers can offer additional algorithms.
+
+Relevant API behavior:
+- `NCryptOpenStorageProvider` opens a named registered KSP;
+- `NCryptEnumAlgorithms` enumerates the algorithms the opened provider reports; `dwAlgOperations = 0x10` filters for digital-signature operations, while zero enumerates all algorithms.
+
+Sources:
+- [Microsoft — CNG Key Storage Providers](https://learn.microsoft.com/en-us/windows/win32/seccertenroll/cng-key-storage-providers)
+- [Microsoft — CNG Algorithm Identifiers](https://learn.microsoft.com/en-us/windows/win32/seccng/cng-algorithm-identifiers)
+- [Microsoft — NCryptEnumAlgorithms](https://learn.microsoft.com/en-us/windows/win32/api/ncrypt/nf-ncrypt-ncryptenumalgorithms)
+- [Microsoft — NCryptOpenStorageProvider](https://learn.microsoft.com/en-us/windows/win32/api/ncrypt/nf-ncrypt-ncryptopenstorageprovider)
+
+The read-only discovery script is [`scripts/probe-windows-cng-capabilities.ps1`](../../scripts/probe-windows-cng-capabilities.ps1). It queries the Microsoft Platform and Software KSPs and, when present, reads TPM status through `Get-Tpm`. It creates no key, certificate or file and does not change machine state. [Windows CNG Capability Discovery run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41480382232) executed successfully on a GitHub-hosted Windows runner. That runner reported no TPM and an unavailable Platform Crypto Provider; its Software KSP reported ECDSA P-256/P-384/P-521, DSA, ML-DSA and RSA, but did not report Ed25519. This is CI-runner evidence only and says nothing about the user's actual Windows device.
+
+Consequently, ES256 (JWS ECDSA P-256) is a candidate for a Windows CNG-backed key, not an accepted implementation choice. The descriptor schema can describe `Ed25519` or `ES256`, but the existing ADR-008 v0.1 grant helper verifies only Ed25519. An ES256 grant profile requires a separately versioned implementation and positive/negative cryptographic tests. A read-only provider inventory is not proof that a key can actually be created non-exportably, signed with, and verified end-to-end. The actual machine's provider and TPM must be probed before selecting a path.
+
 ### 3.3 Descriptor and rotation
 
 [local-host-authority-key-descriptor-v0.1.schema.json](../../schemas/local-host-authority-key-descriptor-v0.1.schema.json) is public/opaque metadata only. It requires:
-- Ed25519 algorithm and public SPKI bytes/fingerprint;
+- a declared `Ed25519` or `ES256` algorithm and public SPKI bytes/fingerprint;
 - issuer and key identifiers;
 - opaque provider ID/reference;
 - `privateKeyExportable: false`;
