@@ -50,6 +50,7 @@ function mandateClaims(overrides = {}) {
       taskWorktreeRequired: true
     },
     allowedOperations: [...operations],
+    executionProfileIds: ["node22-project-tests", "node22-build"],
     gitPolicy: {
       branchPrefix: "agent/",
       defaultBranchWrite: "deny",
@@ -168,6 +169,8 @@ function authorize(childAuthority, overrides = {}) {
     childAuthority,
     trustedMandate: trustedMandate(),
     hostPolicy: hostPolicy(),
+    expectedTaskId: taskId,
+    expectedManifestDigest: manifestDigest,
     operation: "workspace.read",
     relativePath: "src/index.mjs",
     now,
