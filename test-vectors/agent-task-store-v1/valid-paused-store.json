@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "updatedAt": "2026-11-02T13:40:28.038Z",
+  "tasks": [
+    {
+      "id": "TASK-20261102134028-a1b2c3d4",
+      "goal": "Read the current branch head and report the observed commit.",
+      "expectedTools": ["get_branch_head"],
+      "status": "paused",
+      "attempts": 1,
+      "createdAt": "2026-11-02T13:40:28.038Z",
+      "updatedAt": "2026-11-02T13:41:28.038Z",
+      "lastStartedAt": "2026-11-02T13:40:28.038Z",
+      "lastFinishedAt": "2026-11-02T13:41:28.038Z",
+      "toolsUsed": ["get_branch_head"],
+      "lastResult": "A prior observation, retained only as context for an explicit new attempt.",
+      "lastError": "Task interrupted before completion could be established.",
+      "evidencePath": "data/evidence/TASK-20261102134028-a1b2c3d4-attempt-1.json"
+    }
+  ]
+}
