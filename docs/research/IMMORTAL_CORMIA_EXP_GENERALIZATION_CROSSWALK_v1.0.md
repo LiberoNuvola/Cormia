@@ -193,6 +193,10 @@ The next revision should be driven by source changes, an explicit architecture d
 
 ## 10. Source register
 
+**Follow-up boundary and formal conformance contract**
+
+The detailed AEP–IMMORTAL economic-jurisdiction boundary and the four priority EXP contract sets are now specified in [CORMIA_AEP_IMMORTAL_ECONOMIC_JURISDICTION_AND_EXP_CONFORMANCE_v0.1.md](./CORMIA_AEP_IMMORTAL_ECONOMIC_JURISDICTION_AND_EXP_CONFORMANCE_v0.1.md). It formalizes the C0–C4 economic-perimeter classification, AEP→IMMORTAL request/result semantics, C-COMP triggers, and proposed invariants/test vectors for EXP-06, EXP-12, EXP-10 and EXP-11. It remains a research proposal; it is not a model-check result, normative adoption or implementation.
+
 **Cormia**
 - [SPEC.md — Task Manifest, lifecycle, capability, escrow, CRC, Evidence Package and Runtime](https://github.com/LiberoNuvola/Cormia/blob/main/SPEC.md)
 - [Architecture and authority boundaries](https://github.com/LiberoNuvola/Cormia/blob/main/docs/architecture/ARCHITECTURE.md)
