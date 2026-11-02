@@ -48,7 +48,7 @@ This first adapter is local-only. It does not accept network peers, award CRC, s
 
 ### 3. Keep write approval semantics explicit
 
-The current per-operation approval requirement MUST remain intact during the first integration.
+The existing per-operation approval requirement MUST remain intact for the legacy Agent /code compatibility path during the first read-only adapter integration. This restriction is not the target authorization model for the autonomous worker; see ADR-0010.
 
 A future task-scoped consent envelope could authorize a bounded set of operations at task acceptance, but that is a separate policy decision and requires:
 - exact repository/root/path allowlists;
@@ -57,7 +57,7 @@ A future task-scoped consent envelope could authorize a bounded set of operation
 - cancellation and revocation semantics;
 - positive and negative tests proving no operation exceeds the signed envelope.
 
-Until that contract exists, the current interactive `APPROVO` gate remains. AEP tasks that assume unattended mutation must be rejected or marked unsupported by the local adapter; approval must not be bypassed.
+The one-time project-mandate direction is now proposed in ADR-0010. Until its task-worktree, Runtime authorization, credential broker and revocation lifecycle are implemented and tested, this first read-only adapter must continue to reject unattended mutation. Do not bypass the legacy APPROVO gate or reproduce it as a prompt for every edit in the autonomous target.
 
 ### 4. Use the existing classes only through their current contracts
 
@@ -107,7 +107,7 @@ The source-level tool/approval boundary is recorded in [CODING_WORKSPACE_CAPABIL
 
 No canonical capability mapping is implemented yet because the current Task Manifest schema defines `capabilitySet` with generic `capability`, `scope` and optional `constraints`, but does not freeze operation identifiers or path-scope semantics. The existing Agent caller owns the `/code` and `APPROVO` gates; the CodingWorkspace class's `callTool()` method does not enforce them itself. A new adapter must not bypass those gates.
 
-A non-normative candidate vocabulary and exact-path scope proposal is now documented in [ADR-0007](./0007-proposed-task-capabilities-and-workspace-scope.md). It does not change the manifest schema or grant new authority; the operation IDs, host grant intersection, workspace binding and unattended consent model remain proposed pending review.
+A non-normative candidate vocabulary and scope proposal is documented in ADR-0007. The target autonomous project mandate and Runtime-managed task authority are described in ADR-0010. Neither ADR changes the manifest schema or grants operational authority; runtime integration and acceptance tests remain outstanding.
 
 ## First implementation slice recorded 2026-11-02
 
