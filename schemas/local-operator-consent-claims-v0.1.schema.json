@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:immortal-aep:schema:local-operator-consent-claims:0.1.0",
+  "title": "IMMORTAL Local Operator Consent Claims",
+  "description": "Proposed signed record of one explicit local operator decision over an exact task/grant intent. A schema-valid record alone does not prove a trusted UI interaction.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "consentId",
+    "issuerId",
+    "operatorPrincipalId",
+    "consentBrokerId",
+    "grantId",
+    "consentIntentDigest",
+    "taskId",
+    "manifestDigest",
+    "hostPolicyDigest",
+    "capability",
+    "workspaceRef",
+    "scopeDigest",
+    "decision",
+    "interactionMode",
+    "interactionId",
+    "displayedChallenge",
+    "confirmedChallenge",
+    "issuedAt",
+    "expiresAt",
+    "nonce",
+    "sequence"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "consentId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "issuerId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "operatorPrincipalId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "consentBrokerId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "grantId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "consentIntentDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "taskId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "manifestDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "hostPolicyDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "capability": {
+      "type": "string",
+      "enum": [
+        "workspace.list",
+        "workspace.read",
+        "workspace.diff",
+        "workspace.verify",
+        "workspace.create",
+        "workspace.replace",
+        "workspace.test"
+      ]
+    },
+    "workspaceRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "scopeDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "approve",
+        "deny"
+      ]
+    },
+    "interactionMode": {
+      "type": "string",
+      "const": "local-interactive-digest-confirmation"
+    },
+    "interactionId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "displayedChallenge": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{8}$"
+    },
+    "confirmedChallenge": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{8}$"
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "nonce": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "approve"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "confirmedChallenge": {
+            "const": "aaaaaaaa"
+          }
+        },
+        "description": "Semantic validation must compare confirmedChallenge exactly with displayedChallenge; the placeholder const is not an authorization rule."
+      }
+    }
+  ]
+}
