@@ -118,6 +118,12 @@ Future permissionless network
   └── Cardano epoch anchors / escrow / challenge / settlement
 ```
 
+## 6A. Source-level review status — 2026-11-02
+
+The metadata inventory and selected source review are complete. The review archive SHA-256 is `04c895cf577842548b99da8015df391b8029cb79e7210b733cdeba381b6ead90`. The review confirms the existing Agent v0.8, Coding Workspace, Resource Manager, Evolution Manager, Control Room and Mitsuro bridge as separate components with distinct authority boundaries. It also records local test-fixture limitations and the remaining AEP adapter work. See [`LOCAL_NUCLEUS_SOURCE_REVIEW_2026-11-02.md`](LOCAL_NUCLEUS_SOURCE_REVIEW_2026-11-02.md).
+
+No implementation code, runtime data or credentials have been migrated to Cormia.
+
 ## 7. Migration rule
 
 No existing component is deleted merely because a new AEP abstraction is introduced. Each proposed replacement must provide:
