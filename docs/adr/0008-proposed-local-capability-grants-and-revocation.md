@@ -106,7 +106,7 @@ The helper:
 - checks the supplied signed revocation list;
 - denies all write/replace/test capabilities in this local v0.1 evaluator.
 
-This helper is **not connected** to `agent.mjs`, `CodingWorkspace.callTool()`, the existing `APPROVO` workflow, a Task Manifest parser, a key store, or a persistent revocation journal. It does not issue grants automatically. The tests use ephemeral in-memory keys only.
+This helper is **not connected** to `agent.mjs`, `CodingWorkspace.callTool()`, the existing `APPROVO` workflow, a Task Manifest parser, a key store, or a persistent revocation journal. It does not issue grants automatically. The tests use ephemeral in-memory keys only. Its per-capability token representation is an internal contract candidate, not a requirement for the model or operator to handle a token on each call. The autonomous target is one project mandate with Runtime-derived child authority, as defined in [ADR-0010](./0010-autonomous-project-delegation-and-runtime-authority.md).
 
 The dedicated [Local Runtime Capability Grant Contracts run #11](https://github.com/LiberoNuvola/Cormia/actions/runs/41475593197) completed **SUCCESS**: all 21 cryptographic and policy contract tests passed. The final suite also checks that sparse arrays and accessor properties are rejected before validation reads them. It is a contract test of this isolated helper, not proof of key custody, host policy provisioning, operator consent, Agent integration, task isolation, durable revocation or AEP conformance.
 
@@ -127,7 +127,7 @@ The next non-normative design step is recorded in [ADR-0009 — local authority 
 ## 10. Non-regression and non-goals
 
 - Do not change `SPEC.md`, `schemas/task-manifest.schema.json`, current local task-store formats, or PRE-RICH/IMMORTAL-Protocol semantics through this ADR.
-- Do not bypass or replace the existing Agent `/code` and `APPROVO` workflow.
+- Do not bypass or silently weaken the existing Agent `/code` and `APPROVO` compatibility workflow. The target autonomous mode is a new Runtime authorization path under the project mandate in ADR-0010, not a repeated approval prompt.
 - Do not generate or store real signing keys in GitHub or this repository.
 - Do not expose shell, Git mutation, workflow dispatch, network, wallet or Cardano signing capabilities.
 - Do not permit mutation/test grants in the current shared Coding Workspace.
