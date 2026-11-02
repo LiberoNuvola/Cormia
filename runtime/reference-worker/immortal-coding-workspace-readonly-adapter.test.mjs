@@ -104,7 +104,7 @@ test("fails closed if a supposedly read-only operation is marked approval-requir
     readableFiles: ["README.md"],
     listableDirectories: ["."]
   });
-  await assert.rejects(() => adapter.read({ path: "README.md" }), /requires host approval/);
+  await assert.rejects(() => adapter.read({ path: "README.md" }), /requiring host approval/);
   assert.equal(workspace.calls.length, 0);
 });
 
