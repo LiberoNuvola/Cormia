@@ -63,3 +63,22 @@ The dedicated [Local Agent Attempt Evidence Sidecar Compatibility run #5](https:
 The aggregate probe's updated syntax/import workflow also completed **SUCCESS** in [run #10](https://github.com/LiberoNuvola/Cormia/actions/runs/41470239182) at commit `7e00e7aecd3bbf99535700d00ce22bbc6801c241`.
 
 These runs use synthetic fixtures and repository code only. They do not inspect the user's local Windows sidecars.
+
+## 7. Local Windows compatibility result — 2026-11-02
+
+The user ran the integrated aggregate probe on Windows at `2026-11-02T15:22:04.248Z` using Node `v22.15.0`. The sidecar result was **PASS**:
+
+| Aggregate field | Result |
+|---|---:|
+| Referenced sidecars | 6 |
+| Tasks without an evidence path | 1 |
+| Valid sidecars | 6 |
+| Missing / unsafe / oversized / invalid JSON / invalid schema / read errors | 0 |
+| Tasks marked running | 0 |
+| Evidence items | 24 |
+| Items marked `isError: true` | 0 |
+| Bytes read | 79,924 |
+
+The complete aggregate probe also returned `PASS` with zero blockers. The six Task Store warnings remain warnings and are separate from sidecar validation.
+
+This verifies that the six referenced sidecar files on the user's Windows installation were readable within the probe bounds and structurally matched their task/attempt references. It does **not** establish that recorded tool outputs are true, fresh, complete or semantically sufficient, nor does it convert them into AEP Evidence Packages.
