@@ -2,7 +2,7 @@
 
 - **Status:** Proposed target architecture — aligned with the autonomous local-agent objective; no Agent/runtime integration enabled yet
 - **Date:** 2026-11-02
-- **Depends on:** ADR-0006, ADR-0007, ADR-0008 and ADR-0009
+- **Depends on:** ADR-0006, ADR-0007, ADR-0008, ADR-0009 and ADR-0011
 - **Primary objective:** let the local AI independently plan, edit, test, repair and deliver project work inside one pre-authorized project mandate, without per-edit human approval or operator-supplied API/bearer tokens
 
 ## 1. Intent and correction to the current prototype direction
@@ -129,6 +129,7 @@ A mandate can be revoked once through the trusted operator control surface. Revo
 - **ADR-0009:** replace one-consent-per-grant-intent as the normal workflow with one consent receipt for the project mandate digest. Child task grants are derived automatically. A new consent is required only for renewal that widens the mandate or for an explicitly protected action. Key bootstrap and revocation anchor remain host lifecycle services, not per-operation prompts.
 - **Current Agent:** preserve the interactive /code + APPROVO compatibility mode until the autonomous Runtime path is implemented and regression-tested. The autonomous path must use a new trusted task-authority adapter. Do not bypass the old approval prompt by directly calling CodingWorkspace.callTool(); replace it with the reviewed Runtime boundary.
 - **Task Manifest:** the manifest records task intent and requested capabilities. It does not carry private credentials. The host mandate supplies the maximum authority; the task request can only attenuate it.
+- **ADR-0011 Project Normative Contract:** the mandate supplies operational authority; the PNC supplies the source-pinned project rules and human-authority boundaries that every task must preserve. The PNC grants no capabilities. The mandate/consent and task-child-authority schemas must bind the active PNC digest in a future version before autonomous execution is enabled; the current v0.1 mandate and isolated authority prototype do not yet enforce this binding.
 
 ## 10. Implementation plan and acceptance criteria
 
@@ -140,7 +141,8 @@ A mandate can be revoked once through the trusted operator control surface. Revo
 6. Add a new autonomous Agent execution mode that calls the Runtime adapter; keep /code interactive mode available as a legacy/manual fallback.
 7. Run end-to-end synthetic tasks that create files, patch files, add tests, fail, repair and finish without any intervening human approval.
 8. Add crash/restart tests, scope-escape tests, credential-redaction tests, resource-budget tests and cancellation/revocation tests.
-9. Only then enable the autonomous mode for the user's project workspace. Do not activate it by changing the old Agent approval function alone.
+9. Bind the active PNC identity/digest to the consented project mandate and derived task authority, then integrate deterministic PNC enforcement at the Runtime adapter boundary (ADR-0011).
+10. Only then enable the autonomous mode for the user's project workspace. Do not activate it by changing the old Agent approval function alone.
 
 Acceptance means: after one project mandate is approved, a synthetic multi-step coding task can read, create, replace, run its named tests, diagnose a failure, fix it, rerun and produce a completion/evidence report with zero per-operation human prompts, while failing closed outside the isolated mandate and never exposing a credential to the model.
 
