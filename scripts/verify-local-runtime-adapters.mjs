@@ -1,0 +1,185 @@
+#!/usr/bin/env node
+/**
+ * Read-only local compatibility probe for Cormia's IMMORTAL adapters.
+ *
+ * Reads the local Agent tasks.json in memory but prints only aggregate status
+ * counts. It never prints goals, task results, evidence content, secrets or
+ * candidate source. It does not write to the Agent or candidate trees.
+ *
+ * The SelfImprovementManager initialize/list path may create the empty
+ * self-improvement/runs directory if it does not already exist.
+ */
+import { lstat, readFile } from "node:fs/promises";
+import path from "node:path";
+import { pathToFileURL, fileURLToPath } from "node:url";
+
+import { inspectTaskStoreV1 } from "../runtime/reference-worker/immortal-agent-task-store-v1-adapter.mjs";
+import { withLocalResourceLease } from "../runtime/reference-worker/immortal-resource-manager-adapter.mjs";
+import { bindEvolutionRun, listEvolutionRuns } from "../runtime/reference-worker/immortal-evolution-manager-adapter.mjs";
+
+function parseArgs(argv) {
+  const result = {};
+  for (let i = 0; i < argv.length; i++) {
+    const flag = argv[i];
+    if (flag !== "--agent-root" && flag !== "--coding-root") {
+      throw new Error("Usage: node scripts/verify-local-runtime-adapters.mjs --agent-root <path> --coding-root <path>");
+    }
+    const value = argv[++i];
+    if (!value || value.startsWith("--")) throw new Error("Missing value for " + flag);
+    result[flag === "--agent-root" ? "agentRoot" : "codingRoot"] = path.resolve(value);
+  }
+  if (!result.agentRoot || !result.codingRoot) {
+    throw new Error("Both --agent-root and --coding-root are required.");
+  }
+  return result;
+}
+
+async function requireRegularFile(filePath, label) {
+  const stat = await lstat(filePath);
+  if (!stat.isFile() || stat.isSymbolicLink()) {
+    throw new Error(label + " must be a regular, non-symlink file.");
+  }
+}
+
+function countByStatus(items) {
+  const counts = {};
+  for (const item of items) {
+    const status = typeof item.status === "string" ? item.status : "unknown";
+    counts[status] = (counts[status] ?? 0) + 1;
+  }
+  return counts;
+}
+
+async function main() {
+  const { agentRoot, codingRoot } = parseArgs(process.argv.slice(2));
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+  const summary = {
+    schema: "cormia.local-runtime-adapter-probe.v1",
+    generatedAt: new Date().toISOString(),
+    nodeVersion: process.version,
+    collectionMode: "local-read-only-probe",
+    agentRootPresent: false,
+    codingRootPresent: false,
+    taskStore: { present: false, valid: null, taskCount: 0, statusCounts: {}, errorCount: 0, warningCount: 0 },
+    resourceManager: { importOk: false, leaseProbe: "not-run", reason: null, operation: "agent-inference" },
+    evolutionManager: { importOk: false, runCount: 0, statusCounts: {}, openCandidateRead: "not-run", readSha256Prefix: null },
+    limitations: [
+      "No Agent process or Granite model was started.",
+      "No task-store file was changed; only aggregate fields are printed.",
+      "No candidate was created, patched, evaluated or promoted.",
+      "No Docker container or workspace test was run.",
+      "No source, prompt, result, task goal, evidence body, credential or wallet material is printed."
+    ]
+  };
+
+  const taskStorePath = path.join(agentRoot, "data", "tasks.json");
+  const resourceModulePath = path.join(codingRoot, "self-improvement", "resource-manager.mjs");
+  const evolutionModulePath = path.join(codingRoot, "self-improvement", "evolution-manager.mjs");
+  const selfImprovementTestPath = path.join(codingRoot, "self-improvement", "self-improvement.test.mjs");
+
+  try {
+    await requireRegularFile(taskStorePath, "Agent task store");
+    const store = JSON.parse(await readFile(taskStorePath, "utf8"));
+    const inspected = inspectTaskStoreV1(store);
+    summary.taskStore = {
+      present: true,
+      valid: inspected.valid,
+      taskCount: inspected.taskCount,
+      statusCounts: countByStatus(inspected.tasks),
+      errorCount: inspected.errors.length,
+      warningCount: inspected.warnings.length
+    };
+    if (!inspected.valid) summary.taskStore.errors = inspected.errors;
+  } catch (error) {
+    summary.taskStore = {
+      present: false,
+      valid: false,
+      taskCount: 0,
+      statusCounts: {},
+      errorCount: 1,
+      warningCount: 0,
+      reason: String(error?.message ?? error)
+    };
+  }
+
+  try {
+    await requireRegularFile(resourceModulePath, "Resource Manager module");
+    const { ResourceManager } = await import(pathToFileURL(resourceModulePath).href);
+    summary.resourceManager.importOk = typeof ResourceManager === "function";
+    if (summary.resourceManager.importOk) {
+      const resourceManager = new ResourceManager();
+      const result = await withLocalResourceLease({
+        resourceManager,
+        operation: "agent-inference",
+        run: async () => "adapter-probe-ok"
+      });
+      summary.resourceManager.leaseProbe = result.allowed ? "passed" : "blocked";
+      summary.resourceManager.reason = result.allowed ? null : result.reason;
+      summary.resourceManager.resourceMode = result.resource?.mode ?? null;
+    }
+  } catch (error) {
+    summary.resourceManager.leaseProbe = "error";
+    summary.resourceManager.reason = String(error?.message ?? error);
+  }
+
+  try {
+    await requireRegularFile(evolutionModulePath, "Evolution Manager module");
+    await requireRegularFile(selfImprovementTestPath, "Self-improvement baseline test source");
+    const { SelfImprovementManager } = await import(pathToFileURL(evolutionModulePath).href);
+    summary.evolutionManager.importOk = typeof SelfImprovementManager === "function";
+    if (summary.evolutionManager.importOk) {
+      const evolutionRoot = path.join(codingRoot, "self-improvement");
+      const manager = new SelfImprovementManager({
+        workspaceRoot: codingRoot,
+        sourceFiles: {
+          "resource-manager.mjs": path.join(evolutionRoot, "resource-manager.mjs"),
+          "evolution-manager.mjs": path.join(evolutionRoot, "evolution-manager.mjs"),
+          "resource-manager.test.mjs": selfImprovementTestPath,
+          "evolution-manager.test.mjs": selfImprovementTestPath
+        }
+      });
+      await manager.initialize();
+      const runs = await listEvolutionRuns(manager, { limit: 100 });
+      summary.evolutionManager.runCount = runs.length;
+      summary.evolutionManager.statusCounts = countByStatus(runs);
+      const openRun = runs.find(item => item.status === "candidate_open");
+      if (!openRun) {
+        summary.evolutionManager.openCandidateRead = "skipped-no-open-run";
+      } else {
+        const adapter = await bindEvolutionRun(manager, openRun.id);
+        const candidate = await adapter.readCandidate({
+          runId: openRun.id,
+          path: "resource-manager.mjs",
+          startLine: 1,
+          endLine: 1
+        });
+        summary.evolutionManager.openCandidateRead = "passed";
+        summary.evolutionManager.readSha256Prefix = candidate.sha256.slice(0, 12);
+      }
+    }
+  } catch (error) {
+    summary.evolutionManager.openCandidateRead = "error";
+    summary.evolutionManager.reason = String(error?.message ?? error);
+  }
+
+  summary.agentRootPresent = true;
+  summary.codingRootPresent = true;
+
+  const fatal = [];
+  if (!summary.taskStore.present || summary.taskStore.valid !== true) fatal.push("task-store");
+  if (!summary.resourceManager.importOk) fatal.push("resource-manager-import");
+  if (summary.resourceManager.leaseProbe === "error") fatal.push("resource-manager-runtime");
+  if (!summary.evolutionManager.importOk) fatal.push("evolution-manager-import");
+  if (summary.evolutionManager.openCandidateRead === "error") fatal.push("evolution-candidate-read");
+
+  summary.result = fatal.length === 0 ? "PASS" : "PARTIAL_OR_FAIL";
+  summary.blockers = fatal;
+  process.stdout.write(JSON.stringify(summary, null, 2) + "\n");
+  if (fatal.length) process.exitCode = 1;
+}
+
+main().catch(error => {
+  process.stderr.write("Local Runtime adapter probe failed: " + String(error?.message ?? error) + "\n");
+  process.exitCode = 1;
+});
