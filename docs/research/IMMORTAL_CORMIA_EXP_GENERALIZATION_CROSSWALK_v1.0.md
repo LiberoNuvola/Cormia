@@ -195,7 +195,7 @@ The next revision should be driven by source changes, an explicit architecture d
 
 **Follow-up boundary and formal conformance contract**
 
-The detailed AEP–IMMORTAL economic-jurisdiction boundary and the four priority EXP contract sets are now specified in [CORMIA_AEP_IMMORTAL_ECONOMIC_JURISDICTION_AND_EXP_CONFORMANCE_v0.1.md](./CORMIA_AEP_IMMORTAL_ECONOMIC_JURISDICTION_AND_EXP_CONFORMANCE_v0.1.md). It formalizes the C0–C4 economic-perimeter classification, AEP→IMMORTAL request/result semantics, C-COMP triggers, and proposed invariants/test vectors for EXP-06, EXP-12, EXP-10 and EXP-11. It remains a research proposal; it is not a model-check result, normative adoption or implementation.
+The detailed AEP–IMMORTAL economic-jurisdiction boundary and the four priority EXP contract sets are now specified in [CORMIA_AEP_IMMORTAL_ECONOMIC_JURISDICTION_AND_EXP_CONFORMANCE_v0.1.md](./CORMIA_AEP_IMMORTAL_ECONOMIC_JURISDICTION_AND_EXP_CONFORMANCE_v0.1.md). It formalizes the C0–C4 economic-perimeter classification, AEP→IMMORTAL request/result semantics, C-COMP triggers, and proposed invariants/test vectors for EXP-06, EXP-12, EXP-10 and EXP-11. It remains a research proposal, not normative adoption or implementation. A bounded Python reference model for EXP-06/12/10/11 was added in the same PR; its 15 tests passed in [GitHub Actions run #4](https://github.com/LiberoNuvola/Cormia/actions/runs/41528325294) at e59f4cf35eef43304f4eaec0aeff56184a77307f. This is bounded evidence for the abstract model only, not a full-state model check, TLA+/Quint proof or production conformance.
 
 **Cormia**
 - [SPEC.md — Task Manifest, lifecycle, capability, escrow, CRC, Evidence Package and Runtime](https://github.com/LiberoNuvola/Cormia/blob/main/SPEC.md)
