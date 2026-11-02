@@ -24,7 +24,7 @@ Separate three independent records and their authorities:
 2. **Operator consent receipt:** records one explicit, authenticated, interactive decision over a canonical task/grant intent. It is not inferred from model output, task text, a prior generic approval or mere possession of a host signing key.
 3. **Revocation journal + protected monotonic anchor:** records signed revocation events in a hash-linked sequence and binds the latest journal head to state that cannot be rolled back together with the journal file.
 
-A grant is usable only when all three trust paths are healthy: host key trusted and active, exact operator consent valid for that grant intent, and revocation journal reconciled with the monotonic anchor.
+A grant is usable only when all three trust paths are healthy: host key trusted and active, the applicable operator delegation valid, and revocation journal reconciled with the monotonic anchor. For the autonomous project-worker target, the operator consents once to the complete project mandate digest; the Runtime derives child task grants automatically. Per-operation approval is explicitly not the target. See [ADR-0010](./0010-autonomous-project-delegation-and-runtime-authority.md).
 
 The present ADR-008 v0.1 grant helper remains a test-only contract. It does not gain these production properties by the addition of these schemas.
 
@@ -121,9 +121,9 @@ Before presenting consent, the trusted Runtime constructs one immutable intent f
 
 The host computes a domain-separated `consentIntentDigest` over the canonical intent. This digest, not free-form task prose, is the object the operator approves.
 
-### 4.2 Local interactive approval
+### 4.2 Local interactive project-mandate delegation
 
-A trusted local consent broker must display, in the same interaction:
+A trusted local consent broker must display the complete project mandate digest and its effective authority in the same initial project-setup interaction. It must clearly state that routine in-scope reads, edits, tests and builds will run autonomously without further prompts. The detail below is a one-time mandate delegation ceremony, not an approval step repeated for every operation:
 
 - task ID and manifest digest;
 - exact operation(s), workspace and paths;
@@ -131,9 +131,9 @@ A trusted local consent broker must display, in the same interaction:
 - expiry and relevant resource/network/privacy constraints;
 - the complete intent fingerprint and a short challenge derived from it.
 
-The operator explicitly approves or denies. The proposed initial challenge is the final eight lowercase hexadecimal characters of `consentIntentDigest`; the operator must type the displayed suffix to approve. A changed field produces a different intent digest and requires a new interaction. A timeout, closed window, missing authenticated operator identity, denied action, mismatched challenge or unavailable consent broker is a denial.
+The operator explicitly approves or denies the whole mandate once. The proposed initial challenge is the final eight lowercase hexadecimal characters of the mandate digest; the operator must type the displayed suffix to approve the project authority. A change that widens the mandate requires a new consent; routine tool calls and automatically derived child grants do not. A timeout, closed window, missing authenticated operator identity, denied action, mismatched challenge or unavailable consent broker is a denial.
 
-This proposal is one-time and exact-scope. It does not allow wildcard consent, blanket future grants, silent renewal or model-generated approval. The existing `APPROVO` command remains unchanged until a separately reviewed integration is implemented.
+This proposal is one-time and project-scoped. It allows autonomous child tasks only within the displayed mandate, project worktree, budgets and protected-action limits. It does not allow model-generated approval or silent widening/renewal. The existing `APPROVO` command remains unchanged as a legacy interactive mode until the separately reviewed autonomous Runtime path is implemented.
 
 ### 4.3 Consent receipt
 
@@ -151,7 +151,7 @@ The local host authority may sign an approval receipt only after the trusted con
 
 ### 4.4 Binding consent to the grant
 
-Do not add consent implicitly to ADR-008 v0.1. A future grant profile (proposed v0.2) must require a `consentDigest` referencing the signed consent receipt and a `consentIntentDigest` binding the receipt to the exact grant fields.
+Do not add one new human consent receipt to each ADR-008 v0.1 child grant. The autonomous project mandate in ADR-0010 is the consented parent authority. A future grant profile may bind each internal child grant to the parent mandate digest and task digest; that machine binding is not a new human approval. The operator consent receipt binds to the entire project mandate, including all allowed operation families and limits.
 
 To avoid a circular hash:
 1. construct and canonicalize the grant intent without a consent field;
@@ -161,7 +161,7 @@ To avoid a circular hash:
 5. sign the final grant;
 6. at invocation, require both the valid grant and the matching consent receipt.
 
-A missing, denied, expired, mismatched, replayed or unverifiable consent receipt is a hard denial. No fallback to the old `APPROVO` text or model judgement is permitted.
+A missing, denied, expired, mismatched, replayed or unverifiable project-mandate consent receipt is a hard denial for new autonomous tasks. Existing in-scope tasks may continue only if host policy explicitly allows graceful completion during renewal; no fallback to model judgement is permitted. The legacy interactive `/code` path remains separate.
 
 ### 4.5 Operator identity caveat
 
@@ -299,7 +299,7 @@ The provider implementation tests must additionally include process termination 
 3. Decide whether the provider can use the current Ed25519 profile or needs a separately versioned ES256 profile; do not infer this from the GitHub-hosted runner.
 4. Implement a fake provider and deterministic state-machine tests first.
 5. Implement one platform provider behind the opaque interface; validate private-key non-exportability and anchor semantics independently.
-6. Implement the signed consent broker and grant v0.2 binding; keep current `APPROVO` behavior unchanged.
+6. Implement the signed one-time project-mandate consent broker and bind automatically derived child grants to the mandate; keep current `/code` + `APPROVO` as a legacy compatibility path.
 7. Implement journal append, flush, checkpoint and anchor CAS with crash/restart tests.
 8. Integrate with the read-only local adapter only after key trust, consent and anchor all pass.
 9. Keep create/replace/test disabled until task-specific workspace isolation and test selection are established.
