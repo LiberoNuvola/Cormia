@@ -84,10 +84,12 @@ async function main() {
   const evolutionModulePath = path.join(codingRoot, "self-improvement", "evolution-manager.mjs");
   const selfImprovementTestPath = path.join(codingRoot, "self-improvement", "self-improvement.test.mjs");
 
+  let taskStoreFound = false;
   try {
     await requireDirectory(agentRoot, "Agent root");
     summary.agentRootPresent = true;
     await requireRegularFile(taskStorePath, "Agent task store");
+    taskStoreFound = true;
     const store = JSON.parse(await readFile(taskStorePath, "utf8"));
     const inspected = inspectTaskStoreV1(store);
     summary.taskStore = {
@@ -101,7 +103,7 @@ async function main() {
     if (!inspected.valid) summary.taskStore.errors = inspected.errors;
   } catch (error) {
     summary.taskStore = {
-      present: false,
+      present: taskStoreFound,
       valid: false,
       taskCount: 0,
       statusCounts: {},
