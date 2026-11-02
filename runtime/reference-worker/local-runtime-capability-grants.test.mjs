@@ -61,6 +61,7 @@ function context(overrides = {}) {
       path: "src/module.mjs"
     },
     hostPolicy: {
+      issuerId,
       workspaceRef,
       allowedCapabilities: ["workspace.list", "workspace.read", "workspace.diff", "workspace.verify"],
       allowedFiles: ["src/module.mjs", "src/other.mjs"],
@@ -131,6 +132,34 @@ test("binds grants to the exact task and manifest digest", () => {
   assert.equal(authorizeLocalWorkspaceOperation(context({
     expected: { ...context().expected, manifestDigest: "sha256:" + "b".repeat(64) }
   })).reason, "manifest-mismatch");
+});
+
+test("requires the grant issuer to match the local host policy", () => {
+  const result = authorizeLocalWorkspaceOperation(context({
+    hostPolicy: { ...context().hostPolicy, issuerId: "other-local-host" }
+  }));
+  assert.equal(result.reason, "issuer-not-authorized-by-host-policy");
+});
+
+test("denies a grant if the trusted key is marked inactive", () => {
+  const result = authorizeLocalWorkspaceOperation(context({
+    resolveKey: kid => kid === keyId
+      ? { publicKey, issuerId, role: "local-host-authority", status: "revoked" }
+      : null
+  }));
+  assert.equal(result.reason, "untrusted-signing-key");
+});
+
+test("authorizes an exact root directory listing under its directory grant", () => {
+  const token = signGrant({
+    capability: "workspace.list",
+    scope: { workspaceRef, directories: ["."] }
+  });
+  const result = authorizeLocalWorkspaceOperation(context({
+    grantToken: token,
+    expected: { ...context().expected, capability: "workspace.list", path: "." }
+  }));
+  assert.equal(result.allowed, true, result.reason);
 });
 
 test("binds grants to the exact worker, runtime and workspace", () => {
