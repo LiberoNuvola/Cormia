@@ -80,6 +80,13 @@ test("canonicalizes the restricted JCS claim subset deterministically", () => {
   );
   assert.throws(() => canonicalizeLocalClaims({ fractional: 1.5 }), /safe integer/);
   assert.throws(() => canonicalizeLocalClaims({ tooLarge: Number.MAX_SAFE_INTEGER + 1 }), /safe integer/);
+  assert.throws(() => canonicalizeLocalClaims(new Array(1)), /Sparse arrays/);
+  const accessor = {};
+  Object.defineProperty(accessor, "value", {
+    enumerable: true,
+    get() { return "not-json-data"; }
+  });
+  assert.throws(() => canonicalizeLocalClaims(accessor), /Accessors/);
 });
 
 test("signs and verifies a compact JWS Ed25519 grant", () => {
