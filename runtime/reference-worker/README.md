@@ -103,3 +103,11 @@ The pure [revocation-anchor reconciliation model](./local-revocation-anchor-mode
 ## Windows CNG provider discovery
 
 The read-only [Windows CNG capability probe](../../scripts/probe-windows-cng-capabilities.ps1) enumerates signature algorithms exposed by the Microsoft Platform Crypto Provider and Microsoft Software Key Storage Provider and reads TPM status when `Get-Tpm` is available. It does not create a key or certificate, read private key material, or change machine state. [The Windows GitHub Actions run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41480382232) validates the script on a hosted runner only; it is not a measurement of the user's device. Actual host provider selection remains pending an operator-run read-only probe and a separate disposable-key signing test.
+
+## Autonomous project mandate — target design
+
+The target autonomy model is recorded in [ADR-0010](../../docs/adr/0010-autonomous-project-delegation-and-runtime-authority.md). One explicit project-level delegation authorizes a standing policy for a dedicated isolated worktree. Within that boundary the Runtime must automatically accept in-scope tasks, create attenuated child grants and permit routine reads, writes, refactors, builds and tests without per-operation human prompts.
+
+The model must not receive API tokens, bearer credentials or signing keys. Local Granite inference remains local and requires no cloud-provider API key. Any GitHub credential is managed by a host credential broker and is only needed for remote GitHub operations; local work continues offline.
+
+This is not implemented yet. The current /code + APPROVO path remains the legacy interactive compatibility mode, and the existing read-only adapter is not yet an autonomous coding worker. The new mandate/consent schemas have contract tests, but no mandate store, credential broker, task-worktree manager or autonomous Agent execution loop exists.
