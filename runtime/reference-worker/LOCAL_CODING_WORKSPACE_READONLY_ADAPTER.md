@@ -38,7 +38,7 @@ The wrapper rejects absolute, drive, UNC and traversal paths, non-canonical path
 
 The dedicated [GitHub Actions run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41466372070) completed **SUCCESS** at commit `6d7629537ef7d7fbb2a37cd143cd770c1bc3d90b`; all 10 read-only adapter contract tests passed.
 
-The expanded Windows probe now imports the real local CodingWorkspace class and calls only `workspace_list` for the already-existing root directory. It reports only the total entry count and truncation flag, never entry names. This local check is pending execution on the user's Windows installation; CI does not access that machine.
+The expanded Windows probe imported the real local CodingWorkspace class and called only `workspace_list` for the already-existing root directory. On 2026-11-02 at 14:59:32.825Z it passed, reporting `totalEntries: 5` and `truncated: false`, without printing entry names. This verifies the local list path only; CI does not access the user's Windows installation, and this probe does not exercise read/diff/verify, write/patch/test, Agent integration or Docker.
 
 ## Tests
 
