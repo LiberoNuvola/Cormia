@@ -13,7 +13,7 @@ The normative draft already requires capabilities to be explicit, task-scoped, a
 
 The reviewed local Coding Workspace has seven operations. Its class enforces input/path/root checks, but `CodingWorkspace.callTool()` does not enforce the Agent caller's approval gate. The current Agent orchestrator gates `workspace_write`, `workspace_patch`, and `workspace_test` with an interactive `APPROVO` step. The Coding Workspace has one shared root rather than task-specific roots; its test tool executes Node test discovery across that entire root.
 
-This ADR proposes a vocabulary and mapping only. It does not approve an unattended capability grant, change the Task Manifest schema, or connect adapters to the Agent.
+This ADR proposes a vocabulary and mapping only. It does not change the Task Manifest schema or connect adapters to the Agent. The target autonomous authorization model is now defined separately in ADR-0010: one standing project mandate, isolated worktree scope and Runtime-derived task child grants, without per-edit approval. This is a target design, not an implemented permission.
 
 ## 2. Proposed naming convention
 
@@ -93,7 +93,7 @@ The separate Cormia read-only Coding Workspace wrapper exposes only list/read/di
 
 The existing `APPROVO` prompt remains part of the Agent's current `/code` compatibility path. It is an operation-scoped interactive approval, not a signed task-scoped consent grant. It must not be silently reinterpreted as permission for remote or unattended work. Conversely, the Cormia adapter must not directly call the underlying write/replace/test operations merely because the local class recognizes them.
 
-The project goal of bounded automation after a task is accepted requires a separately designed, authenticated task-consent model. Until that exists and is tested, the local AEP adapter must reject mutation/test grants rather than creating an ad hoc human-approval or unattended mode.
+The project goal of bounded autonomous execution after a task is accepted is addressed by ADR-0010. Until the project mandate, isolated worktree, child-grant engine and consent/revocation lifecycle are implemented and tested, this current read-only adapter must continue to reject mutation/test grants. Do not replace this gap with a human prompt on every edit, and do not simply bypass the legacy Agent approval gate.
 
 ## 6. Resource and execution separation
 
@@ -123,7 +123,7 @@ Before any capability mapping is enabled:
 1. Who is authorized to issue/sign a task capability grant, and how does the worker authenticate that authority?
 2. Is `workspaceRef` a task-created snapshot, worktree, directory namespace, or a host-selected shared workspace? What are its creation, cleanup and recovery rules?
 3. What path canonicalization rules apply consistently on Windows and POSIX, including case and Unicode behavior?
-4. What signed task-consent, expiry, cancellation and revocation model replaces per-operation human approval for unattended tasks?
+4. How will the one-time project mandate, automatic child-grant derivation, expiry, cancellation and revocation model in ADR-0010 be implemented and tested without reintroducing per-operation human approval?
 5. What test profile and selector give task-scoped execution without running unrelated tests in the shared workspace?
 6. How are resource requirements separated from actual host admission, preemption and enforceable OS quotas?
 7. What evidence schema binds each operation, its exact arguments, host policy decision, source digest, result commitment and verifier outcome?
