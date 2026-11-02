@@ -373,6 +373,20 @@ Minimum safety invariants to model:
 
 These are model/check obligations, not a claim that a TLA+/Quint model has already been built or proved.
 
+## 10. Bounded reference-model evidence
+
+A standalone Python reference model and standard-library test suite are present under verification/exp_boundary/. They exercise the finite abstractions above; they do not import or execute Cormia Runtime, AEP validators, IMMORTAL kernel, an adapter, or a ledger.
+
+- [Reference model](../../verification/exp_boundary/reference_model.py)
+- [15 bounded tests](../../verification/exp_boundary/test_reference_model.py)
+- [GitHub Actions workflow](../../.github/workflows/exp-boundary-reference-model.yml)
+- [PR run #4 — SUCCESS](https://github.com/LiberoNuvola/Cormia/actions/runs/41528325294)
+- Tested branch head: e59f4cf35eef43304f4eaec0aeff56184a77307f
+
+The 15 tests cover exact evidence/manifest/delivery/gate binding, a receipt-only negative case, capability attenuation, role-authority boundaries, adapter admission binding, concurrent shared-resource draws, canonical non-overlapping partitions, aggregate reservations, worker capability/privacy/assurance eligibility and finite worker capacity. The first CI attempt exposed an incorrect test expectation that assigned two tasks to a capacity-one worker; that assertion was corrected. The later PR run passed all 15 tests.
+
+**Interpretation limit:** this is bounded executable evidence for the abstract reference model only. It is not an implementation conformance test, production Runtime result, full-state model check, TLA+/Quint proof, C-COMP deployment certificate, or evidence of economic solvency.
+
 ## 10. Minimal adversarial model-check scenarios
 
 | Scenario | Attack / interleaving | Expected result |
