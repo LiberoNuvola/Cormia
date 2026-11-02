@@ -4,7 +4,7 @@
 **Stato:** Architecture Draft / Non-production / Prior-art-informed
 **Data:** 2 novembre 2026
 **Rete iniziale proposta:** Cardano
-**Repository proposto:** `LiberoNuvola/cormia` (repository remoto non ancora creato)
+**Repository:** `LiberoNuvola/Cormia` (pubblicato su GitHub; branch `main`; baseline iniziale del 2 novembre 2026)
 **Relazione con `LiberoNuvola/Immortal-Protocol`:** progetto fratello, non sostituzione né estensione implicita
 **Lingua normativa:** italiano; nomi di stato e interfacce in inglese per interoperabilità
 
