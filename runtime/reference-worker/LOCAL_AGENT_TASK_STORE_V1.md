@@ -98,6 +98,9 @@ Tests:
 - [Adapter contract tests](./immortal-agent-task-store-v1-adapter.test.mjs)
 - [Test vectors](../../test-vectors/agent-task-store-v1/README.md)
 
+CI evidence: [Local Agent Task Store v1 Compatibility run #1](https://github.com/LiberoNuvola/Cormia/actions/runs/41461474545) completed **SUCCESS** at commit `ac44f2a03aecd6272cf80d4dadae35da17972fcf`. The workflow ran the adapter syntax check, 10 contract tests, and JSON parsing for both schemas and both synthetic fixtures. This is repository CI evidence, not a Windows integration run against the user's live task store.
+
+
 ## 6. Non-goals and limitations
 
 This first adapter does not:
