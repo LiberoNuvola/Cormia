@@ -84,8 +84,8 @@ foreach ($entry in $Roots.GetEnumerator()) {
         continue
     }
 
-    $files = New-Object System.Collections.Generic.List[object]
-    $packages = New-Object System.Collections.Generic.List[object]
+    $files = [System.Collections.Generic.List[object]]::new()
+    $packages = [System.Collections.Generic.List[object]]::new()
     $pending = New-Object 'System.Collections.Generic.Queue[string]'
     $pending.Enqueue($rootPath)
 
@@ -137,7 +137,7 @@ foreach ($entry in $Roots.GetEnumerator()) {
         FileCount = $sortedFiles.Count
         TotalBytes = $totalBytes
         Files = $sortedFiles
-        Packages = @($packages)
+        Packages = $packages.ToArray()
     }
 }
 
