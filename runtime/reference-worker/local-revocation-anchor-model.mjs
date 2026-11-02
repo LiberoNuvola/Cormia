@@ -7,7 +7,17 @@ const SHA256_PATTERN = /^sha256:[a-f0-9]{64}$/;
 
 function exactKeys(value, expected) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const actual = Object.keys(value).sort();
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null) return false;
+  const ownKeys = Reflect.ownKeys(value);
+  if (ownKeys.some(key => typeof key !== "string")) return false;
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  if (ownKeys.some(key => {
+    const descriptor = descriptors[key];
+    return !descriptor || !descriptor.enumerable ||
+      !Object.hasOwn(descriptor, "value");
+  })) return false;
+  const actual = ownKeys.sort();
   const required = [...expected].sort();
   return actual.length === required.length &&
     actual.every((key, index) => key === required[index]);
@@ -110,7 +120,17 @@ export async function verifyAndReconcileLocalRevocationJournal({
         };
       }
 
-      const verified = await verifyRevocationToken(event.revocationToken);
+      let verified;
+      try {
+        verified = await verifyRevocationToken(event.revocationToken);
+      } catch {
+        return {
+          allowed: false,
+          status: "JOURNAL_INVALID",
+          reason: "revocation-signature-verifier-failed",
+          failedSequence: expectedSequence
+        };
+      }
       if (!verified || verified.valid !== true ||
           verified.issuerId !== expectedIssuerId ||
           !verified.claims ||
@@ -134,7 +154,16 @@ export async function verifyAndReconcileLocalRevocationJournal({
       headEventDigest: previousEventDigest
     };
 
-    const checkpoint = await verifyCheckpointToken(checkpointToken);
+    let checkpoint;
+    try {
+      checkpoint = await verifyCheckpointToken(checkpointToken);
+    } catch {
+      return {
+        allowed: false,
+        status: "CHECKPOINT_INVALID",
+        reason: "checkpoint-signature-verifier-failed"
+      };
+    }
     if (!checkpoint || checkpoint.valid !== true ||
         checkpoint.issuerId !== expectedIssuerId ||
         !checkpoint.claims ||
@@ -148,7 +177,16 @@ export async function verifyAndReconcileLocalRevocationJournal({
       };
     }
 
-    const anchor = await readAnchor();
+    let anchor;
+    try {
+      anchor = await readAnchor();
+    } catch {
+      return {
+        allowed: false,
+        status: "ANCHOR_UNAVAILABLE",
+        reason: "monotonic-anchor-read-failed"
+      };
+    }
     if (!validAnchor(anchor)) {
       return { allowed: false, status: "ANCHOR_INVALID", reason: "invalid-monotonic-anchor-state" };
     }
@@ -197,7 +235,16 @@ export async function verifyAndReconcileLocalRevocationJournal({
       sequence: journalHead.sequence,
       headEventDigest: journalHead.headEventDigest
     };
-    const committed = await advanceAnchor(anchor, nextAnchor);
+    let committed;
+    try {
+      committed = await advanceAnchor(anchor, nextAnchor);
+    } catch {
+      return {
+        allowed: false,
+        status: "ANCHOR_UNAVAILABLE",
+        reason: "monotonic-anchor-advance-failed"
+      };
+    }
     if (committed !== true) {
       return {
         allowed: false,
@@ -219,8 +266,8 @@ export async function verifyAndReconcileLocalRevocationJournal({
   } catch {
     return {
       allowed: false,
-      status: "ANCHOR_UNAVAILABLE",
-      reason: "anchor-or-verifier-operation-failed"
+      status: "JOURNAL_INVALID",
+      reason: "unexpected-journal-validation-failure"
     };
   }
 }
