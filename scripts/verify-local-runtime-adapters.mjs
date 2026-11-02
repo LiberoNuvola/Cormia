@@ -215,7 +215,7 @@ async function main() {
   const fatal = [];
   if (!summary.taskStore.present || summary.taskStore.valid !== true) fatal.push("task-store");
   if (!summary.codingWorkspace.importOk) fatal.push("coding-workspace-import");
-  if (summary.codingWorkspace.readOnlyListProbe === "error") fatal.push("coding-workspace-read-only-list");
+  if (summary.codingWorkspace.readOnlyListProbe !== "passed") fatal.push("coding-workspace-read-only-list");
   if (!summary.resourceManager.importOk) fatal.push("resource-manager-import");
   if (summary.resourceManager.leaseProbe === "error") fatal.push("resource-manager-runtime");
   if (!summary.evolutionManager.importOk) fatal.push("evolution-manager-import");
