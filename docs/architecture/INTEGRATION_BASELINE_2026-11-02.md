@@ -135,6 +135,27 @@ The selected local source archive has now been reviewed. Detailed file map, hash
 The metadata inventory is now complete. The next implementation decision remains blocked on source-level review of the selected runtime and manager modules. Source transfer, adapter implementation and test baselines must follow only after their actual imports, state formats, permissions and test contracts have been inspected.
 
 
+## 6G. Windows local compatibility result — 2026-11-02
+
+The user executed `scripts/verify-local-runtime-adapters.mjs` on the Windows host using Node v22.15.0. The aggregate report was generated at `2026-11-02T14:50:09.504Z`.
+
+| Probe | Observed result |
+|---|---|
+| Agent root / Coding Workspace root | Both present |
+| Task Store v1 | Valid; 7 tasks; 6 completed and 1 paused; 0 validation errors; 6 warnings |
+| Resource Manager import | Passed |
+| Resource Manager lease probe | Passed; reported mode `balanced`; no persistent write |
+| Evolution Manager import | Passed |
+| Existing evolution runs | 1 run, status `candidate_open` |
+| Bound candidate read | Passed; SHA-256 prefix `a8ab76ea9eaa` |
+| Overall probe | `PASS`; 0 blockers |
+
+The six Task Store warnings are consistent with the adapter's expected warning for each `completed` record, which requires completion-integrity checks before treating the result as trusted. The report intentionally did not expose goals, result strings, evidence bodies or task IDs.
+
+The probe did not start Agent/Granite, create or patch an evolution candidate, run Docker, modify the task store, or promote code. The Resource Manager lease was acquired and released around a no-op callback. The Evolution Manager inspection used its existing run registry and a bounded first-line candidate read.
+
+This is a successful local compatibility smoke test for the three adapters on the user's Windows environment. It is **not** a full end-to-end Runtime execution, a Docker isolation proof, an AEP conformance verdict, or approval to promote the existing open candidate.
+
 ## 6F. Aggregate local verification
 
 The read-only Windows verification entry point is `scripts/verify-local-runtime-adapters.mjs`. It validates the live local Task Store format in memory, performs a no-op Resource Manager lease probe, checks the existing Evolution Manager run registry and reads one candidate line only if a valid open run exists. It never prints task text or evidence bodies. It must not be interpreted as a test of Granite, Docker candidate execution, or AEP conformance.
