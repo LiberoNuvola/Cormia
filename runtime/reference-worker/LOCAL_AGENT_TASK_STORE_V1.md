@@ -120,3 +120,9 @@ The Agent uses a temporary file plus rename for task-store writes. This review d
 The aggregate Windows probe has validated the actual local `data/tasks.json` envelope in memory. A bounded sidecar check is now integrated: it reads only exact sidecar paths referenced by the valid Task Store snapshot, verifies task/attempt binding and structural fields in memory, rejects symlinks and skips files above 8 MiB. It prints aggregate counts only; raw tool outputs, identifiers and file names are never returned. See [LOCAL_ATTEMPT_EVIDENCE_SIDECAR_PROBE.md](./LOCAL_ATTEMPT_EVIDENCE_SIDECAR_PROBE.md).
 
 The local sidecar check has not yet been run on the user's Windows installation. The next compatibility step is to pull the updated Cormia `main` and rerun the aggregate probe. This remains an inspector only: it does not execute tasks, change the store or sidecars, or establish AEP Evidence Package conformance.
+
+## 8. Sidecar probe CI and local execution status
+
+The bounded sidecar probe contract suite passed all 9 tests in [GitHub Actions run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41469116933). The aggregate probe's syntax/import workflow passed in [run #8](https://github.com/LiberoNuvola/Cormia/actions/runs/41469547041).
+
+These are synthetic GitHub checks. The integrated check against the user's actual Windows sidecar files remains pending; it is performed by the aggregate Windows command documented in [the reference worker README](./README.md).
