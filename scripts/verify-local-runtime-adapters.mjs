@@ -41,6 +41,13 @@ async function requireRegularFile(filePath, label) {
   }
 }
 
+async function requireDirectory(directoryPath, label) {
+  const stat = await lstat(directoryPath);
+  if (!stat.isDirectory() || stat.isSymbolicLink()) {
+    throw new Error(label + " must be an existing, non-symlink directory.");
+  }
+}
+
 function countByStatus(items) {
   const counts = {};
   for (const item of items) {
@@ -52,7 +59,6 @@ function countByStatus(items) {
 
 async function main() {
   const { agentRoot, codingRoot } = parseArgs(process.argv.slice(2));
-  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
   const summary = {
     schema: "cormia.local-runtime-adapter-probe.v1",
@@ -79,6 +85,8 @@ async function main() {
   const selfImprovementTestPath = path.join(codingRoot, "self-improvement", "self-improvement.test.mjs");
 
   try {
+    await requireDirectory(agentRoot, "Agent root");
+    summary.agentRootPresent = true;
     await requireRegularFile(taskStorePath, "Agent task store");
     const store = JSON.parse(await readFile(taskStorePath, "utf8"));
     const inspected = inspectTaskStoreV1(store);
@@ -104,6 +112,8 @@ async function main() {
   }
 
   try {
+    await requireDirectory(codingRoot, "Coding Workspace root");
+    summary.codingRootPresent = true;
     await requireRegularFile(resourceModulePath, "Resource Manager module");
     const { ResourceManager } = await import(pathToFileURL(resourceModulePath).href);
     summary.resourceManager.importOk = typeof ResourceManager === "function";
@@ -130,6 +140,8 @@ async function main() {
     summary.evolutionManager.importOk = typeof SelfImprovementManager === "function";
     if (summary.evolutionManager.importOk) {
       const evolutionRoot = path.join(codingRoot, "self-improvement");
+      await requireDirectory(evolutionRoot, "Self-improvement directory");
+      await requireDirectory(path.join(evolutionRoot, "runs"), "Evolution runs directory");
       const manager = new SelfImprovementManager({
         workspaceRoot: codingRoot,
         sourceFiles: {
@@ -163,8 +175,6 @@ async function main() {
     summary.evolutionManager.reason = String(error?.message ?? error);
   }
 
-  summary.agentRootPresent = true;
-  summary.codingRootPresent = true;
 
   const fatal = [];
   if (!summary.taskStore.present || summary.taskStore.valid !== true) fatal.push("task-store");
