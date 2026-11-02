@@ -36,6 +36,23 @@ The existing bridge is intentionally fixed to `LiberoNuvola/Immortal-Protocol` /
 
 The v0.8.0 local agent, Granite/llama.cpp backend, task-store lineage, Resource Manager, Evolution Manager, Coding Workspace and Docker test path are the initial implementation nucleus. AEP conformance requires adapters and test vectors; v0.8.0 is not declared conformant today.
 
+### Verified Local Agent integration boundary
+
+The source review of 2026-11-02 found that `agent.mjs` is a process entry point with no exported orchestration API and a top-level `main()` invocation. Its HTTP service is deliberately limited to the fixed read-only Dagu audit request and task-ID reads; it is not a general AEP task intake endpoint.
+
+Normal CLI mode dynamically loads the Coding Workspace, Resource Manager and Evolution Manager from the separate local workspace root. The current Coding Workspace continues to require interactive approval for writes, patches and tests. That approval policy must not be bypassed by an adapter.
+
+Consequences:
+
+- Do not import `agent.mjs` directly into Cormia.
+- Do not widen the existing read-only HTTP endpoint into a generic task API.
+- Treat the current Agent as a preserved compatibility runtime until an importable core boundary is separately implemented and regression-tested.
+- Coding Workspace, Resource Manager and Evolution Manager have explicit module APIs and may be wrapped individually, but only within their existing root, approval, lease and candidate-isolation constraints.
+- Control Room remains a local operator surface; Mitsuro remains a read-only observer.
+- The proposed integration route is documented in [ADR-0006](../adr/0006-local-runtime-adapter-boundary.md). The source-level evidence and test limitations are in [the local nucleus review](../architecture/LOCAL_NUCLEUS_SOURCE_REVIEW_2026-11-02.md).
+
+The current local source is not yet AEP-conformant and no generic AEP task is accepted by the existing service mode.
+
 ## 2. External protocol adapters
 
 | Adapter | Boundary | Authority remains with |
