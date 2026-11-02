@@ -21,3 +21,8 @@ node --test .\immortal-agent-task-store-v1-adapter.test.mjs
 ```
 
 The fixtures test compatibility only. They are not AEP Task Manifests or signed execution evidence.
+
+
+## CI evidence
+
+The compatibility workflow completed successfully in [run #1](https://github.com/LiberoNuvola/Cormia/actions/runs/41461474545) for commit `ac44f2a03aecd6272cf80d4dadae35da17972fcf`. It executed all 10 adapter tests and parsed both schemas and both fixtures.
