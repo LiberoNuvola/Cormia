@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:immortal-aep:schema:local-project-mandate-consent:0.1.0",
+  "title": "IMMORTAL Local Project Mandate Consent",
+  "description": "One authenticated interactive operator decision over the complete autonomous project mandate digest. Not a per-operation approval and not a bearer/API credential.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "consentId",
+    "issuerId",
+    "operatorPrincipalId",
+    "consentBrokerId",
+    "mandateId",
+    "mandateDigest",
+    "projectRef",
+    "workspaceRef",
+    "decision",
+    "interactionMode",
+    "interactionId",
+    "displayedChallenge",
+    "confirmedChallenge",
+    "issuedAt",
+    "expiresAt",
+    "nonce",
+    "sequence"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "consentId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "issuerId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "operatorPrincipalId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "consentBrokerId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "mandateId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "mandateDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "projectRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "workspaceRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "approve",
+        "deny"
+      ]
+    },
+    "interactionMode": {
+      "type": "string",
+      "const": "local-interactive-project-mandate"
+    },
+    "interactionId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "displayedChallenge": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{8}$"
+    },
+    "confirmedChallenge": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{8}$"
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "nonce": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    }
+  }
+}
