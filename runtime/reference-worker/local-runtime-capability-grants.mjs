@@ -284,7 +284,9 @@ function verifyCompactJws(token, { resolveKey, typ, validate }) {
         !keyInfo.publicKey) {
       return { valid: false, reason: "untrusted-signing-key" };
     }
-    const publicKey = createPublicKey(keyInfo.publicKey);
+    const publicKey = keyInfo.publicKey?.type === "public"
+      ? keyInfo.publicKey
+      : createPublicKey(keyInfo.publicKey);
     if (publicKey.asymmetricKeyType !== "ed25519") {
       return { valid: false, reason: "wrong-signing-key-type" };
     }
