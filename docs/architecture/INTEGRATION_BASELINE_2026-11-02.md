@@ -133,3 +133,8 @@ The selected local source archive has now been reviewed. Detailed file map, hash
 ## 7. Next required evidence
 
 The metadata inventory is now complete. The next implementation decision remains blocked on source-level review of the selected runtime and manager modules. Source transfer, adapter implementation and test baselines must follow only after their actual imports, state formats, permissions and test contracts have been inspected.
+
+
+## 6F. Aggregate local verification
+
+The read-only Windows verification entry point is `scripts/verify-local-runtime-adapters.mjs`. It validates the live local Task Store format in memory, performs a no-op Resource Manager lease probe, checks the existing Evolution Manager run registry and reads one candidate line only if a valid open run exists. It never prints task text or evidence bodies. It must not be interpreted as a test of Granite, Docker candidate execution, or AEP conformance.
