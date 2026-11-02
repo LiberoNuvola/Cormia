@@ -259,6 +259,9 @@ function signCompactJws(claims, { privateKey, keyId, typ, validate }) {
   if (typeof keyId !== "string" || keyId.length < 1 || keyId.length > 256) {
     throw new TypeError("A non-empty trusted key ID is required.");
   }
+  // Canonicalize first: do not invoke accessors or otherwise inspect a
+  // non-JSON JavaScript object during claim validation.
+  const canonicalPayload = canonicalizeLocalClaims(claims);
   const verdict = validate(claims);
   if (!verdict.valid) throw new TypeError(verdict.reason);
 
@@ -268,7 +271,7 @@ function signCompactJws(claims, { privateKey, keyId, typ, validate }) {
     typ
   };
   const protectedSegment = encodeBase64Url(Buffer.from(canonicalizeLocalClaims(protectedHeader), "utf8"));
-  const payloadSegment = encodeBase64Url(Buffer.from(canonicalizeLocalClaims(claims), "utf8"));
+  const payloadSegment = encodeBase64Url(Buffer.from(canonicalPayload, "utf8"));
   const signingInput = Buffer.from(protectedSegment + "." + payloadSegment, "ascii");
   const signature = cryptoSign(null, signingInput, privateKey);
   return protectedSegment + "." + payloadSegment + "." + encodeBase64Url(signature);
