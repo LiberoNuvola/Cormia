@@ -247,3 +247,13 @@ Coordination notes:
 - The crosswalk is maintained on a separate branch/PR and does not alter PR #1 or its PNC-bound mandate work.
 - The AEP-to-IMMORTAL economic jurisdiction question remains OPEN: no duplicate or conflicting solvency/protection accounting may be created for the same resource.
 - No PRE-RICH constants, V3, Reveal, Issue semantics, AEP economic parameters or Runtime authority are changed by this research mapping.
+
+## 6O. AEP ↔ IMMORTAL economic jurisdiction and four EXP conformance contracts
+
+The follow-up contract is recorded in [CORMIA_AEP_IMMORTAL_ECONOMIC_JURISDICTION_AND_EXP_CONFORMANCE_v0.1.md](../research/CORMIA_AEP_IMMORTAL_ECONOMIC_JURISDICTION_AND_EXP_CONFORMANCE_v0.1.md).
+
+It distinguishes Cormia-local non-economic tasks, internal reciprocal-compute usage accounting, asset-denominated AEP task contracts, shared/cross-system economic resources subject to C-COMP, and a possible fully isolated independent AEP economic deployment. It recommends an IMMORTAL application profile for asset-denominated AEP flows that operate within an IMMORTAL-governed perimeter, while leaving the independent-jurisdiction option and fee identity as explicit open decisions.
+
+The document also specifies proposed invariants and positive/negative conformance vectors for EXP-06 (Evidence-as-Input), EXP-12 (observer/authority separation), EXP-10 (economic risk budget distinct from operational resource budget) and EXP-11 (allocation). Its formal state variables and model-check scenarios are a specification proposal only: no TLA+/Quint model, implementation test suite, C-COMP deployment certificate or live AEP/IMMORTAL adapter is claimed.
+
+No AEP SPEC, schema, economic parameter, Runtime authority, IMMORTAL normative rule or PRE-RICH semantic change is made.
