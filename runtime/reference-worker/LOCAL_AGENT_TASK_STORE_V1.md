@@ -119,10 +119,10 @@ The Agent uses a temporary file plus rename for task-store writes. This review d
 
 The aggregate Windows probe has validated the actual local `data/tasks.json` envelope in memory. A bounded sidecar check is now integrated: it reads only exact sidecar paths referenced by the valid Task Store snapshot, verifies task/attempt binding and structural fields in memory, rejects symlinks and skips files above 8 MiB. When any task has status `running`, it skips all sidecar reads and reports `PARTIAL_OR_FAIL`. It prints aggregate counts only; raw tool outputs, identifiers and file names are never returned. See [LOCAL_ATTEMPT_EVIDENCE_SIDECAR_PROBE.md](./LOCAL_ATTEMPT_EVIDENCE_SIDECAR_PROBE.md).
 
-The local sidecar check has not yet been run on the user's Windows installation. The next compatibility step is to pull the updated Cormia `main` and rerun the aggregate probe. This remains an inspector only: it does not execute tasks, change the store or sidecars, or establish AEP Evidence Package conformance.
+The user ran the aggregate probe on Windows at `2026-11-02T15:22:04.248Z`. The Task Store contained 7 valid task records (6 completed, 1 paused), with 0 validation errors and 6 warnings. Six referenced evidence sidecars were valid; one task did not reference a sidecar. All 24 evidence items were structurally valid, none was marked `isError`, and there were no missing, unsafe, oversized, malformed or schema-invalid files. No task was running. The probe read 79,924 bytes and returned `PASS` with zero blockers. This remains an inspector only: it did not execute tasks or change the store/sidecars, and it does not establish AEP Evidence Package conformance.
 
 ## 8. Sidecar probe CI and local execution status
 
 The bounded sidecar probe contract suite passed all 10 tests in [GitHub Actions run #5](https://github.com/LiberoNuvola/Cormia/actions/runs/41470239168). The aggregate probe's syntax/import workflow passed in [run #10](https://github.com/LiberoNuvola/Cormia/actions/runs/41470239182).
 
-These are synthetic GitHub checks. The integrated check against the user's actual Windows sidecar files remains pending; it is performed by the aggregate Windows command documented in [the reference worker README](./README.md).
+These GitHub checks use synthetic fixtures. The user has separately completed the integrated check against the actual Windows sidecar files using the aggregate command in [the reference worker README](./README.md); GitHub Actions did not access those local files.
