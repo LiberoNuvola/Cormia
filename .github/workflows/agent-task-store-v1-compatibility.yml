@@ -1,0 +1,54 @@
+name: Local Agent Task Store v1 Compatibility
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "runtime/reference-worker/immortal-agent-task-store-v1-adapter.mjs"
+      - "runtime/reference-worker/immortal-agent-task-store-v1-adapter.test.mjs"
+      - "schemas/immortal-agent-task-store-v1.schema.json"
+      - "schemas/immortal-agent-attempt-evidence-v1.schema.json"
+      - "test-vectors/agent-task-store-v1/**"
+      - ".github/workflows/agent-task-store-v1-compatibility.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "runtime/reference-worker/immortal-agent-task-store-v1-adapter.mjs"
+      - "runtime/reference-worker/immortal-agent-task-store-v1-adapter.test.mjs"
+      - "schemas/immortal-agent-task-store-v1.schema.json"
+      - "schemas/immortal-agent-attempt-evidence-v1.schema.json"
+      - "test-vectors/agent-task-store-v1/**"
+      - ".github/workflows/agent-task-store-v1-compatibility.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compatibility:
+    name: Task Store v1 compatibility contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check adapter syntax
+        run: node --check runtime/reference-worker/immortal-agent-task-store-v1-adapter.mjs
+
+      - name: Run adapter contract tests
+        run: node --test runtime/reference-worker/immortal-agent-task-store-v1-adapter.test.mjs
+
+      - name: Parse schemas and synthetic test vectors
+        run: |
+          node --input-type=commonjs -e "const fs = require('node:fs'); const files = [
+            'schemas/immortal-agent-task-store-v1.schema.json',
+            'schemas/immortal-agent-attempt-evidence-v1.schema.json',
+            'test-vectors/agent-task-store-v1/valid-paused-store.json',
+            'test-vectors/agent-task-store-v1/valid-attempt-evidence.json'
+          ]; for (const file of files) { JSON.parse(fs.readFileSync(file, 'utf8')); console.log('JSON OK: ' + file); }"
