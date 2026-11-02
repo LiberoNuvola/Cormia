@@ -162,8 +162,8 @@ class AllocationTests(unittest.TestCase):
             TaskDemand("task-2", frozenset({"build"}), "P1", "A2"),
         )
         result = allocate_feasible(tasks, workers)
-        self.assertEqual(result, {"task-1": "worker-b", "task-2": "worker-b"})
-        # The test tie-break allocator must not exceed the worker's declared capacity.
+        self.assertEqual(result, {"task-1": "worker-b"})
+        # The second task is left unassigned because the only eligible worker is full.
         self.assertLessEqual(sum(worker == "worker-b" for worker in result.values()), 1)
 
     def test_capacity_prevents_double_assignment(self):
