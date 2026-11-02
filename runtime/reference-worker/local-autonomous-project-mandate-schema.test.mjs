@@ -24,6 +24,8 @@ test("project mandate schema is closed and binds project, worktree and subject",
   assert.equal(schema.properties.workspace.properties.scopeMode.const, "isolated-project-worktree");
   assert.equal(schema.properties.workspace.properties.recursive.const, true);
   assert.equal(schema.properties.workspace.properties.taskWorktreeRequired.const, true);
+  assert.ok(required.has("executionProfileIds"));
+  assert.equal(schema.properties.executionProfileIds.minItems, 1);
   assert.equal(schema.properties.gitPolicy.properties.defaultBranchWrite.const, "deny");
 });
 
