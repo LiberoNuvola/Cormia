@@ -90,6 +90,7 @@ export async function inspectReferencedAttemptEvidence({
     valid: null,
     referencedCount: 0,
     withoutEvidencePathCount: 0,
+    runningTaskCount: tasks.filter(task => task?.status === "running").length,
     validCount: 0,
     missingCount: 0,
     unsafeCount: 0,
@@ -117,6 +118,12 @@ export async function inspectReferencedAttemptEvidence({
       continue;
     }
     references.push(reference);
+  }
+
+  if (summary.runningTaskCount > 0) {
+    summary.result = "PARTIAL_OR_FAIL";
+    summary.valid = false;
+    return summary;
   }
 
   if (summary.referencedCount === 0) return summary;
