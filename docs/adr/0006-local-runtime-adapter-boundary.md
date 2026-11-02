@@ -95,6 +95,12 @@ A separate Cormia-side wrapper now maps three trusted Runtime operations onto th
 
 This wrapper is not connected to the Agent or Coding Workspace. It cannot enforce OS-level quotas and does not change the ResourceManager's process-local lease semantics.
 
+## Coding Workspace read-only slice recorded 2026-11-02
+
+A host-scoped adapter now exposes only list/read/diff/verify and requires exact trusted-host file/directory allowlists. It checks the underlying class's own tool and approval classification before invoking it. Write, patch and test are absent from the adapter surface. This keeps the existing `APPROVO` gate outside the new local read-only protocol boundary. See [LOCAL_CODING_WORKSPACE_READONLY_ADAPTER.md](../runtime/reference-worker/LOCAL_CODING_WORKSPACE_READONLY_ADAPTER.md).
+
+The adapter's 10 contract tests passed in [GitHub Actions run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41466372070). The expanded local Windows probe now imports the real class and lists only the pre-existing root directory, printing aggregate counts only; that local check is pending.
+
 ## Coding Workspace mapping constraint recorded 2026-11-02
 
 The source-level tool/approval boundary is recorded in [CODING_WORKSPACE_CAPABILITY_MATRIX_2026-11-02.md](../architecture/CODING_WORKSPACE_CAPABILITY_MATRIX_2026-11-02.md).
