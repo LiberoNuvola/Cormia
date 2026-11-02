@@ -1,15 +1,49 @@
 # Reference worker runtime
 
-The local IMMORTAL Agent v0.8.0 is a prototype and potential starting point, not yet conformant. Before code is moved here, audit source ownership, licenses, dependencies, secrets, and security boundaries.
+**Status:** local IMMORTAL nucleus source-reviewed; no runtime source migrated into Cormia.  
+**Source review:** [LOCAL_NUCLEUS_SOURCE_REVIEW_2026-11-02.md](../../docs/architecture/LOCAL_NUCLEUS_SOURCE_REVIEW_2026-11-02.md)  
+**Integration proposal:** [ADR-0006 — bounded Local Runtime adapter](../../docs/adr/0006-local-runtime-adapter-boundary.md)
 
-The reference worker should implement:
+The local IMMORTAL Agent v0.8.0 is a prototype and potential starting point, not yet AEP-conformant. The review confirmed the component map and the current trust boundaries. The next work is adapter-contract definition and compatibility testing, not a greenfield rewrite.
 
-1. Task Manifest parsing and signature verification.
-2. Protocol state reconciliation and idempotent event handling.
-3. Capability/policy enforcement independent of the model.
-4. Persistent task journal, checkpoints and recovery.
-5. Model gateway and provider abstraction.
-6. Resource Manager with safe lease acquisition/release.
-7. Sandboxed execution and resource limits.
-8. Evidence Package construction and content commitments.
-9. Cardano adapter transaction construction and status tracking.
+## Existing source map
+
+- **Agent host:** `E:\AI\Immortal-Agent-v0.7\agent.mjs`. Process-oriented executable; it does not currently export an importable orchestration API. Its HTTP service deliberately exposes only a fixed read-only Dagu audit operation and task-ID reads. Do not repurpose this endpoint as generic AEP task intake.
+- **Coding Workspace:** `E:\AI\Immortal-Agent-v0.7\coding-workspace.mjs`, with a byte-identical test subject copy in the separate Coding Workspace root. It provides bounded list/read/write/patch/diff/test/verify tools. Mutating operations require interactive approval.
+- **Resource Manager:** `E:\AI\Immortal-CodingLab\workspace\self-improvement\resource-manager.mjs`. Host telemetry and in-process admission leases; not an OS-level quota controller.
+- **Evolution Manager:** `E:\AI\Immortal-CodingLab\workspace\self-improvement\evolution-manager.mjs`. Candidate-only lifecycle for the two manager modules; hash-linked journal and human-review packet; automatic promotion is disabled.
+- **Control Room:** `E:\AI\Immortal-Control-Room\control-room.mjs`. Local operator dashboard for Granite, Agent and Dagu; not a worker API.
+- **Mitsuro bridge:** `E:\AI\Immortal-MCP\jev-readonly-mcp.mjs`. Four fixed read-only GitHub/JEV tools; not a scheduler, worker or settlement actor.
+
+## Required compatibility boundary
+
+Before an AEP task can use this worker, an adapter must:
+
+1. validate the applicable versioned Task Manifest and local policy envelope;
+2. map manifest capabilities to an explicit allowlist of host operations and paths;
+3. preserve the current approval requirement for writes, patches and tests until a separate task-scoped consent policy is designed and tested;
+4. record durable task identity, attempt/checkpoint state and evidence without treating model conversation history as authority;
+5. use Resource Manager leases as local admission decisions, without claiming OS-level enforcement;
+6. bind artifacts, test outcomes and execution metadata to a versioned Evidence Package;
+7. reject unsupported capabilities and all silent remote/cloud fallback.
+
+The first adapter must remain local-only. It must not accept peer tasks, issue CRC, create signed compute-contribution receipts, or invoke Cardano settlement.
+
+## Implementation stages
+
+1. Freeze module/API hashes and source ownership from the source review.
+2. Define the task-store and evidence adapter contracts without rewriting Agent task-store v1.
+3. Add compatibility tests for recovery, approval gates, path containment, Docker execution and no-auto-promotion.
+4. Decide separately whether to extract a side-effect-free Agent core while retaining the CLI as a compatibility bootstrap.
+5. Implement the local Runtime adapter only after the contracts and negative tests are reviewed.
+
+## Not yet implemented
+
+- canonical AEP Task Manifest parsing/signature verification;
+- protocol state reconciliation and idempotent AEP event handling;
+- AEP capability/delegation enforcement;
+- AEP task journal/checkpoints and evidence-package schema mapping;
+- peer discovery, remote inference scheduling and CRC accounting;
+- Cardano task/receipt anchoring or settlement.
+
+No code is moved here by this documentation. Existing IMMORTAL components remain separate until a reviewed adapter passes parity tests and a rollback path is documented.
