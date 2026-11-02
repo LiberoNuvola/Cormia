@@ -197,6 +197,6 @@ The dedicated GitHub Actions workflow `.github/workflows/local-agent-attempt-evi
 ### GitHub CI evidence for 6J
 
 - [Sidecar probe contract run #5](https://github.com/LiberoNuvola/Cormia/actions/runs/41470239168): **SUCCESS**, 10 tests passed, 0 failed, at `7e00e7aecd3bbf99535700d00ce22bbc6801c241`.
-- [Aggregate probe syntax/import run #8](https://github.com/LiberoNuvola/Cormia/actions/runs/41469547041): **SUCCESS**, at `945e86ed8d18f555fe7f8daabdb3f57a39bd7e3d`.
+- [Aggregate probe syntax/import run #10](https://github.com/LiberoNuvola/Cormia/actions/runs/41470239182): **SUCCESS**, at `7e00e7aecd3bbf99535700d00ce22bbc6801c241`.
 
 The local sidecar check against `E:\AI\Immortal-Agent-v0.7\data\evidence` is still pending. GitHub Actions cannot access that path.
