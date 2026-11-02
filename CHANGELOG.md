@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.3 — 2026-11-02
+
+- Adopted Cormia as the user-facing product/network identity; retained IMMORTAL AEP as the normative protocol.
+- Renamed the proposed repository to `LiberoNuvola/cormia` and updated repository/publishing references.
+- Added ADR-0005 documenting the name and its carefully bounded biological inspiration.
+- No protocol semantics, economic coefficients, runtime code, or on-chain contracts changed.
+
+
 ## 0.1.0 — 2026-11-02
 
 - Initial architecture-first repository scaffold.

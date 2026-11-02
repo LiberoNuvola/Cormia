@@ -1,4 +1,4 @@
-# ADR-0001: Dedicated repository for IMMORTAL Autonomous Execution Protocol
+# ADR-0001: Dedicated Cormia repository for IMMORTAL AEP
 
 - **Status:** Accepted as project direction; remote repository creation pending
 - **Date:** 2026-11-02
@@ -9,7 +9,7 @@
 
 ## Decision
 
-Create a separate project named `immortal-autonomous-execution-protocol`. Treat it as a sibling protocol and keep `Immortal-Protocol` separate. Publish an architecture/specification baseline before importing runtime code.
+Create a separate product repository named `cormia`, built on IMMORTAL Autonomous Execution Protocol (AEP). Treat it as a sibling project and keep `Immortal-Protocol` separate. Publish an architecture/specification baseline before importing runtime code.
 
 ## Consequences
 

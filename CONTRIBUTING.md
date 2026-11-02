@@ -1,6 +1,6 @@
-# Contributing
+# Contributing to Cormia / IMMORTAL AEP
 
-IMMORTAL-AEP is specification-first. Code is accepted only when it conforms to the normative specification and has test vectors demonstrating its behavior.
+Cormia is specification-first and IMMORTAL-AEP is its normative protocol. Code is accepted only when it conforms to the normative specification and has test vectors demonstrating its behavior.
 
 ## Before proposing code
 

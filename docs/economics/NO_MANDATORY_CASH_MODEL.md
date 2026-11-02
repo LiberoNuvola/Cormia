@@ -1,8 +1,8 @@
 # No-Mandatory-Cash Access Model
 
 **Status:** design proposal / non-normative until ratified  
-**Working product name:** IMMORTAL Hive  
-**Protocol:** IMMORTAL Autonomous Execution Protocol (AEP)  
+**Product:** Cormia
+**Protocol:** IMMORTAL Autonomous Execution Protocol (AEP)
 **Date:** 2026-11-02
 
 ## 1. The economic question

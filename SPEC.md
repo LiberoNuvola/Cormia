@@ -4,7 +4,7 @@
 **Stato:** Architecture Draft / Non-production / Prior-art-informed
 **Data:** 2 novembre 2026
 **Rete iniziale proposta:** Cardano
-**Repository proposto:** `LiberoNuvola/immortal-autonomous-execution-protocol` (non ancora creato)
+**Repository proposto:** `LiberoNuvola/cormia` (repository remoto non ancora creato)
 **Relazione con `LiberoNuvola/Immortal-Protocol`:** progetto fratello, non sostituzione né estensione implicita
 **Lingua normativa:** italiano; nomi di stato e interfacce in inglese per interoperabilità
 
@@ -510,7 +510,7 @@ Questa è un'ipotesi di contributo, non una dichiarazione di novità già dimost
 
 Si raccomanda un repository dedicato, separato da `Immortal-Protocol`.
 
-**Nome proposto:** `LiberoNuvola/immortal-autonomous-execution-protocol`
+**Repository prodotto:** `LiberoNuvola/cormia`
 **Descrizione proposta:** `A trust-minimized, permissionless protocol for autonomous task execution, verification and settlement, with Cardano as the first settlement adapter.`
 
 La prima release del repository SHOULD essere **spec-first**: documento normativo, ADR, threat model, schemi e test vectors. Il codice del Runtime v0.8.0 non deve essere copiato prima di un audit di licenze, dipendenze, segreti, sicurezza e confini architetturali.
@@ -518,7 +518,7 @@ La prima release del repository SHOULD essere **spec-first**: documento normativ
 Struttura iniziale proposta:
 
 ```text
-immortal-autonomous-execution-protocol/
+cormia/
 ├── README.md
 ├── SPEC.md
 ├── CONTRIBUTING.md
