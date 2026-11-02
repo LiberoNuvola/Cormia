@@ -1,0 +1,43 @@
+name: Project Normative Contract
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "schemas/project-normative-contract-v0.1.schema.json"
+      - "examples/project-normative-contracts/immortal-protocol-v0.1.json"
+      - "scripts/validate-project-normative-contract.py"
+      - "docs/adr/0011-project-normative-contract.md"
+      - ".github/workflows/project-normative-contract-compatibility.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "schemas/project-normative-contract-v0.1.schema.json"
+      - "examples/project-normative-contracts/immortal-protocol-v0.1.json"
+      - "scripts/validate-project-normative-contract.py"
+      - "docs/adr/0011-project-normative-contract.md"
+      - ".github/workflows/project-normative-contract-compatibility.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate PNC schema and IMMORTAL fixture
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned JSON Schema validator
+        run: python -m pip install --disable-pip-version-check jsonschema==4.23.0
+
+      - name: Validate schema, fixture and fail-closed cases
+        run: python scripts/validate-project-normative-contract.py
