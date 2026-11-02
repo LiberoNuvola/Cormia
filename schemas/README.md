@@ -14,3 +14,10 @@ The JSON Schemas in this directory are early interface drafts. They are not yet 
 - [immortal-agent-attempt-evidence-v1.schema.json](immortal-agent-attempt-evidence-v1.schema.json) describes one per-attempt evidence sidecar. It is not a canonical AEP Evidence Package.
 
 These schemas preserve unknown properties and are used only for compatibility validation. See [the adapter contract](../runtime/reference-worker/LOCAL_AGENT_TASK_STORE_V1.md).
+
+## Experimental local capability grant contracts
+
+- [local-runtime-capability-grant-claims-v0.1.schema.json](local-runtime-capability-grant-claims-v0.1.schema.json) describes the payload claims for one host-issued local Coding Workspace capability.
+- [local-runtime-capability-revocation-claims-v0.1.schema.json](local-runtime-capability-revocation-claims-v0.1.schema.json) describes one signed revocation statement.
+
+These are experimental local contracts, not additions to the canonical Task Manifest or a network-wide identity/authorization format. The payloads are carried in compact JWS tokens using the proposed Ed25519/JCS profile described in [ADR-0008](../docs/adr/0008-proposed-local-capability-grants-and-revocation.md). The host key resolver and host policy are trusted inputs; the schemas alone do not establish trust. No real key material is stored in this repository, and the contracts are not connected to the Agent.
