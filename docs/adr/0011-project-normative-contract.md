@@ -143,7 +143,15 @@ The model can propose a classification, but the Runtime owns the protected-sourc
 
 The v0.1 JSON Schema defines the data shape only. It does not establish source authenticity, GitHub trust, signature validity, effective governance, semantic consistency, proof correctness or implementation conformance.
 
-The repository has not yet selected a canonical JSON encoding and digest profile for these project contracts. Therefore this ADR does not invent one. Before a PNC digest is signed or bound to a mandate, select and test the canonical representation, digest algorithm, domain separation and compatibility rules. Until then, the example's pinned Git commit and blob SHAs provide source identity, not a signed PNC authorization.
+The repository now contains a **proposed and tested PNC v0.1 identity profile** in [PNC Identity Profile v0.1](../identity/project-normative-contract-identity-profile-v0.1.md). It uses RFC 8785 JCS through the existing restricted JSON canonicalizer from ADR-0008 and computes SHA-256 over the complete canonical PNC object with the dedicated UTF-8 domain separator:
+
+    CORMIA\0PROJECT-NORMATIVE-CONTRACT\0v0.1\0
+
+The profile includes status and all source pins; it omits no properties. Its digest is a deterministic content fingerprint only, not a signature or authorization.
+
+The profile is pinned to schema version 0.1.0, has a golden test vector, and rejects unsupported schema versions and unsafe JavaScript values. The PNC loader must reject duplicate JSON member names and validate the schema before computing an identity. RFC 8785 is an Informational RFC; its use here is an explicit Cormia reference profile, not a claim of an Internet Standards Track standard.
+
+Before a PNC identity is signed or bound to a mandate, the profile must receive the relevant design review and be integrated with an authenticated project-owner PNC store. The current mandate/consent schemas and task-child authority do not yet carry the PNC identity tuple. No canonical digest makes an unsigned or draft PNC trusted.
 
 A PNC must be issued and activated by trusted host code after an authenticated project-owner review. The model may draft a candidate PNC but cannot activate it, change its authority class, mark a decision closed, change a source pin or sign/approve it.
 
@@ -175,7 +183,7 @@ The reference component:
 
 The source-drift classifier consumes paths from a trusted Git adapter; it does not accept a model-authored classification. Its evidence/status-only result is a non-authoritative overlay and never updates or replaces the PNC. It does not parse arbitrary prose to prove semantic equivalence. Unregistered source-like files are therefore escalated rather than guessed.
 
-**Trust limit:** this is a tested reference library, not an integrated Runtime boundary. The \`active\` status field is only a necessary loader condition, not proof of owner approval or authenticity. A future host must load the contract from an authenticated, owner-authorized store, bind its identity to the standing mandate and task child authority, and enforce the result at every capability boundary. The reference implementation does not define or compute a canonical PNC digest, does not sign or activate a contract, does not grant capabilities, and does not connect to the local Agent. The IMMORTAL fixture remains \`draft\`.
+**Trust limit:** this is a tested reference library, not an integrated Runtime boundary. The active status field is only a necessary loader condition, not proof of owner approval or authenticity. A future host must load the contract from an authenticated, owner-authorized store, bind its identity to the standing mandate and task child authority, and enforce the result at every capability boundary. The reference loader and identity helper do not authenticate or sign a contract, do not activate it, do not grant capabilities, and do not connect to the local Agent. The identity helper computes only the proposed deterministic content fingerprint described in section 10. The IMMORTAL fixture remains draft.
 
 ## 12. Non-goals and non-regression
 

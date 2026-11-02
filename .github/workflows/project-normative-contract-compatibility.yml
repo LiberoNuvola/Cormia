@@ -48,3 +48,11 @@ jobs:
 
       - name: Test deterministic PNC loader, source drift and policy
         run: python -m unittest discover -s tests -p 'test_pnc_runtime.py' -v
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Test deterministic PNC identity profile
+        run: node --test runtime/reference-worker/pnc-contract-identity.test.mjs
