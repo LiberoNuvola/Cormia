@@ -36,6 +36,14 @@ The existing bridge is intentionally fixed to `LiberoNuvola/Immortal-Protocol` /
 
 The v0.8.0 local agent, Granite/llama.cpp backend, task-store lineage, Resource Manager, Evolution Manager, Coding Workspace and Docker test path are the initial implementation nucleus. AEP conformance requires adapters and test vectors; v0.8.0 is not declared conformant today.
 
+### IMMORTAL Agent Task Store v1 compatibility adapter
+
+A read-only compatibility slice is implemented at `runtime/reference-worker/immortal-agent-task-store-v1-adapter.mjs`, with schemas for the v1 task-store envelope and attempt evidence sidecars.
+
+It validates and summarizes known fields while tolerating unknown properties. It mirrors the Agent's explicit-resume status allowlist (`pending`, `paused`, `failed`) and labels the operation as a new attempt from the original goal, with previous output treated only as context. It does not access local files, mutate the task store, launch work, or produce a canonical AEP Task Manifest.
+
+See [the v1 compatibility contract](../runtime/reference-worker/LOCAL_AGENT_TASK_STORE_V1.md) and [synthetic test vectors](../test-vectors/agent-task-store-v1/README.md).
+
 ### Verified Local Agent integration boundary
 
 The source review of 2026-11-02 found that `agent.mjs` is a process entry point with no exported orchestration API and a top-level `main()` invocation. Its HTTP service is deliberately limited to the fixed read-only Dagu audit request and task-ID reads; it is not a general AEP task intake endpoint.
