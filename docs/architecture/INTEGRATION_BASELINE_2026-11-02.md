@@ -207,6 +207,18 @@ The non-normative [ADR-0008](../adr/0008-proposed-local-capability-grants-and-re
 
 The v0.1 evaluator allows only `workspace.list`, `workspace.read`, `workspace.diff` and `workspace.verify`. It rejects create/replace/test and all delegation. The current Agent's `APPROVO` flow is unchanged. The evaluator is not connected to `agent.mjs`, `CodingWorkspace.callTool()`, manifest verification or a real key store. Its revocation feed is caller-supplied; durable rollback-resistant feed storage and monotonic checkpointing remain unimplemented.
 
-The dedicated [Local Runtime Capability Grant Contracts run #11](https://github.com/LiberoNuvola/Cormia/actions/runs/41475593197) completed **SUCCESS** with 21 tests passed and 0 failed. Tests create ephemeral Ed25519 key pairs in memory and exercise canonicalization (including sparse-array/accessor rejection), signature verification, key/issuer trust, task/manifest/subject binding, expiry, exact host path intersection, denied mutation/delegation, and signed revocation. This is isolated contract evidence, not proof of real key custody, operator consent, production authorization, task isolation or AEP conformance.
+The [Local Runtime Capability Grant Contracts run #19](https://github.com/LiberoNuvola/Cormia/actions/runs/41479984954) completed **SUCCESS**: 21 cryptographic/policy tests, 6 lifecycle schema-profile tests and 15 in-memory revocation-anchor model tests all passed (42 total, 0 failed). Tests create ephemeral Ed25519 key pairs in memory and exercise canonicalization (including sparse-array/accessor rejection), signature verification, key/issuer trust, task/manifest/subject binding, expiry, exact host path intersection, denied mutation/delegation, signed revocation, anchor rollback/fork/prefix detection and compare-and-set recovery. This is isolated contract evidence, not proof of real key custody, operator consent, durable storage, task isolation or AEP conformance.
 
 No private key, local Agent data or user workspace content was added to Cormia.
+
+## 6L. Windows CNG capability discovery — read-only probe implemented
+
+A read-only PowerShell probe, `scripts/probe-windows-cng-capabilities.ps1`, queries:
+- the Microsoft Platform Crypto Provider (TPM KSP);
+- the Microsoft Software Key Storage Provider;
+- signature algorithms exposed through `NCryptEnumAlgorithms`;
+- TPM presence/readiness through `Get-Tpm`, when the cmdlet is available.
+
+It does not create keys/certificates, read private key material, or change machine state. The dedicated [Windows CNG Capability Discovery run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41480382232) passed on a GitHub-hosted Windows runner. That hosted runner had no TPM; the Microsoft Platform Crypto Provider was unavailable, while the Software KSP listed `ECDSA_P256`, `ECDSA_P384`, `ECDSA_P521`, DSA, ML-DSA and RSA. This is not evidence about the user's physical Windows machine.
+
+The result reinforces the algorithm decision boundary: the current ADR-008 v0.1 grant helper supports Ed25519; ES256/P-256 is recorded only as a candidate for a separately versioned Windows CNG profile. The actual local provider inventory and a disposable-key end-to-end signing test are still required before selecting an operational key profile. No key has been created and no local Windows system has been queried by GitHub Actions.
