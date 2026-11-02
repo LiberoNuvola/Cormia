@@ -65,6 +65,9 @@ test("revocation event envelope has sequence, predecessor digest and signed even
   assert.equal(schema.properties.sequence.minimum, 1);
   assert.deepEqual(schema.properties.previousEventDigest.type, ["string", "null"]);
   assert.ok(schema.properties.revocationToken.pattern.includes("A-Za-z0-9_-"));
+  assert.equal(schema.allOf.length, 2);
+  assert.equal(schema.allOf[0].then.properties.previousEventDigest.type, "null");
+  assert.equal(schema.allOf[1].then.properties.previousEventDigest.type, "string");
 });
 
 test("checkpoint binds a signed journal head to a named independent anchor provider", async () => {
