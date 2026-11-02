@@ -103,6 +103,9 @@ function validateTrustedConsent(trustedConsent, trustedMandate, now) {
       c.mandateDigest !== trustedMandate.mandateDigest ||
       c.issuerId !== m.issuerId ||
       c.operatorPrincipalId !== m.operatorPrincipalId ||
+      c.displayedChallenge !== c.confirmedChallenge ||
+      !/^[a-f0-9]{8}$/.test(c.displayedChallenge) ||
+      !Number.isSafeInteger(c.sequence) || c.sequence < 1 ||
       c.projectRef !== m.project.projectRef ||
       c.workspaceRef !== m.workspace.workspaceRef ||
       !sameBinding(c.normativeContractBinding, m.normativeContractBinding)) {
@@ -121,7 +124,14 @@ function validateTrustedConsent(trustedConsent, trustedMandate, now) {
 }
 
 function normalizeMandateV2(trustedMandate) {
-  if (!exactKeys(trustedMandate, MANDATE_KEYS) || !plain(trustedMandate.claims) ||
+  if (!exactKeys(trustedMandate, MANDATE_KEYS) ||
+      trustedMandate.schemaValidationVerified !== true ||
+      typeof trustedMandate.mandateDigest !== "string" ||
+      !/^sha256:[a-f0-9]{64}$/.test(trustedMandate.mandateDigest) ||
+      trustedMandate.signatureVerified !== true ||
+      trustedMandate.consentVerified !== true ||
+      trustedMandate.revocationState !== "healthy" ||
+      !plain(trustedMandate.claims) ||
       trustedMandate.claims.schemaVersion !== "0.2.0" ||
       !exactKeys(trustedMandate.claims.normativeContractBinding, BINDING_KEYS)) return null;
   try {
