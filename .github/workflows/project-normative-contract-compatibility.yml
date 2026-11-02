@@ -7,6 +7,8 @@ on:
       - "schemas/project-normative-contract-v0.1.schema.json"
       - "examples/project-normative-contracts/immortal-protocol-v0.1.json"
       - "scripts/validate-project-normative-contract.py"
+      - "scripts/pnc_runtime.py"
+      - "tests/test_pnc_runtime.py"
       - "docs/adr/0011-project-normative-contract.md"
       - ".github/workflows/project-normative-contract-compatibility.yml"
   pull_request:
@@ -15,6 +17,8 @@ on:
       - "schemas/project-normative-contract-v0.1.schema.json"
       - "examples/project-normative-contracts/immortal-protocol-v0.1.json"
       - "scripts/validate-project-normative-contract.py"
+      - "scripts/pnc_runtime.py"
+      - "tests/test_pnc_runtime.py"
       - "docs/adr/0011-project-normative-contract.md"
       - ".github/workflows/project-normative-contract-compatibility.yml"
   workflow_dispatch:
@@ -24,7 +28,7 @@ permissions:
 
 jobs:
   validate:
-    name: Validate PNC schema and IMMORTAL fixture
+    name: Validate PNC contract and reference runtime
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -41,3 +45,6 @@ jobs:
 
       - name: Validate schema, fixture and fail-closed cases
         run: python scripts/validate-project-normative-contract.py
+
+      - name: Test deterministic PNC loader, source drift and policy
+        run: python -m unittest discover -s tests -p 'test_pnc_runtime.py' -v

@@ -160,6 +160,23 @@ A PNC must be issued and activated by trusted host code after an authenticated p
 
 Acceptance means a synthetic IMMORTAL task can implement, test, repair and report a clearly specified behavior with zero per-operation human prompts, while a normative amendment, material authority conflict or invalid source pin cannot be silently applied.
 
+## 11A. Deterministic reference implementation checkpoint (2026-11-02)
+
+The Cormia repository now carries a reference implementation under \`scripts/pnc_runtime.py\` and deterministic tests under \`tests/test_pnc_runtime.py\`.
+
+The reference component:
+- rejects duplicate JSON object keys, validates the v0.1 schema and cross-reference/authority-class invariants;
+- resolves each declared commit and file blob through an injectable read-only source adapter; its public-GitHub adapter uses unauthenticated GET requests and fails closed on lookup errors or SHA mismatches;
+- requires \`status: active\` by default at the loader entry point, while allowing explicit draft loading only for validation/tests;
+- classifies trusted Git changed-path facts as implementation-only, evidence/status-only, informative-only, normative-source-change or unclassified-source-change;
+- treats changed, unregistered source-like documents as unclassified and escalates them;
+- compares structured PNC candidates for invariant, closed-decision, source-registry, obligation-registry and authority-boundary changes;
+- returns deterministic \`ALLOW\`, \`DENY\` or \`ESCALATE\` outcomes with reason codes and independent-task continuation.
+
+The source-drift classifier consumes paths from a trusted Git adapter; it does not accept a model-authored classification. Its evidence/status-only result is a non-authoritative overlay and never updates or replaces the PNC. It does not parse arbitrary prose to prove semantic equivalence. Unregistered source-like files are therefore escalated rather than guessed.
+
+**Trust limit:** this is a tested reference library, not an integrated Runtime boundary. The \`active\` status field is only a necessary loader condition, not proof of owner approval or authenticity. A future host must load the contract from an authenticated, owner-authorized store, bind its identity to the standing mandate and task child authority, and enforce the result at every capability boundary. The reference implementation does not define or compute a canonical PNC digest, does not sign or activate a contract, does not grant capabilities, and does not connect to the local Agent. The IMMORTAL fixture remains \`draft\`.
+
 ## 12. Non-goals and non-regression
 
 - No change to IMMORTAL or PRE-RICH source specifications.
