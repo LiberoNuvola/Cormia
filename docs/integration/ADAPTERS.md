@@ -50,6 +50,14 @@ A Cormia-side trusted-orchestrator wrapper is implemented at `runtime/reference-
 
 The operation identifier must come from trusted Runtime code; model/task text cannot choose a ResourceManager class. The wrapper returns only a bounded resource summary and does not claim OS-level throttling, process termination, persistence, scheduling or remote enforcement. It is not wired into the local Agent yet. See [LOCAL_RESOURCE_MANAGER_ADAPTER.md](../runtime/reference-worker/LOCAL_RESOURCE_MANAGER_ADAPTER.md).
 
+### Coding Workspace read-only adapter
+
+A host-scoped wrapper is implemented at `runtime/reference-worker/immortal-coding-workspace-readonly-adapter.mjs`. It exposes only `workspace_list`, `workspace_read`, `workspace_diff` and `workspace_verify`. Trusted host code must inject exact readable-file and listable-directory allowlists; the model cannot extend them.
+
+The wrapper checks that the underlying CodingWorkspace recognizes each operation and does not classify it as approval-required. It does not expose write, patch or test methods. The dedicated 10-test GitHub Actions run passed: [run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41466372070). The aggregate Windows probe now additionally calls root-only `workspace_list` and reports counts only; its expanded local result is still pending.
+
+See [LOCAL_CODING_WORKSPACE_READONLY_ADAPTER.md](../runtime/reference-worker/LOCAL_CODING_WORKSPACE_READONLY_ADAPTER.md).
+
 ### Coding Workspace capability boundary
 
 The local Coding Workspace exposes seven tools and enforces path/root safety in its class. However, the existing Agent orchestrator—not `CodingWorkspace.callTool()`—enforces the `/code` turn gate, the single-operation `APPROVO` confirmation for `workspace_write`, `workspace_patch` and `workspace_test`, and the `cpu-heavy` lease for tests.
