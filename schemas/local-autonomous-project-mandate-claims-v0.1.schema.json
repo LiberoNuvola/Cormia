@@ -23,7 +23,8 @@
     "notBefore",
     "expiresAt",
     "delegable",
-    "operatorConsentDigest"
+    "operatorConsentDigest",
+    "executionProfileIds"
   ],
   "properties": {
     "schemaVersion": {
@@ -327,6 +328,18 @@
     "operatorConsentDigest": {
       "type": "string",
       "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "executionProfileIds": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128
+      },
+      "description": "Named host-approved build/test execution profiles. A task may select only one of these profiles."
     }
   }
 }
