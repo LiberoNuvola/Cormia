@@ -111,3 +111,9 @@ The target autonomy model is recorded in [ADR-0010](../../docs/adr/0010-autonomo
 The model must not receive API tokens, bearer credentials or signing keys. Local Granite inference remains local and requires no cloud-provider API key. Any GitHub credential is managed by a host credential broker and is only needed for remote GitHub operations; local work continues offline.
 
 This is not implemented yet. The current /code + APPROVO path remains the legacy interactive compatibility mode, and the existing read-only adapter is not yet an autonomous coding worker. The new mandate/consent schemas have contract tests, but no mandate store, credential broker, task-worktree manager or autonomous Agent execution loop exists.
+
+## Autonomous project authority policy prototype — implemented, not integrated
+
+The isolated policy engine is [local-autonomous-project-authority.mjs](./local-autonomous-project-authority.mjs), with [17 contract tests](./local-autonomous-project-authority.test.mjs). It derives one internal child authority from an already trusted project mandate and uses it across repeated in-scope edits, tests and builds without an approval callback or user-supplied token. It checks task/manifest/worktree/worker/runtime binding, expiry, excluded paths, host-policy intersection, named execution profiles, feature-branch and HTTPS-allowlist restrictions.
+
+The helper assumes host code has already verified the mandate signature, operator consent and revocation/anchor state. It does not create keys, sign/store mandates, create worktrees, run tools, broker credentials or connect to the Agent. GitHub Actions run #25 passed all 65 contracts across grant, lifecycle schemas, mandate schemas, autonomous authority and revocation-anchor model. See [ADR-0010](../../docs/adr/0010-autonomous-project-delegation-and-runtime-authority.md).
