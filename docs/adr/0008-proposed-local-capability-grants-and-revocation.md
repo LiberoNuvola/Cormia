@@ -108,7 +108,7 @@ The helper:
 
 This helper is **not connected** to `agent.mjs`, `CodingWorkspace.callTool()`, the existing `APPROVO` workflow, a Task Manifest parser, a key store, or a persistent revocation journal. It does not issue grants automatically. The tests use ephemeral in-memory keys only.
 
-The dedicated [Local Runtime Capability Grant Contracts run #6](https://github.com/LiberoNuvola/Cormia/actions/runs/41474422554) completed **SUCCESS**: all 21 cryptographic and policy contract tests passed. It is a contract test of this isolated helper, not proof of key custody, host policy provisioning, operator consent, Agent integration, task isolation, durable revocation or AEP conformance.
+The dedicated [Local Runtime Capability Grant Contracts run #11](https://github.com/LiberoNuvola/Cormia/actions/runs/41475593197) completed **SUCCESS**: all 21 cryptographic and policy contract tests passed. The final suite also checks that sparse arrays and accessor properties are rejected before validation reads them. It is a contract test of this isolated helper, not proof of key custody, host policy provisioning, operator consent, Agent integration, task isolation, durable revocation or AEP conformance.
 
 ## 8. Open decisions before any production integration
 
