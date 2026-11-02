@@ -1,6 +1,6 @@
 # Integration baseline — 2026-11-02
 
-**Status:** repository and local-source inventory verified; four-adapter Windows smoke test passed; AEP Runtime integration remains proposed  
+**Status:** repository and local-source inventory verified; four-adapter Windows smoke test passed; bounded evidence-sidecar probe implemented, Windows check pending; AEP Runtime integration remains proposed  
 **Cormia:** public repository, branch main; initial scaffold commit fdc3e868c032257323e341ba846d169f01f34939 (three-commit history preserved)  
 **IMMORTAL source branch inspected:** work/immortal-green-closure  
 **IMMORTAL source HEAD observed:** cabe00f1b7743e4335b5a140b32feb52e47f2be6  
@@ -183,3 +183,13 @@ The user ran the updated probe from the local Cormia checkout after a fast-forwa
 The six Task Store warnings were recorded without treating them as errors. Earlier review found that this warning count is consistent with the adapter's completion-integrity warnings on completed records; the aggregate output does not independently certify the correctness of those records.
 
 The probe did not start Agent or Granite, run Docker or workspace tests, start a task/evolution, modify the task store, create or patch a candidate, or promote code. It is local compatibility evidence for the listed probe operations only.
+
+## 6J. Bounded attempt evidence sidecar probe — implemented; Windows check pending
+
+A new local-only helper, `runtime/reference-worker/local-evidence-sidecar-probe.mjs`, is integrated into `scripts/verify-local-runtime-adapters.mjs`. It inspects only exact sidecar paths referenced by a valid Task Store v1 snapshot; it does not scan the evidence directory or infer missing paths.
+
+For each reference it checks the exact task-bound filename, embedded task ID and attempt, directory/file symlink boundaries, JSON structure through `inspectAttemptEvidenceV1`, and a defensive 8 MiB per-file read limit. The limit belongs to this probe, not to the v1 evidence schema. It returns only aggregate counts; raw tool payloads, task identifiers and file names are never printed.
+
+The dedicated GitHub Actions workflow `.github/workflows/local-agent-attempt-evidence-sidecar-compatibility.yml` runs syntax checks and contract tests for valid/empty, missing, unsafe, mismatched, malformed, oversized and symlink cases. Repository CI validates only synthetic fixtures; it cannot access the user's local sidecar files.
+
+**Next required local evidence:** pull the updated `main` and rerun the aggregate Windows probe. The new `evidenceSidecars` object must show the counts and `result` without exposing sidecar contents. A `PARTIAL_OR_FAIL` result stops the aggregate probe and requires investigation; do not copy or upload the raw sidecars.
