@@ -114,6 +114,10 @@ The inventory contains paths, extensions, sizes, SHA-256 digests and last-write 
 
 These are hash/path observations, not code-quality or semantic assessments. A matching digest establishes byte identity, not that either copy is correct or safe.
 
+## 6B. Source-level review
+
+The selected local source archive has now been reviewed. Detailed file map, hash identities, security boundaries, syntax/unit-test results, test-fixture defects and migration sequence are recorded in [`LOCAL_NUCLEUS_SOURCE_REVIEW_2026-11-02.md`](LOCAL_NUCLEUS_SOURCE_REVIEW_2026-11-02.md). The next decision is no longer blocked on source discovery; it is blocked on adapter contracts and compatibility tests. No local source has been copied into Cormia.
+
 ## 7. Next required evidence
 
 The metadata inventory is now complete. The next implementation decision remains blocked on source-level review of the selected runtime and manager modules. Source transfer, adapter implementation and test baselines must follow only after their actual imports, state formats, permissions and test contracts have been inspected.
