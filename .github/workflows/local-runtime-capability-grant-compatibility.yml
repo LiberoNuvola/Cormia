@@ -1,0 +1,50 @@
+name: Local Runtime Capability Grant Contracts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "schemas/local-runtime-capability-grant-claims-v0.1.schema.json"
+      - "schemas/local-runtime-capability-revocation-claims-v0.1.schema.json"
+      - "runtime/reference-worker/local-runtime-capability-grants.mjs"
+      - "runtime/reference-worker/local-runtime-capability-grants.test.mjs"
+      - ".github/workflows/local-runtime-capability-grant-compatibility.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "schemas/local-runtime-capability-grant-claims-v0.1.schema.json"
+      - "schemas/local-runtime-capability-revocation-claims-v0.1.schema.json"
+      - "runtime/reference-worker/local-runtime-capability-grants.mjs"
+      - "runtime/reference-worker/local-runtime-capability-grants.test.mjs"
+      - ".github/workflows/local-runtime-capability-grant-compatibility.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compatibility:
+    name: Signed grant, attenuation and revocation contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check syntax
+        run: |
+          node --check runtime/reference-worker/local-runtime-capability-grants.mjs
+          node --check runtime/reference-worker/local-runtime-capability-grants.test.mjs
+
+      - name: Parse claim schemas
+        run: |
+          node -e "JSON.parse(require('node:fs').readFileSync('schemas/local-runtime-capability-grant-claims-v0.1.schema.json', 'utf8'))"
+          node -e "JSON.parse(require('node:fs').readFileSync('schemas/local-runtime-capability-revocation-claims-v0.1.schema.json', 'utf8'))"
+
+      - name: Run cryptographic and policy contract tests
+        run: node --test runtime/reference-worker/local-runtime-capability-grants.test.mjs
