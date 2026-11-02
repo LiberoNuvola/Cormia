@@ -2,7 +2,8 @@
 
 **Status:** local IMMORTAL nucleus source-reviewed; no runtime source migrated into Cormia.  
 **Source review:** [LOCAL_NUCLEUS_SOURCE_REVIEW_2026-11-02.md](../../docs/architecture/LOCAL_NUCLEUS_SOURCE_REVIEW_2026-11-02.md)  
-**Integration proposal:** [ADR-0006 — bounded Local Runtime adapter](../../docs/adr/0006-local-runtime-adapter-boundary.md)
+**Integration proposal:** [ADR-0006 — bounded Local Runtime adapter](../../docs/adr/0006-local-runtime-adapter-boundary.md)  
+**Coding Workspace boundary:** [capability and approval matrix](../../docs/architecture/CODING_WORKSPACE_CAPABILITY_MATRIX_2026-11-02.md)
 
 The local IMMORTAL Agent v0.8.0 is a prototype and potential starting point, not yet AEP-conformant. The review confirmed the component map and the current trust boundaries. The next work is adapter-contract definition and compatibility testing, not a greenfield rewrite.
 
