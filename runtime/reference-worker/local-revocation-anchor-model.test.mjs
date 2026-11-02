@@ -225,6 +225,42 @@ test("denies if signature verifiers or trusted issuer context are missing", asyn
   assert.equal(result.status, "CONFIGURATION_INVALID");
 });
 
+test("rejects accessor-backed journal envelopes without invoking getters", async () => {
+  const fixture = makeFixture(1, 0);
+  let getterCalls = 0;
+  const accessorEvent = { ...fixture.events[0] };
+  Object.defineProperty(accessorEvent, "sequence", {
+    enumerable: true,
+    get() {
+      getterCalls++;
+      return 1;
+    }
+  });
+  fixture.options.events = [accessorEvent];
+  const result = await verifyAndReconcileLocalRevocationJournal(fixture.options);
+  assert.equal(result.allowed, false);
+  assert.equal(result.status, "JOURNAL_INVALID");
+  assert.equal(getterCalls, 0);
+});
+
+test("classifies signature verifier failures separately from anchor outages", async () => {
+  const eventFailure = makeFixture(1, 0);
+  eventFailure.options.verifyRevocationToken = async () => {
+    throw new Error("signature verifier failed");
+  };
+  const eventResult = await verifyAndReconcileLocalRevocationJournal(eventFailure.options);
+  assert.equal(eventResult.status, "JOURNAL_INVALID");
+  assert.equal(eventResult.reason, "revocation-signature-verifier-failed");
+
+  const checkpointFailure = makeFixture(1, 0);
+  checkpointFailure.options.verifyCheckpointToken = async () => {
+    throw new Error("checkpoint verifier failed");
+  };
+  const checkpointResult = await verifyAndReconcileLocalRevocationJournal(checkpointFailure.options);
+  assert.equal(checkpointResult.status, "CHECKPOINT_INVALID");
+  assert.equal(checkpointResult.reason, "checkpoint-signature-verifier-failed");
+});
+
 test("bounds the journal size and event shape before reconciliation", async () => {
   const fixture = makeFixture(1, 0);
   fixture.options.events = [{ ...fixture.events[0], extra: true }];
