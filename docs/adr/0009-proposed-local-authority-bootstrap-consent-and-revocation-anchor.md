@@ -80,6 +80,8 @@ The host must have exactly one active signing key per issuer for v0.1. Rotation 
 
 If the old key is suspected compromised, do not accept its signature as sufficient authorization to replace itself. Recovery requires an out-of-band re-pin using the operator's separately protected recovery procedure. That procedure is not yet implemented.
 
+Historical verification is a separate policy from permission to sign new grants. Retired keys must remain available as public verification keys for their valid historical period. The current ADR-008 v0.1 verifier accepts only resolver entries marked `active`; that is a deliberate prototype restriction, not a complete key-rotation design. Before activation, define and test separate `canSign` and `canVerifyHistorical` decisions, trusted retirement/revocation cutoffs and compromised-key handling. Do not make a retired key active again merely to replay an old journal.
+
 ### 3.4 Fail-closed conditions
 
 Do not sign a grant when the key is missing, inactive, expired, revoked, unpinned, wrong-issuer, provider-unavailable or unable to report the expected key fingerprint. Never regenerate a replacement key automatically after a missing key or restore event.
@@ -190,6 +192,16 @@ If the process crashes after the durable journal append but before the anchor up
 
 The storage adapter must not claim single-writer safety based only on an in-process JavaScript mutex. Cross-process serialization needs an OS-backed lock or a single authority service. Atomic file replacement and flush behavior must be tested separately on Windows and POSIX; do not assume identical filesystem semantics.
 
+### 5.6 Pure in-memory reconciliation model — implemented; no persistence provider
+
+A first deterministic state-machine model is implemented in:
+- [local-revocation-anchor-model.mjs](../../runtime/reference-worker/local-revocation-anchor-model.mjs);
+- [local-revocation-anchor-model.test.mjs](../../runtime/reference-worker/local-revocation-anchor-model.test.mjs).
+
+It verifies contiguous sequence numbers and predecessor digests, calls an injected trusted revocation-token verifier for every event, binds a separately verified checkpoint to the reconstructed journal head and provider ID, and compares the result with a trusted anchor. If the journal is ahead, it requires an atomic compare-and-set from the exact prior anchor pair before returning an allowed result. Journal rollback, equal-sequence digest mismatch, prefix mismatch, invalid event/checkpoint, missing verifier, unavailable anchor and failed compare-and-set all deny.
+
+The test suite uses synthetic token strings and fake verifier/anchor callbacks in memory. It proves only the deterministic reconciliation state machine. It does **not** perform Ed25519 verification itself, persist events, fsync a file, acquire an OS lock, create a signed checkpoint, or contact a TPM/OS/hardware anchor. ADR-008 separately tests Ed25519 grant/revocation token verification.
+
 ### 5.4 Recovery state machine
 
 At startup, compare the fully verified journal head `J=(seq,digest)` with external anchor `A=(seq,digest)`:
@@ -258,7 +270,9 @@ Negative:
 - restore of a journal backup without the independent anchor;
 - attempt to use the v0.1 grant without the future consent binding.
 
-The tests must include process termination and restart simulations, not only in-memory happy paths. Real provider tests must use disposable test keys and isolated storage, never the user's production authority key.
+The in-memory reconciliation state-machine contract currently passes 15 synthetic tests covering genesis, healthy match, recovery-ahead, rollback, fork, prefix mismatch, reordered/broken links, invalid signature callback, wrong issuer, missing/stale/wrong-provider checkpoint, anchor outage, failed CAS, missing verifier, accessor-backed objects and size bounds. The dedicated [GitHub Actions run #15](https://github.com/LiberoNuvola/Cormia/actions/runs/41479158529) passed alongside the 21 grant tests and 6 schema-profile tests (42 total; zero failures). These are synthetic contract tests only.
+
+The provider implementation tests must additionally include process termination and restart simulations at every durability boundary, not only in-memory cases. Real provider tests must use disposable test keys and isolated storage, never the user's production authority key.
 
 ## 8. Implementation order
 
