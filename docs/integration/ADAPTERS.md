@@ -130,10 +130,16 @@ This contract is **not connected** to the Agent or to the existing Coding Worksp
 
 ### Local authority lifecycle boundary — proposed; state model only
 
-[ADR-0009](../adr/0009-proposed-local-authority-bootstrap-consent-and-revocation-anchor.md) specifies a non-exportable host signing key, one-time consent over an exact grant-intent digest, and a signed/hash-linked revocation journal whose head is independently pinned by a monotonic anchor provider. Four draft schemas describe the public key descriptor, consent receipt, journal event and checkpoint.
+[ADR-0009](../adr/0009-proposed-local-authority-bootstrap-consent-and-revocation-anchor.md) specifies a non-exportable host signing key, one-time consent over the complete project mandate digest, and a signed/hash-linked revocation journal whose head is independently pinned by a monotonic anchor provider. Draft schemas describe the public key descriptor, project mandate consent receipt, journal event and checkpoint.
 
 A pure in-memory reconciliation model and synthetic tests are now present in `runtime/reference-worker`. The tests verify rollback/fork/prefix conditions and compare-and-set failure behavior using injected fake providers. They do not implement durable file I/O, OS locking, key provisioning, an authenticated consent broker, or a real TPM/OS monotonic anchor. The local Agent and `APPROVO` path remain untouched.
 
 ### Windows CNG key-provider discovery
 
 The read-only Windows CNG probe at `scripts/probe-windows-cng-capabilities.ps1` enumerates signature algorithms and reads TPM state only. Its [GitHub-hosted Windows run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41480382232) passed, but the runner had no TPM and cannot establish the user's local hardware capabilities. The existing Ed25519 grant helper remains unchanged; ES256/P-256 is only a candidate for a separately versioned CNG signing profile. See [ADR-0009](../adr/0009-proposed-local-authority-bootstrap-consent-and-revocation-anchor.md).
+
+## Autonomous project delegation — target, not yet integrated
+
+[ADR-0010](../adr/0010-autonomous-project-delegation-and-runtime-authority.md) is the authoritative target for the local AI operating model. The operator delegates one standing project mandate. Within a dedicated project worktree, the Runtime automatically accepts in-scope tasks and derives internal child grants for ordinary reads, edits, refactors, tests and builds. There is no approval prompt for every file or test, and the model does not receive API keys, bearer tokens, signing keys or grant strings.
+
+The current /code + APPROVO behavior remains only for the legacy Agent compatibility path while the new autonomous Runtime path is built. The project mandate and one-time mandate-consent schemas have contract tests, but the project worktree manager, mandate store, automatic child-grant engine, credential broker and full autonomous Agent loop are not implemented yet. Remote GitHub push/PR is optional and depends on a host-managed credential provider; local inference and local project work must continue without any cloud API token.
