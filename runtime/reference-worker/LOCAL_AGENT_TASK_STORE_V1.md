@@ -123,6 +123,6 @@ The local sidecar check has not yet been run on the user's Windows installation.
 
 ## 8. Sidecar probe CI and local execution status
 
-The bounded sidecar probe contract suite passed all 10 tests in [GitHub Actions run #5](https://github.com/LiberoNuvola/Cormia/actions/runs/41470239168). The aggregate probe's syntax/import workflow passed in [run #8](https://github.com/LiberoNuvola/Cormia/actions/runs/41469547041).
+The bounded sidecar probe contract suite passed all 10 tests in [GitHub Actions run #5](https://github.com/LiberoNuvola/Cormia/actions/runs/41470239168). The aggregate probe's syntax/import workflow passed in [run #10](https://github.com/LiberoNuvola/Cormia/actions/runs/41470239182).
 
 These are synthetic GitHub checks. The integrated check against the user's actual Windows sidecar files remains pending; it is performed by the aggregate Windows command documented in [the reference worker README](./README.md).
