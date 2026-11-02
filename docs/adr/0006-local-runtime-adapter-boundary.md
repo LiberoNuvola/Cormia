@@ -107,6 +107,8 @@ The source-level tool/approval boundary is recorded in [CODING_WORKSPACE_CAPABIL
 
 No canonical capability mapping is implemented yet because the current Task Manifest schema defines `capabilitySet` with generic `capability`, `scope` and optional `constraints`, but does not freeze operation identifiers or path-scope semantics. The existing Agent caller owns the `/code` and `APPROVO` gates; the CodingWorkspace class's `callTool()` method does not enforce them itself. A new adapter must not bypass those gates.
 
+A non-normative candidate vocabulary and exact-path scope proposal is now documented in [ADR-0007](./0007-proposed-task-capabilities-and-workspace-scope.md). It does not change the manifest schema or grant new authority; the operation IDs, host grant intersection, workspace binding and unattended consent model remain proposed pending review.
+
 ## First implementation slice recorded 2026-11-02
 
 The following compatibility artifacts have been added without modifying the local Agent or its store:
