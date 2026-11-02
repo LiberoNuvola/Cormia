@@ -2,7 +2,7 @@ name: Project Normative Contract
 
 on:
   push:
-    branches: [main]
+    branches: ["**"]
     paths:
       - "schemas/project-normative-contract-v0.1.schema.json"
       - "examples/project-normative-contracts/immortal-protocol-v0.1.json"
