@@ -159,3 +159,10 @@ This is a successful local compatibility smoke test for the three adapters on th
 ## 6F. Aggregate local verification
 
 The read-only Windows verification entry point is `scripts/verify-local-runtime-adapters.mjs`. It validates the live local Task Store format in memory, performs a no-op Resource Manager lease probe, checks the existing Evolution Manager run registry and reads one candidate line only if a valid open run exists. It never prints task text or evidence bodies. It must not be interpreted as a test of Granite, Docker candidate execution, or AEP conformance.
+
+
+## 6H. Coding Workspace read-only adapter implementation
+
+A separate wrapper exposes exactly four non-mutating operations and requires exact readable-file/listable-directory allowlists injected by trusted host code. The model cannot expand these sets. Write/patch/test are not exposed. Its 10 contract tests passed in [GitHub Actions run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41466372070).
+
+The local probe has been expanded to import the real `CodingWorkspace` class and call only root `workspace_list` through the new adapter. It prints the total entry count and truncation flag, not the entry names. This expanded Windows probe has not yet been executed by the user.
