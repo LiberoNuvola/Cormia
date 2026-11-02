@@ -193,3 +193,10 @@ For each reference it checks the exact task-bound filename, embedded task ID and
 The dedicated GitHub Actions workflow `.github/workflows/local-agent-attempt-evidence-sidecar-compatibility.yml` runs syntax checks and contract tests for valid/empty, missing, unsafe, mismatched, malformed, oversized and symlink cases. Repository CI validates only synthetic fixtures; it cannot access the user's local sidecar files.
 
 **Next required local evidence:** pull the updated `main` and rerun the aggregate Windows probe. The new `evidenceSidecars` object must show the counts and `result` without exposing sidecar contents. A `PARTIAL_OR_FAIL` result stops the aggregate probe and requires investigation; do not copy or upload the raw sidecars.
+
+### GitHub CI evidence for 6J
+
+- [Sidecar probe contract run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41469116933): **SUCCESS**, 9 tests passed, 0 failed, at `149d7439989f6a52fe47b5f7b59999502846851e`.
+- [Aggregate probe syntax/import run #8](https://github.com/LiberoNuvola/Cormia/actions/runs/41469547041): **SUCCESS**, at `945e86ed8d18f555fe7f8daabdb3f57a39bd7e3d`.
+
+The local sidecar check against `E:\AI\Immortal-Agent-v0.7\data\evidence` is still pending. GitHub Actions cannot access that path.
