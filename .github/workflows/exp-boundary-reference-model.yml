@@ -1,0 +1,30 @@
+name: EXP boundary reference model
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "verification/exp_boundary/**"
+      - ".github/workflows/exp-boundary-reference-model.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "verification/exp_boundary/**"
+      - ".github/workflows/exp-boundary-reference-model.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bounded-reference-model:
+    name: Bounded EXP boundary checks (abstract model)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run bounded reference-model tests
+        run: python -m unittest discover -s verification/exp_boundary -p "test_*.py" -v
