@@ -261,6 +261,21 @@ test("denies host/project/worktree/worker/runtime substitution", () => {
   }
 });
 
+test("rechecks mandate not-before time on every tool invocation", () => {
+  const futureMandate = trustedMandate({
+    claims: mandateClaims({ notBefore: "2026-11-02T17:10:00.000Z" })
+  });
+  const child = derive({
+    trustedMandate: futureMandate,
+    now: "2026-11-02T17:15:00.000Z"
+  });
+  assert.equal(child.authorized, true);
+  assert.equal(authorize(child, {
+    trustedMandate: futureMandate,
+    now: "2026-11-02T17:00:00.000Z"
+  }).reason, "mandate-not-yet-valid");
+});
+
 test("denies expired, not-yet-valid and invalidly ordered mandates", () => {
   assert.equal(derive({
     now: "2026-11-04T00:00:00.000Z"
