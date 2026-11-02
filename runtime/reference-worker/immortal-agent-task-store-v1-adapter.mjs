@@ -40,7 +40,7 @@ function safeEvidencePath(task, candidate) {
   if (segments.length !== 3 || segments[0] !== "data" || segments[1] !== "evidence") return false;
   const match = segments[2].match(/^(.+)-attempt-([1-9][0-9]*)\.json$/);
   if (!match || match[1] !== task.id) return false;
-  if (Number.isInteger(task.attempts) && task.attempts > 0 && Number(match[2]) !== task.attempts) return false;
+  if (Number.isInteger(task.attempts) && task.attempts > 0 && Number(match[2]) > task.attempts) return false;
   return true;
 }
 
@@ -106,7 +106,7 @@ export function inspectTaskStoreV1(store) {
         errors.push(prefix + ".lastError must be a string or null when present.");
       }
       if (task.evidencePath !== undefined && !safeEvidencePath(task, task.evidencePath)) {
-        errors.push(prefix + ".evidencePath is outside the expected task evidence path or does not match the current attempt.");
+        errors.push(prefix + ".evidencePath is outside the expected task evidence directory or points to an attempt newer than the task record.");
       }
       if (task.expectedTools === undefined) {
         warnings.push(prefix + " has no expectedTools; the existing Agent derives them during startup migration.");
