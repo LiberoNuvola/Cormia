@@ -6,6 +6,7 @@ import { authorizeLocalProjectOperation, deriveLocalProjectTaskAuthority } from 
 const BINDING_KEYS = ["contractId", "schemaVersion", "identityProfile", "digest"];
 const TRUSTED_PNC_KEYS = ["contract", "schemaValidationVerified", "sourceIntegrityVerified", "ownerAuthorized"];
 const MANDATE_KEYS = ["claims", "mandateDigest", "issuerId", "signatureVerified", "consentVerified", "revocationState", "schemaValidationVerified"];
+const TRUSTED_CONSENT_KEYS = ["claims", "schemaValidationVerified", "signatureVerified", "brokerAuthenticated"];
 const CHILD_KEYS = ["schemaVersion", "mandateId", "mandateDigest", "taskId", "manifestDigest", "issuerId", "workerId", "runtimeId", "projectRef", "repositoryRef", "workspaceRef", "operations", "expiresAt"];
 const OUTER_KEYS = ["authorized", "kind", "childDigest", "baseChildDigest", "authority"];
 const CHILD_KIND = "internal-pnc-bound-local-project-task-authority";
@@ -79,6 +80,46 @@ function verifyPncStoreRecord(record, binding, project) {
   return { valid: true };
 }
 
+
+function validateTrustedConsent(trustedConsent, trustedMandate, now) {
+  if (!exactKeys(trustedConsent, TRUSTED_CONSENT_KEYS) ||
+      trustedConsent.schemaValidationVerified !== true ||
+      trustedConsent.signatureVerified !== true ||
+      trustedConsent.brokerAuthenticated !== true ||
+      !plain(trustedConsent.claims)) {
+    return { valid: false, reason: "project-mandate-consent-not-trusted" };
+  }
+  const c = trustedConsent.claims;
+  const m = trustedMandate.claims;
+  try {
+    canonicalizeLocalClaims(c);
+  } catch {
+    return { valid: false, reason: "project-mandate-consent-invalid-claims" };
+  }
+  if (c.schemaVersion !== "0.2.0" ||
+      c.decision !== "approve" ||
+      c.interactionMode !== "local-interactive-project-mandate" ||
+      c.mandateId !== m.mandateId ||
+      c.mandateDigest !== trustedMandate.mandateDigest ||
+      c.issuerId !== m.issuerId ||
+      c.operatorPrincipalId !== m.operatorPrincipalId ||
+      c.projectRef !== m.project.projectRef ||
+      c.workspaceRef !== m.workspace.workspaceRef ||
+      !sameBinding(c.normativeContractBinding, m.normativeContractBinding)) {
+    return { valid: false, reason: "project-mandate-consent-binding-mismatch" };
+  }
+  const nowMs = now instanceof Date ? now.getTime() :
+    typeof now === "string" ? Date.parse(now) :
+    typeof now === "number" ? now : NaN;
+  const issuedAt = Date.parse(c.issuedAt);
+  const expiresAt = Date.parse(c.expiresAt);
+  if (![nowMs, issuedAt, expiresAt].every(Number.isFinite) ||
+      issuedAt > nowMs || expiresAt <= nowMs || issuedAt >= expiresAt) {
+    return { valid: false, reason: "project-mandate-consent-expired-or-not-yet-valid" };
+  }
+  return { valid: true };
+}
+
 function normalizeMandateV2(trustedMandate) {
   if (!exactKeys(trustedMandate, MANDATE_KEYS) || !plain(trustedMandate.claims) ||
       trustedMandate.claims.schemaVersion !== "0.2.0" ||
@@ -110,11 +151,13 @@ function pncChildDigest(baseDigest, authority) {
 }
 
 export function derivePncBoundProjectTaskAuthority({
-  trustedMandate, trustedNormativeContract, expectedHost, task, now = new Date()
+  trustedMandate, trustedConsent, trustedNormativeContract, expectedHost, task, now = new Date()
 } = {}) {
   try {
     const normalized = normalizeMandateV2(trustedMandate);
     if (!normalized) return { authorized: false, reason: "invalid-pnc-bound-mandate-v0.2" };
+    const consent = validateTrustedConsent(trustedConsent, trustedMandate, now);
+    if (!consent.valid) return { authorized: false, reason: consent.reason };
     const binding = trustedMandate.claims.normativeContractBinding;
     const pnc = verifyPncStoreRecord(trustedNormativeContract, binding, trustedMandate.claims.project);
     if (!pnc.valid) return { authorized: false, reason: pnc.reason };
@@ -140,7 +183,7 @@ export function derivePncBoundProjectTaskAuthority({
 }
 
 export function authorizePncBoundProjectOperation({
-  childAuthority, trustedMandate, trustedNormativeContract, hostPolicy,
+  childAuthority, trustedMandate, trustedConsent, trustedNormativeContract, hostPolicy,
   expectedTaskId, expectedManifestDigest, operation, relativePath,
   executionProfileId, branchName, remoteHost, now = new Date()
 } = {}) {
@@ -161,6 +204,8 @@ export function authorizePncBoundProjectOperation({
       return { allowed: false, reason: "invalid-pnc-bound-child-payload" };
     }
 
+    const consent = validateTrustedConsent(trustedConsent, trustedMandate, now);
+    if (!consent.valid) return { allowed: false, reason: consent.reason };
     const binding = trustedMandate.claims.normativeContractBinding;
     if (!sameBinding(authority.normativeContractBinding, binding)) {
       return { allowed: false, reason: "child-pnc-binding-mismatch" };

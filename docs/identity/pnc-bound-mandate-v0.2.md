@@ -35,3 +35,10 @@ The consent schema duplicates the PNC tuple deliberately for human-display bindi
 This is not an integrated local Agent or production Runtime. The flags representing schema validation, source integrity and owner authorization are trusted host-store inputs; they are not accepted from the model. The current repository still has no authenticated PNC store, no mandate signing/persistence lifecycle, no consent UI/broker integration, no runtime Agent connection and no OS-isolated worktree manager. This slice tests the binding contract; it does not enable unattended local mutation or remote credential access.
 
 No PNC is activated by this work. The IMMORTAL example remains draft, so it cannot be used to create an accepted PNC-bound mandate until an authenticated owner-authorized activation process exists.
+
+
+## 5. Consent tuple enforcement
+
+The v0.2 reference adapter also receives a host-verified consent receipt. Before deriving a child authority and again before each operation, it checks that the receipt is schema-validated, signature-verified and broker-authenticated; that the decision is approve; that mandate ID/digest, issuer, operator, project and workspace match; and that the repeated PNC identity tuple is identical and the receipt remains within its validity window.
+
+The adapter does not verify the receipt signature itself. The booleans are trusted host-store assertions, analogous to the already-required mandate signature/consent assertions. A future consent broker must produce these assertions only after verifying the authenticated envelope and displayed challenge.

@@ -80,6 +80,34 @@ function pnc(overrides = {}) {
     sourceIntegrityVerified: true, ownerAuthorized: true, ...overrides
   };
 }
+function consent(overrides = {}) {
+  return {
+    claims: {
+      schemaVersion: "0.2.0",
+      mandateId: "11111111-1111-4111-8111-111111111111",
+      issuerId,
+      operatorPrincipalId: "os-principal:operator-1",
+      consentBrokerId: "os-consent-broker:1",
+      mandateDigest,
+      projectRef,
+      workspaceRef,
+      decision: "approve",
+      interactionMode: "local-interactive-project-mandate",
+      interactionId: "22222222-2222-4222-8222-222222222222",
+      displayedChallenge: "abcdef01",
+      confirmedChallenge: "abcdef01",
+      issuedAt: "2026-11-02T16:30:00.000Z",
+      expiresAt: "2026-11-02T17:30:00.000Z",
+      nonce: "33333333-3333-4333-8333-333333333333",
+      sequence: 1,
+      normativeContractBinding: { ...binding }
+    },
+    schemaValidationVerified: true,
+    signatureVerified: true,
+    brokerAuthenticated: true,
+    ...overrides
+  };
+}
 function host() {
   return { issuerId, projectRef, repositoryRef, workspaceRef, workerId, runtimeId };
 }
@@ -97,13 +125,13 @@ function task() {
 }
 function derive(overrides = {}) {
   return derivePncBoundProjectTaskAuthority({
-    trustedMandate: mandate(), trustedNormativeContract: pnc(),
+    trustedMandate: mandate(), trustedConsent: consent(), trustedNormativeContract: pnc(),
     expectedHost: host(), task: task(), now, ...overrides
   });
 }
 function authorize(child, overrides = {}) {
   return authorizePncBoundProjectOperation({
-    childAuthority: child, trustedMandate: mandate(), trustedNormativeContract: pnc(),
+    childAuthority: child, trustedMandate: mandate(), trustedConsent: consent(), trustedNormativeContract: pnc(),
     hostPolicy: hostPolicy(), expectedTaskId: taskId, expectedManifestDigest: manifestDigest,
     operation: "workspace.read", relativePath: "src/index.mjs", now, ...overrides
   });
@@ -122,7 +150,7 @@ test("same child authorizes repeated in-scope operations without per-operation a
   const child = derive();
   for (const operation of ["workspace.read", "workspace.diff"]) {
     const result = authorizePncBoundProjectOperation({
-      childAuthority: child, trustedMandate: mandate(), trustedNormativeContract: pnc(),
+      childAuthority: child, trustedMandate: mandate(), trustedConsent: consent(), trustedNormativeContract: pnc(),
       hostPolicy: hostPolicy(), expectedTaskId: taskId, expectedManifestDigest: manifestDigest,
       operation, relativePath: "src/index.mjs", now
     });
@@ -201,3 +229,38 @@ test("existing operation and workspace policy remains enforced", () => {
   const result = authorize(child, { hostPolicy: { ...hostPolicy(), allowedOperations: ["workspace.diff"] } });
   assert.equal(result.reason, "operation-not-allowed-by-host-policy");
 });
+
+test("consent receipt must bind the same PNC tuple and complete mandate digest", () => {
+  const child = derive();
+  const wrongTuple = consent({
+    claims: {
+      ...consent().claims,
+      normativeContractBinding: { ...binding, digest: "sha256:" + "9".repeat(64) }
+    }
+  });
+  assert.equal(authorize(child, { trustedConsent: wrongTuple }).reason,
+    "project-mandate-consent-binding-mismatch");
+  const wrongMandate = consent({
+    claims: { ...consent().claims, mandateDigest: "sha256:" + "e".repeat(64) }
+  });
+  assert.equal(authorize(child, { trustedConsent: wrongMandate }).reason,
+    "project-mandate-consent-binding-mismatch");
+});
+
+test("missing, unverified or expired consent cannot authorize an operation", () => {
+  const child = derive();
+  assert.equal(authorize(child, { trustedConsent: null }).reason,
+    "project-mandate-consent-not-trusted");
+  assert.equal(authorize(child, {
+    trustedConsent: consent({ signatureVerified: false })
+  }).reason, "project-mandate-consent-not-trusted");
+  const expired = consent({
+    claims: {
+      ...consent().claims,
+      expiresAt: "2026-11-02T16:59:59.000Z"
+    }
+  });
+  assert.equal(authorize(child, { trustedConsent: expired }).reason,
+    "project-mandate-consent-expired-or-not-yet-valid");
+});
+
