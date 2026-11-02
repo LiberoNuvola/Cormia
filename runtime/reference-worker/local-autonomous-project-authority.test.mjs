@@ -314,6 +314,13 @@ test("allows only named test/build profiles", () => {
     operation: "workspace.test",
     executionProfileId: "arbitrary-shell"
   }).reason, "execution-profile-not-allowed");
+  assert.equal(authorize(child, {
+    operation: "workspace.test",
+    executionProfileId: "node22-host-only-profile",
+    hostPolicy: hostPolicy({
+      allowedExecutionProfiles: ["node22-project-tests", "node22-host-only-profile"]
+    })
+  }).reason, "execution-profile-not-allowed");
 });
 
 test("feature branches may be pushed only when both mandate and host policy permit", () => {
@@ -389,13 +396,17 @@ test("denies a modified mandate, task or internal child authority at invocation"
   const alteredMandate = trustedMandate({
     mandateDigest: "sha256:" + "f".repeat(64)
   });
-  assert.equal(authorize(child, { trustedMandate: alteredMandate }).reason, "runtime-host-binding-mismatch");
+  assert.equal(authorize(child, { trustedMandate: alteredMandate }).reason, "child-mandate-digest-mismatch");
+  assert.equal(authorize(child, { expectedTaskId: "another-task" }).reason, "task-context-mismatch");
+  assert.equal(authorize(child, {
+    expectedManifestDigest: "sha256:" + "f".repeat(64)
+  }).reason, "task-context-mismatch");
 
   const alteredChild = {
     ...child,
     authority: { ...child.authority, workspaceRef: "other-worktree" }
   };
-  assert.equal(authorize(alteredChild).reason, "runtime-host-binding-mismatch");
+  assert.equal(authorize(alteredChild).reason, "child-authority-integrity-failure");
 });
 
 test("host policy is an upper bound over mandate operation sets", () => {
