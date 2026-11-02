@@ -32,3 +32,5 @@ The following v0.1 files are non-normative local design contracts associated wit
 - [local-revocation-checkpoint-claims-v0.1.schema.json](local-revocation-checkpoint-claims-v0.1.schema.json): signed journal head to compare with an independent monotonic anchor.
 
 These schemas do not implement key provisioning, authenticated UI consent, persistent journal storage or anti-rollback by themselves. Semantic checks and provider guarantees are defined in ADR-0009. They do not change the Task Manifest or ADR-008 v0.1 grant profile.
+
+The host key descriptor permits `Ed25519` (the current isolated ADR-008 v0.1 profile) and `ES256` (a candidate for a future Windows CNG profile). The ADR-008 grant helper currently supports Ed25519 only. Listing ES256 in the descriptor schema does not enable ES256 signing or verification; see the read-only [Windows CNG discovery probe](../scripts/probe-windows-cng-capabilities.ps1) and [ADR-0009](../docs/adr/0009-proposed-local-authority-bootstrap-consent-and-revocation-anchor.md).
