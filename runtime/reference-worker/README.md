@@ -56,3 +56,16 @@ The first adapter must remain local-only. It must not accept peer tasks, issue C
 - Cardano task/receipt anchoring or settlement.
 
 No code is moved here by this documentation. Existing IMMORTAL components remain separate until a reviewed adapter passes parity tests and a rollback path is documented.
+
+
+## Local Windows compatibility probe
+
+After pulling `main`, run from the Cormia checkout:
+
+```powershell
+node .\scripts\verify-local-runtime-adapters.mjs --agent-root "E:\AI\Immortal-Agent-v0.7" --coding-root "E:\AI\Immortal-CodingLab\workspace"
+```
+
+The probe checks the local `data/tasks.json` in memory and prints only total/status counts and schema error counts; it never prints task goals, result text, or evidence. It samples the real Resource Manager through a short acquire/release lease with a no-op callback. It imports the real SelfImprovementManager, validates existing run journals through its list operation, and if an open candidate exists reads only the first line of `resource-manager.mjs` and reports a short SHA prefix.
+
+It refuses to create missing roots, source files, or `self-improvement/runs` directories. It does not start an evolution, call Granite, run Docker, write the Agent task store, create/patch a candidate, or promote code. A resource lease may report `blocked` when the host policy says the machine is busy; this is an availability result, not a corruption error.
