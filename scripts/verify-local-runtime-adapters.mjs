@@ -11,7 +11,7 @@
  */
 import { lstat, readFile } from "node:fs/promises";
 import path from "node:path";
-import { pathToFileURL, fileURLToPath } from "node:url";
+import { pathToFileURL } from "node:url";
 
 import { inspectTaskStoreV1 } from "../runtime/reference-worker/immortal-agent-task-store-v1-adapter.mjs";
 import { withLocalResourceLease } from "../runtime/reference-worker/immortal-resource-manager-adapter.mjs";
