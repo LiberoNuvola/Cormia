@@ -157,3 +157,8 @@ Preferred proposal. It preserves the current executable and creates a testable p
 - Do not give JEV, Flux Point, Control Room or the model protocol authority.
 - Do not copy local task/session/audit data, secrets, wallet material, model files or logs into Cormia.
 - Do not claim AEP conformance until adapter contract tests and evidence profiles pass.
+
+
+## Local Windows validation path recorded 2026-11-02
+
+The current adapter slices have a single aggregate local check at `scripts/verify-local-runtime-adapters.mjs`. It validates the local Agent task-store envelope, acquires/releases a no-op Resource Manager lease, reads Evolution Manager run summaries and optionally reads one line from the first open candidate. The script is designed to print aggregate counts only. It does not change the Agent, start a run, execute candidate code, run Docker, or invoke the model. See the PowerShell command in [runtime/reference-worker/README.md](../runtime/reference-worker/README.md).
