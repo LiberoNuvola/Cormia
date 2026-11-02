@@ -102,21 +102,16 @@ The approval is operation-scoped, not a durable signed task consent. It is not c
 
 ## 7. AEP mapping status
 
-The current AEP Task Manifest schema has a generic `capabilitySet` item containing `capability`, `scope` and optional `constraints`; it does not yet enumerate Coding Workspace operation identifiers or define path-scope grammar.
+The current AEP Task Manifest schema still has a generic `capabilitySet` item containing `capability`, `scope` and optional `constraints`; the schema has not been changed.
 
-Therefore this document deliberately does **not** invent a canonical AEP capability vocabulary or a signed grant format.
+A non-normative candidate vocabulary and scope grammar are now recorded in [ADR-0007 — Proposed AEP task capabilities and workspace scope](../adr/0007-proposed-task-capabilities-and-workspace-scope.md). Candidate operation IDs are `workspace.list`, `workspace.read`, `workspace.diff`, `workspace.verify`, `workspace.create`, `workspace.replace` and `workspace.test`. The proposal requires opaque host-resolved workspace references and exact file/directory allowlists; it does not grant arbitrary roots or path-prefix expansion.
 
-Before implementing a capability adapter, the project must freeze:
-1. canonical identifiers for read/list/diff/verify/create/replace/test operations;
-2. path scope rules (exact file, directory prefix, repo/branch/worktree and symlink semantics);
-3. whether each operation is local-only, host-approved or unattended-eligible;
-4. the task workspace lifecycle and isolation model;
-5. test selection semantics, since current `workspace_test` runs across the entire root;
-6. limits, expiry, cancellation, delegation attenuation and audit fields.
+The proposal does **not** freeze a canonical AEP vocabulary or signed grant format. It remains subject to maintainer/community decision and the open items in ADR-0007. No change to `SPEC.md`, `schemas/task-manifest.schema.json`, or runtime authorization behavior is implied.
 
-Until then, the safe local disposition is:
+Until a normative decision and enforcement tests exist, the safe local disposition remains:
 - retain `/code` as the explicit entry gate;
-- preserve `APPROVO` for write, patch and test;
+- preserve `APPROVO` for write, replace and test in the existing Agent path;
+- expose only list/read/diff/verify through the separate read-only adapter;
 - reject unsupported remote/peer capability requests;
 - never call `callTool()` from a new adapter without independently enforcing the approval contract.
 
