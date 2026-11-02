@@ -1,0 +1,45 @@
+name: Windows CNG Capability Discovery
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/probe-windows-cng-capabilities.ps1"
+      - ".github/workflows/windows-cng-capability-discovery.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/probe-windows-cng-capabilities.ps1"
+      - ".github/workflows/windows-cng-capability-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  read-only-discovery:
+    name: Read-only CNG provider and signature algorithm discovery
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+
+      - name: Execute read-only CNG discovery
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $json = & .\scripts\probe-windows-cng-capabilities.ps1
+          if ($LASTEXITCODE -ne 0) {
+            throw "CNG probe process returned exit code $LASTEXITCODE"
+          }
+          $result = $json | ConvertFrom-Json
+          if ($result.probeMode -ne "read-only-provider-discovery") {
+            throw "Unexpected probe mode"
+          }
+          if ($result.createsKeys -ne $false -or
+              $result.readsPrivateKeyMaterial -ne $false -or
+              $result.changesMachineState -ne $false) {
+            throw "Probe safety declaration failed"
+          }
+          Write-Output ($result | ConvertTo-Json -Depth 6)
