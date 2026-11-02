@@ -40,6 +40,12 @@ The wrapper is not connected to `agent.mjs`; it is a Cormia-side compatibility c
 - A missing CPU telemetry sample fails closed for heavy CPU work under the current policy.
 - The reviewed Agent uses `model-inference` around model turns and `cpu-heavy` around workspace/evolution Docker tests.
 
+## Verification evidence
+
+The adapter's 11 Node-native contract tests pass in the isolated review environment. GitHub Actions [Local Resource Manager Adapter Compatibility run #1](https://github.com/LiberoNuvola/Cormia/actions/runs/41463016417) completed **SUCCESS** at commit `137261e2074dae0450bf146ff4344b145e530182`. It passed the syntax check and adapter contract tests.
+
+This is Cormia repository CI evidence. It is not a live test against the user's Windows process, nor a Docker/host telemetry exercise.
+
 ## Tests
 
 Run from this directory:
