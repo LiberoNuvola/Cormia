@@ -83,6 +83,12 @@ That extraction must preserve:
 
 No extraction is authorized by this ADR alone.
 
+## Resource Manager adapter slice recorded 2026-11-02
+
+A separate Cormia-side wrapper now maps three trusted Runtime operations onto the existing ResourceManager classes and guarantees lease release in `finally`. Its 11 isolated contract tests pass, and the dedicated GitHub Actions run completed successfully. The implementation and limitations are documented in [LOCAL_RESOURCE_MANAGER_ADAPTER.md](../runtime/reference-worker/LOCAL_RESOURCE_MANAGER_ADAPTER.md).
+
+This wrapper is not connected to the Agent or Coding Workspace. It cannot enforce OS-level quotas and does not change the ResourceManager's process-local lease semantics.
+
 ## Coding Workspace mapping constraint recorded 2026-11-02
 
 The source-level tool/approval boundary is recorded in [CODING_WORKSPACE_CAPABILITY_MATRIX_2026-11-02.md](../architecture/CODING_WORKSPACE_CAPABILITY_MATRIX_2026-11-02.md).
