@@ -51,7 +51,7 @@ Only then does it call the existing SelfImprovementManager evaluation. These rec
 - **Real-manager smoke test:** the adapter was exercised against the actual `SelfImprovementManager` source copied into a disposable temporary workspace. It created a temporary run, read a candidate source file, created a candidate-specific test, applied a SHA-preconditioned patch, listed the open run and confirmed that promotion is denied. The temporary workspace was deleted afterward. No user PC files or live Agent state were touched.
 - **GitHub Actions:** [Local Evolution Manager Adapter Compatibility run #1](https://github.com/LiberoNuvola/Cormia/actions/runs/41464055794) completed **SUCCESS** at `f65a7852b31b96b08c48527c3a5ccda8c53188ee`; syntax and all adapter contract tests passed.
 
-These checks do not run Docker against the user's local setup, do not invoke Granite, and do not evaluate or promote an actual candidate.
+These checks do not run Docker against the user's local setup, do not invoke Granite, and do not evaluate or promote an actual candidate. The aggregate local probe at `scripts/verify-local-runtime-adapters.mjs` can validate existing Windows run journals and read one line from an open candidate without creating or modifying a run.
 
 ## Limitations
 
