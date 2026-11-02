@@ -20,27 +20,6 @@ function snapshot() {
   };
 }
 
-function fakeManager({ allowed = true, throwSnapshot = false } = {}) {
-  const calls = { snapshot: 0, acquire: [], released: 0 };
-  return {
-    calls,
-    async snapshot() {
-      calls.snapshot++;
-      if (throwSnapshot) throw new Error("telemetry unavailable");
-      return snapshot();
-    },
-    acquire(kind, value) {
-      calls.acquire.push({ kind, sameSnapshot: value === currentSnapshot });
-      return {
-        allowed,
-        reason: allowed ? "allowed" : "busy",
-        leaseId: allowed ? "lease-test-1" : null,
-        release: allowed ? () => { calls.released++; return true; } : null
-      };
-    }
-  };
-}
-
 let currentSnapshot;
 test("maps only trusted local operations to fixed ResourceManager classes", () => {
   assert.deepEqual(RESOURCE_OPERATION_KINDS, {
@@ -114,6 +93,51 @@ test("fails closed if ResourceManager is absent or snapshot sampling fails", asy
     run: async () => "must not run"
   });
   assert.equal(failedSnapshot.reason, "resource-snapshot-failed");
+});
+
+test("fails closed when snapshot structure is incomplete", async () => {
+  let acquired = false;
+  const result = await withLocalResourceLease({
+    resourceManager: {
+      async snapshot() { return { capturedAt: "2026-11-02T14:00:00.000Z", recommendation: {} }; },
+      acquire() { acquired = true; return { allowed: true, release() {} }; }
+    },
+    operation: "workspace-test",
+    run: async () => "must not run"
+  });
+  assert.equal(result.allowed, false);
+  assert.equal(result.reason, "resource-snapshot-invalid");
+  assert.equal(acquired, false);
+});
+
+test("fails closed when lease acquisition throws", async () => {
+  let ran = false;
+  const result = await withLocalResourceLease({
+    resourceManager: {
+      async snapshot() { currentSnapshot = snapshot(); return currentSnapshot; },
+      acquire() { throw new Error("lease counter unavailable"); }
+    },
+    operation: "workspace-test",
+    run: async () => { ran = true; }
+  });
+  assert.equal(result.allowed, false);
+  assert.equal(result.reason, "resource-acquisition-failed");
+  assert.equal(ran, false);
+});
+
+test("does not invoke work when an allowed lease has no release callback", async () => {
+  let ran = false;
+  const result = await withLocalResourceLease({
+    resourceManager: {
+      async snapshot() { currentSnapshot = snapshot(); return currentSnapshot; },
+      acquire() { return { allowed: true, leaseId: "bad-lease" }; }
+    },
+    operation: "agent-inference",
+    run: async () => { ran = true; }
+  });
+  assert.equal(result.allowed, false);
+  assert.equal(result.reason, "lease-release-unavailable");
+  assert.equal(ran, false);
 });
 
 test("releases the lease if the protected action throws", async () => {
