@@ -6,6 +6,8 @@
 
 The local IMMORTAL Agent v0.8.0 is a prototype and potential starting point, not yet AEP-conformant. The review confirmed the component map and the current trust boundaries. The next work is adapter-contract definition and compatibility testing, not a greenfield rewrite.
 
+**First compatibility slice implemented:** a read-only Agent Task Store v1 inspector, evidence-sidecar validator, schemas and synthetic test vectors are now published. It never opens the local store, mutates records, launches tasks or claims AEP Task Manifest semantics. See [LOCAL_AGENT_TASK_STORE_V1.md](./LOCAL_AGENT_TASK_STORE_V1.md).
+
 ## Existing source map
 
 - **Agent host:** `E:\AI\Immortal-Agent-v0.7\agent.mjs`. Process-oriented executable; it does not currently export an importable orchestration API. Its HTTP service deliberately exposes only a fixed read-only Dagu audit operation and task-ID reads. Do not repurpose this endpoint as generic AEP task intake.
