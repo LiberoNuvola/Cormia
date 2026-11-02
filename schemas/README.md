@@ -21,3 +21,14 @@ These schemas preserve unknown properties and are used only for compatibility va
 - [local-runtime-capability-revocation-claims-v0.1.schema.json](local-runtime-capability-revocation-claims-v0.1.schema.json) describes one signed revocation statement.
 
 These are experimental local contracts, not additions to the canonical Task Manifest or a network-wide identity/authorization format. The payloads are carried in compact JWS tokens using the proposed Ed25519/JCS profile described in [ADR-0008](../docs/adr/0008-proposed-local-capability-grants-and-revocation.md). The host key resolver and host policy are trusted inputs; the schemas alone do not establish trust. No real key material is stored in this repository, and the contracts are not connected to the Agent.
+
+## Local authority lifecycle proposals
+
+The following v0.1 files are non-normative local design contracts associated with [ADR-0009](../docs/adr/0009-proposed-local-authority-bootstrap-consent-and-revocation-anchor.md):
+
+- [local-host-authority-key-descriptor-v0.1.schema.json](local-host-authority-key-descriptor-v0.1.schema.json): public key metadata and opaque provider reference only; private key export is forbidden.
+- [local-operator-consent-claims-v0.1.schema.json](local-operator-consent-claims-v0.1.schema.json): one explicit, task/grant-intent-bound operator decision.
+- [local-revocation-journal-event-v0.1.schema.json](local-revocation-journal-event-v0.1.schema.json): one event in a hash-linked, signed revocation journal.
+- [local-revocation-checkpoint-claims-v0.1.schema.json](local-revocation-checkpoint-claims-v0.1.schema.json): signed journal head to compare with an independent monotonic anchor.
+
+These schemas do not implement key provisioning, authenticated UI consent, persistent journal storage or anti-rollback by themselves. Semantic checks and provider guarantees are defined in ADR-0009. They do not change the Task Manifest or ADR-008 v0.1 grant profile.
