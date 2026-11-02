@@ -288,20 +288,21 @@ Negative:
 - restore of a journal backup without the independent anchor;
 - attempt to use the v0.1 grant without the future consent binding.
 
-The in-memory reconciliation state-machine contract currently passes 15 synthetic tests covering genesis, healthy match, recovery-ahead, rollback, fork, prefix mismatch, reordered/broken links, invalid signature callback, wrong issuer, missing/stale/wrong-provider checkpoint, anchor outage, failed CAS, missing verifier, accessor-backed objects and size bounds. The dedicated [GitHub Actions run #15](https://github.com/LiberoNuvola/Cormia/actions/runs/41479158529) passed alongside the 21 grant tests and 6 schema-profile tests (42 total; zero failures). These are synthetic contract tests only.
+The in-memory reconciliation state-machine contract currently passes 15 synthetic tests covering genesis, healthy match, recovery-ahead, rollback, fork, prefix mismatch, reordered/broken links, invalid signature callback, wrong issuer, missing/stale/wrong-provider checkpoint, anchor outage, failed CAS, missing verifier, accessor-backed objects and size bounds. The latest combined [GitHub Actions run #19](https://github.com/LiberoNuvola/Cormia/actions/runs/41479984954) passed alongside the 21 grant tests and 6 schema-profile tests (42 total; zero failures). The separate [Windows CNG discovery run #2](https://github.com/LiberoNuvola/Cormia/actions/runs/41480382232) also passed on a hosted runner without TPM hardware. These are synthetic contract and hosted-runner results only.
 
 The provider implementation tests must additionally include process termination and restart simulations at every durability boundary, not only in-memory cases. Real provider tests must use disposable test keys and isolated storage, never the user's production authority key.
 
 ## 8. Implementation order
 
 1. Review and accept the key/consent/anchor threat model and residual administrator assumption.
-2. Identify the user's actual OS/provider capabilities without generating a key or modifying local state.
-3. Implement a fake provider and deterministic state-machine tests first.
-4. Implement one platform provider behind the opaque interface; validate private-key non-exportability and anchor semantics independently.
-5. Implement the signed consent broker and grant v0.2 binding; keep current `APPROVO` behavior unchanged.
-6. Implement journal append, flush, checkpoint and anchor CAS with crash/restart tests.
-7. Integrate with the read-only local adapter only after key trust, consent and anchor all pass.
-8. Keep create/replace/test disabled until task-specific workspace isolation and test selection are established.
+2. Use the read-only Windows CNG discovery probe to identify the actual local provider and TPM state; do not create a key or modify local state during this discovery.
+3. Decide whether the provider can use the current Ed25519 profile or needs a separately versioned ES256 profile; do not infer this from the GitHub-hosted runner.
+4. Implement a fake provider and deterministic state-machine tests first.
+5. Implement one platform provider behind the opaque interface; validate private-key non-exportability and anchor semantics independently.
+6. Implement the signed consent broker and grant v0.2 binding; keep current `APPROVO` behavior unchanged.
+7. Implement journal append, flush, checkpoint and anchor CAS with crash/restart tests.
+8. Integrate with the read-only local adapter only after key trust, consent and anchor all pass.
+9. Keep create/replace/test disabled until task-specific workspace isolation and test selection are established.
 
 ## 9. Non-goals and non-regression
 
