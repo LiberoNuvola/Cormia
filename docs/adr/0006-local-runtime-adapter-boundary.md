@@ -11,10 +11,10 @@ The local source review confirms that the current IMMORTAL Local Agent v0.8 is a
 
 The current source has these properties:
 
-- \`agent.mjs\` is an executable entry point. Its orchestration functions are local to the module and are not exported as a library API; importing it reaches the top-level \`main()\` invocation.
-- Its HTTP mode is intentionally fixed to a read-only Dagu audit operation. It accepts an empty body at \`POST /v1/tasks/read-only-audit\` and exposes task-ID reads. It is not a generic task submission API and must not be repurposed by silently widening the endpoint.
-- Normal CLI mode dynamically loads \`CodingWorkspace\`, \`ResourceManager\` and \`SelfImprovementManager\` from the separate Coding Workspace root.
-- The Coding Workspace requires interactive approval for \`workspace_write\`, \`workspace_patch\` and \`workspace_test\`. This is an existing host safety policy.
+- `agent.mjs` is an executable entry point. Its orchestration functions are local to the module and are not exported as a library API; importing it reaches the top-level `main()` invocation.
+- Its HTTP mode is intentionally fixed to a read-only Dagu audit operation. It accepts an empty body at `POST /v1/tasks/read-only-audit` and exposes task-ID reads. It is not a generic task submission API and must not be repurposed by silently widening the endpoint.
+- Normal CLI mode dynamically loads `CodingWorkspace`, `ResourceManager` and `SelfImprovementManager` from the separate Coding Workspace root.
+- The Coding Workspace requires interactive approval for `workspace_write`, `workspace_patch` and `workspace_test`. This is an existing host safety policy.
 - Resource Manager and Self-Improvement Manager are importable classes, but their current behavior is local-host scoped.
 - Control Room is an operator dashboard, not a task API or protocol authority.
 - Mitsuro MCP is a fixed read-only observer of IMMORTAL GitHub/JEV evidence.
@@ -31,7 +31,7 @@ Keep the existing CLI and service behavior working while a separately reviewed R
 
 ### 2. Build a Cormia-owned adapter boundary before refactoring the Agent
 
-The first Cormia Runtime adapter should be a separate module that depends only on explicit interfaces. It must not import \`agent.mjs\` while that file remains a side-effecting executable.
+The first Cormia Runtime adapter should be a separate module that depends only on explicit interfaces. It must not import `agent.mjs` while that file remains a side-effecting executable.
 
 Initial adapter responsibilities:
 
@@ -57,20 +57,20 @@ A future task-scoped consent envelope could authorize a bounded set of operation
 - cancellation and revocation semantics;
 - positive and negative tests proving no operation exceeds the signed envelope.
 
-Until that contract exists, the current interactive \`APPROVO\` gate remains. AEP tasks that assume unattended mutation must be rejected or marked unsupported by the local adapter; approval must not be bypassed.
+Until that contract exists, the current interactive `APPROVO` gate remains. AEP tasks that assume unattended mutation must be rejected or marked unsupported by the local adapter; approval must not be bypassed.
 
 ### 4. Use the existing classes only through their current contracts
 
-- \`CodingWorkspace\`: retain its path validation, SHA preconditions, approval classification and Docker restrictions. Do not turn it into a general shell.
-- \`ResourceManager\`: use it for local admission and in-process leases; do not claim it enforces OS-level quotas or terminates jobs.
-- \`SelfImprovementManager\`: use only for isolated manager candidates and review packets. It is not the general AEP task engine and cannot promote runtime code.
-- \`Control Room\`: operator-only local UI, outside the peer protocol.
-- \`Mitsuro\`: read-only evidence observer, outside execution and settlement authority.
-- \`JEV\`: evidence normalization/index only; no capability, credit or settlement authority.
+- `CodingWorkspace`: retain its path validation, SHA preconditions, approval classification and Docker restrictions. Do not turn it into a general shell.
+- `ResourceManager`: use it for local admission and in-process leases; do not claim it enforces OS-level quotas or terminates jobs.
+- `SelfImprovementManager`: use only for isolated manager candidates and review packets. It is not the general AEP task engine and cannot promote runtime code.
+- `Control Room`: operator-only local UI, outside the peer protocol.
+- `Mitsuro`: read-only evidence observer, outside execution and settlement authority.
+- `JEV`: evidence normalization/index only; no capability, credit or settlement authority.
 
 ### 5. Defer any Agent core extraction to a separate implementation change
 
-If a later integration requires direct in-process orchestration, extract a side-effect-free core module (for example, an exported Agent runtime factory) and leave \`agent.mjs\` as a thin backward-compatible CLI bootstrap.
+If a later integration requires direct in-process orchestration, extract a side-effect-free core module (for example, an exported Agent runtime factory) and leave `agent.mjs` as a thin backward-compatible CLI bootstrap.
 
 That extraction must preserve:
 - CLI commands and their current behavior;
@@ -97,7 +97,7 @@ This slice is **read-only**. It does not implement the durable AEP adapter task 
 
 ## Alternatives considered
 
-### A. Import \`agent.mjs\` directly
+### A. Import `agent.mjs` directly
 
 Rejected. The file is an executable with top-level startup behavior and no exported core API. Importing it is not a safe adapter contract.
 
