@@ -2,7 +2,7 @@
 
 - **Product:** Cormia
 - **Normative protocol:** IMMORTAL Autonomous Execution Protocol (AEP)
-- **Repository:** `LiberoNuvola/cormia` (local scaffold prepared; GitHub remote pending)
+- **Repository:** `LiberoNuvola/Cormia` (public GitHub repository; default branch `main`; initial baseline published 2026-11-02)
 - **Status:** architecture-first specification draft v0.1.3
 - **First proposed settlement adapter:** Cardano eUTXO
 
@@ -38,7 +38,7 @@ The name Cormia is a coined product name inspired by the biological term *cormid
 
 ## Repository status
 
-This is an initial local repository scaffold. **No GitHub remote has been created yet.** The repository is prepared under `/mnt/data/cormia`; publishing instructions are in [`PUBLISHING.md`](PUBLISHING.md).
+The initial repository scaffold has been published to the public GitHub repository `LiberoNuvola/Cormia` on branch `main`. The published baseline retains its three original commits. This repository remains an architecture-first specification draft; publication does not imply implementation, audit, or production readiness.
 
 The existing `LiberoNuvola/Immortal-Protocol` remains a separate project. Cormia/AEP is a sibling project, not a migration or replacement. Any future integration must be explicit, versioned, and tested through adapters.
 
