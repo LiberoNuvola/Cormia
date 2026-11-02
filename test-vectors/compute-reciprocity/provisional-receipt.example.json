@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "0.1.0",
+  "receiptId": "receipt-example-00000001",
+  "taskId": "task-example-00000001",
+  "contributorId": "ed25519:example-worker-key-id-0001",
+  "requesterId": "ed25519:example-requester-key-0001",
+  "serviceMode": "reciprocal-mesh",
+  "privacyClass": "P1-shared-peer",
+  "verificationProfileId": "llm-inference-sampled-audit-v0",
+  "workload": {
+    "class": "llm-inference",
+    "modelDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "tokenizerDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "runtimeDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+    "quantization": "Q4_K_M",
+    "profileId": "consumer-local-peer-v0"
+  },
+  "measurements": {
+    "startedAt": "2026-11-02T08:00:00Z",
+    "completedAt": "2026-11-02T08:00:12Z",
+    "inputUnits": 512,
+    "outputUnits": 192,
+    "latencyMs": 12000
+  },
+  "inputCommitment": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+  "outputCommitment": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+  "evidenceRefs": [
+    "cas://example/receipt-evidence/0001"
+  ],
+  "issuedAt": "2026-11-02T08:00:13Z",
+  "nonce": "example-nonce-0000000000000001",
+  "requesterSignature": "example-requester-signature-not-cryptographic",
+  "contributorSignature": "example-contributor-signature-not-cryptographic",
+  "verifierAttestations": [],
+  "status": "provisional",
+  "limitations": [
+    "Illustrative test vector only; signatures are placeholders.",
+    "P1 peer can inspect prompt plaintext.",
+    "Provisional receipt MUST NOT mint spendable CRC."
+  ]
+}

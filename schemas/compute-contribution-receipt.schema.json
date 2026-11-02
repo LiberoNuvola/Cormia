@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:immortal-aep:schema:compute-contribution-receipt:0.1.0",
+  "title": "IMMORTAL-AEP Compute Contribution Receipt",
+  "description": "Draft receipt for an accepted compute contribution. It is evidence, not by itself proof of correct execution or entitlement to cash.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "receiptId",
+    "taskId",
+    "contributorId",
+    "workload",
+    "measurements",
+    "inputCommitment",
+    "outputCommitment",
+    "issuedAt",
+    "nonce",
+    "status",
+    "requesterId",
+    "serviceMode",
+    "privacyClass",
+    "verificationProfileId",
+    "requesterSignature",
+    "contributorSignature"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "receiptId": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 128
+    },
+    "taskId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "contributorId": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 256
+    },
+    "requesterId": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 256
+    },
+    "serviceMode": {
+      "type": "string",
+      "enum": [
+        "reciprocal-mesh",
+        "community-sponsored"
+      ]
+    },
+    "privacyClass": {
+      "type": "string",
+      "enum": [
+        "P1-shared-peer",
+        "P2-attested-execution",
+        "P3-split-inference"
+      ]
+    },
+    "verificationProfileId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "workload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "class",
+        "runtimeDigest"
+      ],
+      "properties": {
+        "class": {
+          "type": "string",
+          "enum": [
+            "llm-inference",
+            "embedding",
+            "reranking",
+            "build-test",
+            "verification",
+            "other"
+          ]
+        },
+        "modelDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "tokenizerDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "runtimeDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "quantization": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "profileId": {
+          "type": "string",
+          "maxLength": 128
+        }
+      }
+    },
+    "measurements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "startedAt",
+        "completedAt"
+      ],
+      "properties": {
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "completedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "inputUnits": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "outputUnits": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "verifiedWorkUnits": {
+          "type": "number",
+          "minimum": 0
+        },
+        "cpuTimeMs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "gpuTimeMs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "peakRamBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "peakVramBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "latencyMs": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "inputCommitment": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "outputCommitment": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 512
+      },
+      "uniqueItems": true
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 256
+    },
+    "requesterSignature": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 512
+    },
+    "contributorSignature": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 512
+    },
+    "verifierAttestations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 16,
+        "maxLength": 512
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "provisional",
+        "accepted",
+        "challenged",
+        "rejected",
+        "expired"
+      ]
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 512
+      }
+    }
+  }
+}

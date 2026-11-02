@@ -1,0 +1,31 @@
+# Secrets and local credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials/
+
+# Runtime state and logs
+*.log
+logs/
+data/
+state/
+checkpoints/
+
+# Local build/test output
+node_modules/
+dist/
+build/
+coverage/
+.cache/
+.tmp/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
