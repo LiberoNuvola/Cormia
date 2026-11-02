@@ -34,3 +34,12 @@ The following v0.1 files are non-normative local design contracts associated wit
 These schemas do not implement key provisioning, authenticated UI consent, persistent journal storage or anti-rollback by themselves. Semantic checks and provider guarantees are defined in ADR-0009. They do not change the Task Manifest or ADR-008 v0.1 grant profile.
 
 The host key descriptor permits `Ed25519` (the current isolated ADR-008 v0.1 profile) and `ES256` (a candidate for a future Windows CNG profile). The ADR-008 grant helper currently supports Ed25519 only. Listing ES256 in the descriptor schema does not enable ES256 signing or verification; see the read-only [Windows CNG discovery probe](../scripts/probe-windows-cng-capabilities.ps1) and [ADR-0009](../docs/adr/0009-proposed-local-authority-bootstrap-consent-and-revocation-anchor.md).
+
+## Autonomous project delegation proposal
+
+[ADR-0010](../docs/adr/0010-autonomous-project-delegation-and-runtime-authority.md) defines the target for autonomous local project work. Its draft schemas are:
+
+- [local-autonomous-project-mandate-claims-v0.1.schema.json](local-autonomous-project-mandate-claims-v0.1.schema.json): one standing project mandate with multi-operation authority, a dedicated project worktree, operation/network/resource policies, expiry and protected-action boundaries.
+- [local-project-mandate-consent-claims-v0.1.schema.json](local-project-mandate-consent-claims-v0.1.schema.json): one interactive operator consent receipt over the complete mandate digest.
+
+The intended interaction is one initial project delegation, not approval for every edit, patch or test. The Runtime loads the mandate and derives internal child grants automatically. The schema files do not yet implement mandate signing, storage, Agent integration or credential brokering.
