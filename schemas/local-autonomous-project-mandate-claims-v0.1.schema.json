@@ -1,0 +1,332 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:immortal-aep:schema:local-autonomous-project-mandate:0.1.0",
+  "title": "IMMORTAL Local Autonomous Project Mandate",
+  "description": "A standing operator-authorized project policy loaded by trusted local Runtime code. It is not a per-call bearer token and private/service credentials are forbidden.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "mandateId",
+    "issuerId",
+    "operatorPrincipalId",
+    "subject",
+    "project",
+    "workspace",
+    "allowedOperations",
+    "gitPolicy",
+    "networkPolicy",
+    "resourceBudget",
+    "autonomyPolicy",
+    "protectedActions",
+    "issuedAt",
+    "notBefore",
+    "expiresAt",
+    "delegable",
+    "operatorConsentDigest"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "mandateId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "issuerId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "operatorPrincipalId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workerId",
+        "runtimeId"
+      ],
+      "properties": {
+        "workerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "runtimeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      }
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "projectRef",
+        "repositoryRef",
+        "baseRef"
+      ],
+      "properties": {
+        "projectRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "repositoryRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "baseRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      }
+    },
+    "workspace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workspaceRef",
+        "scopeMode",
+        "recursive",
+        "excludedPaths",
+        "taskWorktreeRequired"
+      ],
+      "properties": {
+        "workspaceRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "scopeMode": {
+          "type": "string",
+          "const": "isolated-project-worktree"
+        },
+        "recursive": {
+          "type": "boolean",
+          "const": true
+        },
+        "excludedPaths": {
+          "type": "array",
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          }
+        },
+        "taskWorktreeRequired": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "allowedOperations": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "workspace.list",
+          "workspace.read",
+          "workspace.diff",
+          "workspace.verify",
+          "workspace.create",
+          "workspace.replace",
+          "workspace.patch",
+          "workspace.test",
+          "workspace.build",
+          "git.branch.create",
+          "git.commit.local",
+          "git.push.feature-branch",
+          "github.pull-request.create",
+          "github.pull-request.update"
+        ]
+      }
+    },
+    "gitPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "branchPrefix",
+        "defaultBranchWrite",
+        "protectedBranchMerge",
+        "releaseTag",
+        "autoPushFeatureBranch",
+        "autoCreatePullRequest"
+      ],
+      "properties": {
+        "branchPrefix": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._/-]{1,64}$"
+        },
+        "defaultBranchWrite": {
+          "type": "string",
+          "const": "deny"
+        },
+        "protectedBranchMerge": {
+          "type": "string",
+          "const": "separate-authority"
+        },
+        "releaseTag": {
+          "type": "string",
+          "const": "separate-authority"
+        },
+        "autoPushFeatureBranch": {
+          "type": "boolean"
+        },
+        "autoCreatePullRequest": {
+          "type": "boolean"
+        }
+      }
+    },
+    "networkPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "allowedHttpsHosts"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "offline",
+            "https-allowlist"
+          ]
+        },
+        "allowedHttpsHosts": {
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 64,
+          "items": {
+            "type": "string",
+            "pattern": "^(?=.{1,253}$)[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?$"
+          }
+        }
+      }
+    },
+    "resourceBudget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxConcurrentTasks",
+        "maxAttemptsPerTask",
+        "maxRuntimeMinutes",
+        "maxCpuHeavyMinutes",
+        "maxMemoryMiB"
+      ],
+      "properties": {
+        "maxConcurrentTasks": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "maxAttemptsPerTask": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "maxRuntimeMinutes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10080
+        },
+        "maxCpuHeavyMinutes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1440
+        },
+        "maxMemoryMiB": {
+          "type": "integer",
+          "minimum": 256,
+          "maximum": 1048576
+        }
+      }
+    },
+    "autonomyPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "acceptInScopeTasksAutomatically",
+        "allowAgentCreatedSubtasks",
+        "humanApprovalPerOperation",
+        "continueIndependentTasksOnBlock",
+        "stopOnTrustFailure"
+      ],
+      "properties": {
+        "acceptInScopeTasksAutomatically": {
+          "type": "boolean",
+          "const": true
+        },
+        "allowAgentCreatedSubtasks": {
+          "type": "boolean",
+          "const": true
+        },
+        "humanApprovalPerOperation": {
+          "type": "boolean",
+          "const": false
+        },
+        "continueIndependentTasksOnBlock": {
+          "type": "boolean",
+          "const": true
+        },
+        "stopOnTrustFailure": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "protectedActions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "push-protected-branch",
+          "merge-protected-branch",
+          "release",
+          "production-deploy",
+          "read-secret-material",
+          "wallet-signing",
+          "fund-transfer",
+          "cardano-settlement",
+          "change-trust-anchor",
+          "widen-mandate"
+        ]
+      }
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notBefore": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "delegable": {
+      "type": "boolean",
+      "const": false
+    },
+    "operatorConsentDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    }
+  }
+}
