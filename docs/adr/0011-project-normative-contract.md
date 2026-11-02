@@ -195,3 +195,12 @@ The source-drift classifier consumes paths from a trusted Git adapter; it does n
 - No human approval for ordinary in-scope code changes, tests, builds, refactors or evidence collection.
 - No autonomous semantic changes to normative sources, closed decisions or protected invariants.
 - No merge to protected branches, production deployment, wallet signing, fund transfer or Cardano settlement authority from the PNC.
+
+
+## 11B. PNC identity bound to mandate v0.2 — reference checkpoint
+
+The new v0.2 mandate and consent schemas require the same PNC identity tuple (contract identifier, PNC schema version, canonical identity profile and SHA-256 digest). The mandate digest covers that tuple; the consent receipt repeats it so the host can check the displayed baseline against the mandate that was approved.
+
+The isolated PNC-bound authority adapter refuses v0.1 mandates, untrusted or inactive PNCs, source-integrity failures, digest mismatch and project/repository mismatch. It carries the tuple into the derived task child authority and rechecks it at every operation boundary before reusing the existing operational policy engine.
+
+This is a reference integration test, not production authority. PNC verification flags must originate from a trusted host store, not model input. The repository does not yet provide the authenticated PNC store, signing/consent lifecycle, local Agent integration or task worktree isolation. The IMMORTAL PNC fixture remains draft and is intentionally rejected by the v0.2 authority adapter.

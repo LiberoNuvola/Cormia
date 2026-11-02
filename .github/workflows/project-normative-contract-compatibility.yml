@@ -12,9 +12,23 @@ on:
       - "runtime/reference-worker/pnc-contract-identity.mjs"
       - "runtime/reference-worker/pnc-contract-identity.test.mjs"
       - "docs/identity/project-normative-contract-identity-profile-v0.1.md"
+      - "schemas/local-autonomous-project-mandate-claims-v0.2.schema.json"
+      - "schemas/local-project-mandate-consent-claims-v0.2.schema.json"
+      - "runtime/reference-worker/pnc-bound-project-authority.mjs"
+      - "runtime/reference-worker/pnc-bound-project-authority.test.mjs"
+      - "tests/test_pnc_bound_mandate.py"
+      - "docs/identity/pnc-bound-mandate-v0.2.md"
+      - "docs/adr/0010-autonomous-project-delegation-and-runtime-authority.md"
       - "schemas/README.md"
       - "tests/test_pnc_runtime.py"
       - "docs/adr/0011-project-normative-contract.md"
+      - "schemas/local-autonomous-project-mandate-claims-v0.2.schema.json"
+      - "schemas/local-project-mandate-consent-claims-v0.2.schema.json"
+      - "runtime/reference-worker/pnc-bound-project-authority.mjs"
+      - "runtime/reference-worker/pnc-bound-project-authority.test.mjs"
+      - "tests/test_pnc_bound_mandate.py"
+      - "docs/identity/pnc-bound-mandate-v0.2.md"
+      - "docs/adr/0010-autonomous-project-delegation-and-runtime-authority.md"
       - ".github/workflows/project-normative-contract-compatibility.yml"
   pull_request:
     branches: [main]
@@ -27,9 +41,23 @@ on:
       - "runtime/reference-worker/pnc-contract-identity.mjs"
       - "runtime/reference-worker/pnc-contract-identity.test.mjs"
       - "docs/identity/project-normative-contract-identity-profile-v0.1.md"
+      - "schemas/local-autonomous-project-mandate-claims-v0.2.schema.json"
+      - "schemas/local-project-mandate-consent-claims-v0.2.schema.json"
+      - "runtime/reference-worker/pnc-bound-project-authority.mjs"
+      - "runtime/reference-worker/pnc-bound-project-authority.test.mjs"
+      - "tests/test_pnc_bound_mandate.py"
+      - "docs/identity/pnc-bound-mandate-v0.2.md"
+      - "docs/adr/0010-autonomous-project-delegation-and-runtime-authority.md"
       - "schemas/README.md"
       - "tests/test_pnc_runtime.py"
       - "docs/adr/0011-project-normative-contract.md"
+      - "schemas/local-autonomous-project-mandate-claims-v0.2.schema.json"
+      - "schemas/local-project-mandate-consent-claims-v0.2.schema.json"
+      - "runtime/reference-worker/pnc-bound-project-authority.mjs"
+      - "runtime/reference-worker/pnc-bound-project-authority.test.mjs"
+      - "tests/test_pnc_bound_mandate.py"
+      - "docs/identity/pnc-bound-mandate-v0.2.md"
+      - "docs/adr/0010-autonomous-project-delegation-and-runtime-authority.md"
       - ".github/workflows/project-normative-contract-compatibility.yml"
   workflow_dispatch:
 
@@ -56,6 +84,9 @@ jobs:
       - name: Validate schema, fixture and fail-closed cases
         run: python scripts/validate-project-normative-contract.py
 
+      - name: Test PNC-bound mandate and consent schemas
+        run: python -m unittest discover -s tests -p 'test_pnc_bound_mandate.py' -v
+
       - name: Test deterministic PNC loader, source drift and policy
         run: python -m unittest discover -s tests -p 'test_pnc_runtime.py' -v
 
@@ -66,3 +97,6 @@ jobs:
 
       - name: Test deterministic PNC identity profile
         run: node --test runtime/reference-worker/pnc-contract-identity.test.mjs
+
+      - name: Test PNC-bound project task authority
+        run: node --test runtime/reference-worker/pnc-bound-project-authority.test.mjs

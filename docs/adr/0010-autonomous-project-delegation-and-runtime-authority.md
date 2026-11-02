@@ -167,3 +167,10 @@ This is a pure authorization-policy prototype, not an Agent integration. It does
 - No silent cloud fallback when local inference is unavailable.
 - No direct merge/deploy/release, fund transfer, wallet signing or Cardano settlement authority from this coding mandate.
 - No removal of the legacy APPROVO path until the new autonomous Runtime boundary has passed its parity and safety tests.
+
+
+### 10.2 PNC-bound mandate v0.2 — reference slice
+
+The v0.2 mandate and consent schemas require an exact PNC identity tuple. The isolated PNC-bound authority adapter verifies the host-supplied PNC status, schema/source-integrity/owner-authority assertions, recomputed digest, and project/repository binding before deriving a child authority. The child payload includes the same tuple under its own integrity digest, and every operation rechecks the current PNC before delegating to the existing operation policy.
+
+This does not alter mandate v0.1 or its legacy prototype. It does not activate the IMMORTAL draft, create a trusted PNC store, sign/persist mandates, create consent UI, build a worktree, or connect to the Agent. The new v0.2 schemas and adapter are an isolated reference contract pending review and integration.
