@@ -28,11 +28,14 @@ test("all lifecycle claim schemas are valid JSON Schema draft 2020-12 objects", 
 test("host key descriptor contains only public metadata and an opaque key-provider reference", async () => {
   const schema = await loadSchema(schemaPaths.key);
   const properties = schema.properties;
-  assert.equal(properties.algorithm.const, "Ed25519");
+  assert.deepEqual(properties.algorithm.enum, ["Ed25519", "ES256"]);
+  assert.ok(properties.algorithm.description.includes("current grant helper does not implement ES256"));
   assert.equal(properties.privateKeyExportable.const, false);
   assert.ok(properties.publicKeySpkiDerBase64);
   assert.ok(properties.publicKeySha256);
   assert.ok(properties.providerKeyRef);
+  assert.ok(properties.providerId.enum.includes("windows-cng-platform-crypto-provider"));
+  assert.ok(properties.providerId.enum.includes("windows-cng-software-key-storage-provider"));
   assert.ok(!Object.hasOwn(properties, "privateKey"));
   assert.ok(!Object.hasOwn(properties, "privateKeyPem"));
   assert.ok(!Object.hasOwn(properties, "privateKeyBytes"));
