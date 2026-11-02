@@ -70,7 +70,7 @@ async function main() {
     agentRootPresent: false,
     codingRootPresent: false,
     taskStore: { present: false, valid: null, taskCount: 0, statusCounts: {}, errorCount: 0, warningCount: 0 },
-    evidenceSidecars: { checked: false, result: "not-run", valid: null, referencedCount: 0, validCount: 0, missingCount: 0, unsafeCount: 0, tooLargeCount: 0, invalidJsonCount: 0, invalidSchemaCount: 0, readErrorCount: 0, evidenceItemCount: 0, errorItemCount: 0, emptySidecarCount: 0, bytesRead: 0, withoutEvidencePathCount: 0, maxFileBytes: 8388608 },
+    evidenceSidecars: { checked: false, result: "not-run", valid: null, referencedCount: 0, validCount: 0, missingCount: 0, unsafeCount: 0, tooLargeCount: 0, invalidJsonCount: 0, invalidSchemaCount: 0, readErrorCount: 0, evidenceItemCount: 0, errorItemCount: 0, emptySidecarCount: 0, bytesRead: 0, withoutEvidencePathCount: 0, runningTaskCount: 0, maxFileBytes: 8388608 },
     resourceManager: { importOk: false, leaseProbe: "not-run", reason: null, operation: "agent-inference" },
     codingWorkspace: { importOk: false, readOnlyListProbe: "not-run", totalEntries: null, truncated: null, reason: null },
     evolutionManager: { importOk: false, runCount: 0, statusCounts: {}, openCandidateRead: "not-run", readSha256Prefix: null },
