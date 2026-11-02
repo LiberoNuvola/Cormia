@@ -108,3 +108,8 @@ The following invariants MUST hold:
 ## 4. Compatibility and migration policy
 
 Every adapter MUST pin its protocol/schema version, expose its capability set, record a source/runtime digest, and provide positive/negative contract tests. Existing components are preserved until a target adapter passes parity tests and a rollback path is documented in an ADR.
+
+
+### Local adapter verification on Windows
+
+The aggregate local probe is `scripts/verify-local-runtime-adapters.mjs`. It checks the real Task Store v1 envelope without printing task contents, samples the local Resource Manager using an immediate lease release, validates existing Evolution Manager run journals, and performs a bounded candidate read only when a valid open run exists. It does not start a task, evolution or model process, and it does not call Docker or modify live state. See the run instructions in [the reference worker README](../runtime/reference-worker/README.md).
