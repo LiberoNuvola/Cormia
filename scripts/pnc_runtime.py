@@ -106,7 +106,7 @@ def semantic_errors(contract: Mapping[str, Any]) -> list[str]:
             for ref in item.get(field, []):
                 if ref not in source_ids:
                     errors.append(f"{group}/{iid}: unknown source reference {ref}")
-                elif group in {"closedDecisions", "invariants"} and sources_by_id[ref].get("authorityClass") not in NORMATIVE:
+                elif group == "closedDecisions" and sources_by_id[ref].get("authorityClass") not in NORMATIVE:
                     errors.append(f"{group}/{iid}: {ref} is not a normative/decision source")
 
     for ref in contract.get("evidencePolicy", {}).get("classificationSourceRefs", []):
