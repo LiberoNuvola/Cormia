@@ -133,7 +133,7 @@ A mandate can be revoked once through the trusted operator control surface. Revo
 ## 10. Implementation plan and acceptance criteria
 
 1. Define and schema-test the project mandate, including a multi-operation capability set, project/worktree binding, branch policy, resource/retry budget, network policy, expiry and protected-action list.
-2. Build a fake mandate/child-grant provider and deterministic Runtime authorization engine. Tests must prove no human callback is requested for an in-scope read/write/test loop.
+2. Build and review the deterministic Runtime authorization engine. A first isolated policy prototype now exists in [local-autonomous-project-authority.mjs](../../runtime/reference-worker/local-autonomous-project-authority.mjs), with [17 contract tests](../../runtime/reference-worker/local-autonomous-project-authority.test.mjs). It derives one internal child authority per task and authorizes repeated in-scope operations without per-operation approval callbacks.
 3. Build a dedicated workspace/worktree manager with task-safe root binding, path/symlink containment, named test profiles and cleanup/recovery.
 4. Implement local credential brokering as a separate host service. Test that secrets never enter model messages, tool responses, task store or evidence.
 5. Implement a durable one-time project mandate store using the key provider and monotonic/revocation model in ADR-0009.
@@ -143,6 +143,16 @@ A mandate can be revoked once through the trusted operator control surface. Revo
 9. Only then enable the autonomous mode for the user's project workspace. Do not activate it by changing the old Agent approval function alone.
 
 Acceptance means: after one project mandate is approved, a synthetic multi-step coding task can read, create, replace, run its named tests, diagnose a failure, fix it, rerun and produce a completion/evidence report with zero per-operation human prompts, while failing closed outside the isolated mandate and never exposing a credential to the model.
+
+### 10.1 First policy-engine slice — implemented, not integrated
+
+The isolated policy engine is [local-autonomous-project-authority.mjs](../../runtime/reference-worker/local-autonomous-project-authority.mjs), with [17 contract tests](../../runtime/reference-worker/local-autonomous-project-authority.test.mjs). It accepts a mandate object that host code has already signature-verified, consent-verified and reconciled against the revocation anchor. It derives one internal child authority bound to the mandate digest, task ID, manifest digest, worker, Runtime, project, repository, worktree, operation set and expiry. Repeated tool calls reuse that authority and receive machine authorization decisions; there is no human-approval callback and no bearer/API token parameter.
+
+The policy checks host/mandate intersection, path traversal and excluded paths, named test/build profiles, feature-branch restrictions, optional HTTPS host allowlisting, mandate/task expiry, child-authority digest integrity and trust/revocation state. Protected external actions remain denied.
+
+[Local Runtime Capability Grant Contracts run #25](https://github.com/LiberoNuvola/Cormia/actions/runs/41484097123) passed **65 tests**: 21 grant/crypto, 6 lifecycle schema, 6 project mandate schema, 17 autonomous authority and 15 revocation-anchor tests, with zero failures.
+
+This is a pure authorization-policy prototype, not an Agent integration. It does not verify mandate signatures itself, issue or persist a signed mandate, create a project worktree, perform filesystem realpath checks, run builds/tests, obtain remote credentials, enforce OS resource quotas or run an autonomous task loop. The trusted mandate object in tests is synthetic. The old Agent /code + APPROVO path is unchanged.
 
 ## 11. Non-goals and non-regression
 
