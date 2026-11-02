@@ -377,6 +377,9 @@ export function authorizeLocalWorkspaceOperation({
   if (!Number.isFinite(nowMs)) return { allowed: false, reason: "invalid-runtime-clock" };
 
   const claims = grant.claims;
+  if (hostPolicy.issuerId !== grant.issuerId) {
+    return { allowed: false, reason: "issuer-not-authorized-by-host-policy" };
+  }
   if (claims.taskId !== expected.taskId) return { allowed: false, reason: "task-mismatch" };
   if (claims.manifestDigest !== expected.manifestDigest) return { allowed: false, reason: "manifest-mismatch" };
   if (claims.subject.workerId !== expected.workerId) return { allowed: false, reason: "worker-mismatch" };
