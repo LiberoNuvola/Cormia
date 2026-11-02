@@ -36,6 +36,14 @@ The existing bridge is intentionally fixed to `LiberoNuvola/Immortal-Protocol` /
 
 The v0.8.0 local agent, Granite/llama.cpp backend, task-store lineage, Resource Manager, Evolution Manager, Coding Workspace and Docker test path are the initial implementation nucleus. AEP conformance requires adapters and test vectors; v0.8.0 is not declared conformant today.
 
+### Coding Workspace capability boundary
+
+The local Coding Workspace exposes seven tools and enforces path/root safety in its class. However, the existing Agent orchestrator—not `CodingWorkspace.callTool()`—enforces the `/code` turn gate, the single-operation `APPROVO` confirmation for `workspace_write`, `workspace_patch` and `workspace_test`, and the `cpu-heavy` lease for tests.
+
+The exact tool classification, path rules, file limits, Docker restrictions and AEP mapping blockers are recorded in the [Coding Workspace capability matrix](../architecture/CODING_WORKSPACE_CAPABILITY_MATRIX_2026-11-02.md).
+
+The current AEP `capabilitySet` has no frozen operation vocabulary or path-scope grammar. A Cormia capability adapter must not invent one or call the class directly in a way that bypasses the Agent approval gate. Per-task path roots and task-scoped test selection remain unimplemented.
+
 ### IMMORTAL Agent Task Store v1 compatibility adapter
 
 A read-only compatibility slice is implemented at `runtime/reference-worker/immortal-agent-task-store-v1-adapter.mjs`, with schemas for the v1 task-store envelope and attempt evidence sidecars.
