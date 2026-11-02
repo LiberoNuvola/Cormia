@@ -3,7 +3,7 @@
 - **Status:** Proposed — non-normative security design; no real key or persistence provider activated
 - **Date:** 2026-11-02
 - **Depends on:** [ADR-0007](./0007-proposed-task-capabilities-and-workspace-scope.md) and [ADR-0008](./0008-proposed-local-capability-grants-and-revocation.md)
-- **Scope:** local-only host identity, task-specific operator consent, and rollback-aware revocation recovery
+- **Scope:** local-only host identity, one-time project-mandate delegation, and rollback-aware revocation recovery
 
 ## 1. Source findings and security boundary
 
@@ -21,7 +21,7 @@ No existing component currently supplies a complete local host trust anchor, tas
 Separate three independent records and their authorities:
 
 1. **Host authority key descriptor:** identifies the public key and opaque key-provider handle of the local host authority. The private key remains inside a protected signing provider and is never written to Cormia, Task Store, evidence sidecars, Git or ordinary configuration.
-2. **Operator consent receipt:** records one explicit, authenticated, interactive decision over a canonical task/grant intent. It is not inferred from model output, task text, a prior generic approval or mere possession of a host signing key.
+2. **Operator consent receipt:** records one explicit, authenticated, interactive decision over the canonical project-mandate digest. It is not inferred from model output, task text, a prior generic approval or mere possession of a host signing key.
 3. **Revocation journal + protected monotonic anchor:** records signed revocation events in a hash-linked sequence and binds the latest journal head to state that cannot be rolled back together with the journal file.
 
 A grant is usable only when all three trust paths are healthy: host key trusted and active, the applicable operator delegation valid, and revocation journal reconciled with the monotonic anchor. For the autonomous project-worker target, the operator consents once to the complete project mandate digest; the Runtime derives child task grants automatically. Per-operation approval is explicitly not the target. See [ADR-0010](./0010-autonomous-project-delegation-and-runtime-authority.md).
@@ -108,28 +108,28 @@ Do not sign a grant when the key is missing, inactive, expired, revoked, unpinne
 
 ### 4.1 Canonical intent
 
-Before presenting consent, the trusted Runtime constructs one immutable intent from trusted inputs. It includes at minimum:
+Before presenting consent, the trusted Runtime constructs one immutable project mandate intent from trusted inputs. It includes at minimum:
 
-- task ID and authenticated manifest digest;
-- issuer, worker and Runtime identities;
-- capability ID;
-- workspace reference and exact file/directory set or named execution profile;
-- resource/constraint profile where applicable;
-- host-policy digest;
-- grant validity interval;
-- intended adapter and operation family.
+- project ID, repository identity and base reference;
+- issuer, operator, worker and Runtime identities;
+- host-resolved isolated worktree reference and branch policy;
+- the complete set of allowed operation families, including routine file writes, builds and tests;
+- network destination policy and any optional remote GitHub scope;
+- resource, retry, concurrency and runtime budgets;
+- excluded secret/credential areas and protected external actions;
+- mandate validity interval and revocation policy.
 
-The host computes a domain-separated `consentIntentDigest` over the canonical intent. This digest, not free-form task prose, is the object the operator approves.
+The host computes a domain-separated mandate digest over the canonical intent. This digest, not free-form task prose, is the object the operator approves.
 
 ### 4.2 Local interactive project-mandate delegation
 
 A trusted local consent broker must display the complete project mandate digest and its effective authority in the same initial project-setup interaction. It must clearly state that routine in-scope reads, edits, tests and builds will run autonomously without further prompts. The detail below is a one-time mandate delegation ceremony, not an approval step repeated for every operation:
 
-- task ID and manifest digest;
-- exact operation(s), workspace and paths;
-- whether content will be read, created, replaced or executed;
-- expiry and relevant resource/network/privacy constraints;
-- the complete intent fingerprint and a short challenge derived from it.
+- project/repository identity and exact isolated worktree binding;
+- routine operations the agent may perform autonomously, including edits, tests and builds;
+- branch, commit and optional feature-branch push/PR policy;
+- expiry, network destinations, resource/retry limits and protected actions;
+- the complete mandate fingerprint and a short challenge derived from it.
 
 The operator explicitly approves or denies the whole mandate once. The proposed initial challenge is the final eight lowercase hexadecimal characters of the mandate digest; the operator must type the displayed suffix to approve the project authority. A change that widens the mandate requires a new consent; routine tool calls and automatically derived child grants do not. A timeout, closed window, missing authenticated operator identity, denied action, mismatched challenge or unavailable consent broker is a denial.
 
@@ -137,11 +137,10 @@ This proposal is one-time and project-scoped. It allows autonomous child tasks o
 
 ### 4.3 Consent receipt
 
-[local-operator-consent-claims-v0.1.schema.json](../../schemas/local-operator-consent-claims-v0.1.schema.json) defines the proposed receipt claims. The signed receipt binds:
+[local-project-mandate-consent-claims-v0.1.schema.json](../../schemas/local-project-mandate-consent-claims-v0.1.schema.json) defines the target autonomous project's one-time mandate receipt. The signed receipt binds:
 - issuer and authenticated operator principal;
 - trusted consent broker and unique interaction ID;
-- exact grant intent digest, task, manifest and host-policy digest;
-- capability, workspace and scope digest;
+- the complete project mandate digest, project and workspace references;
 - explicit `approve` or `deny` decision;
 - displayed/confirmed challenge, short expiry, nonce and sequence.
 
@@ -149,7 +148,9 @@ Semantic verification MUST compare `displayedChallenge` with `confirmedChallenge
 
 The local host authority may sign an approval receipt only after the trusted consent broker reports a successful authenticated interactive action. The signature attests that the host authority recorded the broker's decision; it does not magically prove a physical human interaction if the broker itself is compromised.
 
-### 4.4 Binding consent to the grant
+#The earlier single-capability consent-claim schema remains a lower-level experimental artifact. For autonomous project work, use the project-mandate consent schema above; do not request a new human receipt for each child grant or tool invocation.
+
+## 4.4 Binding consent to the grant
 
 Do not add one new human consent receipt to each ADR-008 v0.1 child grant. The autonomous project mandate in ADR-0010 is the consented parent authority. A future grant profile may bind each internal child grant to the parent mandate digest and task digest; that machine binding is not a new human approval. The operator consent receipt binds to the entire project mandate, including all allowed operation families and limits.
 
@@ -310,6 +311,6 @@ The provider implementation tests must additionally include process termination 
 - No write to the user's PC, Agent, Control Room, local Task Store or Evolution Manager.
 - No GitHub secret, repository private key or hosted signer.
 - No change to `SPEC.md`, Task Manifest schema, Agent `APPROVO`, IMMORTAL/PRE-RICH on-chain logic or task-store format.
-- No production or unattended grants.
+- No production grant activation or unattended execution until the project mandate, trusted key provider, consent broker, isolated worktree and durable anti-rollback anchor are implemented and verified. This is an implementation gate, not a requirement for per-operation human prompts.
 - No claim that a file hash chain is rollback-resistant.
 - No claim that an operator consent schema is proof of a human action until the trusted broker and OS principal binding exist.
