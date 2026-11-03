@@ -301,3 +301,14 @@ The contract keeps project lifecycle, mandate/authority lifecycle and individual
 A bounded Core reference model and 22 standard-library tests were added in `verification/core_contracts/`. GitHub Actions [run #37](https://github.com/LiberoNuvola/Cormia/actions/runs/41583031982) passed 22 Core tests plus 31 EXP boundary tests (53 total, 0 failures). This verifies only abstract contract predicates; it is not a production Core implementation, mandate/consent persistence, credential broker, Resource Provider mesh, Community Support registry or end-to-end agent loop.
 
 No runtime, mandate schema, Task Manifest, payment provider, wallet, Cardano, token, CRC or IMMORTAL economic behavior was implemented or changed.
+
+
+## 6T. Versioned Cormia Core record schemas — 2026-11-03
+
+The four Core contracts now have an initial JSON record-schema slice, catalogued in [CORMIA_CORE_INTERFACE_CATALOG_v0.1.md](CORMIA_CORE_INTERFACE_CATALOG_v0.1.md). Seven strict JSON Schema Draft 2020-12 records live under `schemas/core/`: Project Descriptor; Project Lifecycle Record and Event; Resource Offer and Lease; Financial Support Contribution; and In-Kind Support Contribution.
+
+The Project Descriptor contains a digest-bound reference to the existing mandate claims, not a second mandate representation. Project lifecycle, mandate authority and task lifecycle remain separate. Resource offers cannot become available without owner acceptance and validation evidence. Financial and in-kind support remain distinct; a settled financial contribution requires provider confirmation, while an in-kind record has no monetary equivalent.
+
+GitHub Actions [run #48](https://github.com/LiberoNuvola/Cormia/actions/runs/41583912440) passed **39 Core tests** (22 abstract predicate tests + 17 JSON Schema conformance tests) and **31 EXP boundary tests**: 70 total, zero failures.
+
+This is contract/schema evidence only. No schema-generated Runtime types, durable project journal, lifecycle reducer, mandate resolver, persistent Resource Lease store, Community Support service or integrated autonomous Core Runtime is present. Existing signed mandate/consent schemas, ADR-0010, AEP Task Manifest and production runtime behavior remain unchanged.
