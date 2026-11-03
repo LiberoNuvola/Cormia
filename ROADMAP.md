@@ -6,6 +6,19 @@
 - Prior-art register and licensing decision.
 - Normative principles, actors, trust model and layer boundaries.
 
+## Gate 0A — Current architecture prior-art composition gate
+
+Before building any newly proposed Core subsystem, map it to an existing standard/system or justify the Cormia-specific residual. The canonical review is [Cormia Prior-Art Composition Review v0.1](docs/research/CORMIA_PRIOR_ART_COMPOSITION_REVIEW_2026-11-03.md).
+
+- Complete PA-01 durable local task execution comparison (Temporal vs LangGraph/current local store) before creating a generic task engine.
+- Complete PA-02 authority/delegation comparison (current mandate + Cedar/OPA; current grant + UCAN/Biscuit) before creating a new policy language or token format.
+- Complete PA-03 host-isolation comparison (Windows/Linux native enforcement, with optional gVisor/Kata/Firecracker tiers) before creating Cormia sandbox code.
+- Complete PA-04 provenance comparison (in-toto/DSSE/SLSA + Orynq + SCITT/Materios) before freezing a new completion-receipt envelope or evidence log.
+- Complete PA-05 only if a real multi-agent workflow needs a chat backend beyond A2A/MCP and Git worktrees.
+- Complete PA-06 before remote compute markets, CRC issuance or project compute rewards.
+- Record exact upstream version, source commit, license, dependency/security review, trust boundary, adapter contract and conformance tests for each adopted implementation.
+- If an upstream system satisfies the requirement, ADOPT/ADAPT it rather than implementing a competing generic subsystem.
+
 ## Gate 0B — Preserve and map the existing nucleus
 
 - Map the IMMORTAL Local Agent v0.8.0, Resource Manager, Evolution Manager, Coding Workspace and persistent task/audit lineage.
