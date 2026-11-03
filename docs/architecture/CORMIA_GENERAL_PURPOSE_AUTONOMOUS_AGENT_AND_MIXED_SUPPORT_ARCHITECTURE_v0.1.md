@@ -164,6 +164,8 @@ Treat resources as typed, independent inputs to execution:
 
 The Resource Manager decides whether a machine or service can safely execute a workload. It does not determine financial solvency. A budget manager or external financial authority does not decide CPU/GPU scheduling or grant host privileges.
 
+The local Resource Broker is an adapter over owner-approved host controls, not a new Cormia sandbox. Windows Job Objects/AppContainer and Windows Sandbox, or Linux OCI/cgroups and optional gVisor/Kata/Firecracker tiers, are prior art to evaluate before writing host enforcement code. CPU/RAM/process control and GPU isolation/measurement are separate capabilities. See the [Cormia Prior-Art Composition Review](../research/CORMIA_PRIOR_ART_COMPOSITION_REVIEW_2026-11-03.md).
+
 A resource offer is not automatically a task capability. The task policy must still authorize what an agent may do with the resource.
 
 ### 5.4 Community support layer — optional
@@ -196,21 +198,21 @@ Financial custody, payments, refunds, contracts and settlement belong behind opt
 
 ### 5.6 Team Collaboration Plane — the agents work as a team
 
-A multi-agent project needs more than task dispatch and isolated worker sandboxes. The Coordination Plane includes a Team Room in which agents discuss, debate, ask each other for help, share progress and conduct peer review. Significant decisions are recorded as structured project decisions linked to tasks and artifacts; a chat message alone never grants authority or changes the mandate.
+A multi-agent project needs more than task dispatch and isolated worker sandboxes. Cormia needs a Team Room experience, but it should compose an existing conversation backend rather than invent a new chat protocol. Matrix or Zulip are candidates for persistent project discussion; A2A is the agent-to-agent interoperability boundary, while MCP covers agent-to-tool/resource access. Significant decisions are recorded as structured project decisions linked to tasks and artifacts; a chat message alone never grants authority or changes the mandate.
 
-The Team Room is paired with a Project Workbench:
-- a shared project context and artifact index;
-- isolated task worktrees for parallel contributions;
+The Team Room experience is paired with a Project Workbench composed from existing primitives:
+- shared project context and an artifact index;
+- isolated Git worktrees for parallel contributions;
 - local repository/version history, independent of any GitHub remote;
 - patch exchange and a common integration worktree;
-- pair/team editing through host-controlled file/module claims, short-lived edit leases or conflict-aware editing;
+- explicit integration/merge operations; evaluate Yjs or another CRDT only if simultaneous same-document editing is a demonstrated requirement;
 - accepted contributions, conflict resolution and attribution.
 
-Agents can work independently, pair on the same component or contribute modules to a common project. The system prevents uncontrolled concurrent overwrites; "shared work" means shared visibility and integration, not unrestricted write access to every host file.
+Agents can work independently, pair on the same component or contribute modules to a common project. The system prevents uncontrolled concurrent overwrites; "shared work" means shared visibility and integration, not unrestricted write access to every host file. Do not build a custom VCS, shared filesystem protocol or real-time editor before the first two-agent workflow demonstrates a gap. See the [prior-art composition review](../research/CORMIA_PRIOR_ART_COMPOSITION_REVIEW_2026-11-03.md).
 
 ### 5.7 Integration & Verification Bench and optional delivery
 
-Contributions are composed in an internal integration workspace before any external publication. The team can compile/build, run declared tests, validate documents/data, conduct independent review, fix failures and rerun within its mandate and resource budget. The output is a digest-bound candidate with evidence and unresolved risks.
+Contributions are composed in an internal integration workspace before any external publication. The team uses the selected existing CI runner, Flux Point DoD gates and JEV evidence vocabulary to compile/build, run declared tests, validate documents/data, conduct independent review, fix failures and rerun within its mandate and resource budget. Cormia binds the exact source revision, inputs, test profile, result and candidate digest; it does not create a parallel CI engine. The output is a digest-bound candidate with evidence and unresolved risks.
 
 Each project declares a delivery profile:
 - local action only (for example, organize/clean a PC);
@@ -226,9 +228,9 @@ A GitHub remote is not a prerequisite for team collaboration, local commits, int
 
 A project may require verifiable completion evidence for selected tasks or compute contributions. Completion is an evidence-bearing claim, not just a task status or agent self-report. The worker-local Cormia Node remains the resource authority: it enforces owner-controlled limits, isolates the workload and produces a task-bound meter/receipt. Resource donation does not give the project or its agents general access to the contributor's PC.
 
-A Work Completion Receipt should bind project/task/attempt, assignment, worker, exact lease, workload, input/output commitments, meter profile, acceptance predicate and verifier evidence. Integrity/availability, resource metering, execution-environment attestation, task-outcome acceptance, execution proof and chain finality are separate claims.
+The Work Completion Receipt is a proposed Cormia claim model, not a decision to invent a new signed-evidence envelope. Before schema freeze, map the Cormia task/attempt/assignment/lease/verifier/acceptance binding to in-toto Statement/DSSE, SLSA provenance, Orynq agent traces/tool receipts and optional SCITT transparency receipts. OpenTelemetry may supply operational traces but is not a correctness proof. The integrity/availability, resource metering, execution-environment attestation, task-outcome acceptance, execution proof and chain finality dimensions remain separate.
 
-Materios may act as an optional receipt/evidence certification adapter; it must not control local resources or project authority. Its current receipt path supports commitment integrity and availability attestation, which does not alone prove task execution or semantic correctness. The [Work Completion Evidence and Materios Certification proposal](./CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md) records current implementation limits and the target profile boundary. Local Core remains independent of Materios and no certification schema/runtime is claimed yet.
+Materios may act as an optional receipt/evidence certification adapter; it must not control local resources or project authority. Its current receipt path supports commitment integrity and availability attestation, which does not alone prove task execution or semantic correctness. The [Work Completion Evidence and Materios Certification proposal](./CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md) records current implementation limits, while the [prior-art composition review](../research/CORMIA_PRIOR_ART_COMPOSITION_REVIEW_2026-11-03.md) defines the PA-04 comparison. No bespoke receipt schema is to be frozen until that comparison leaves a concrete Cormia-specific gap. R0–R4 remain Cormia proposal labels, not an adopted industry assurance standard. Local Core remains independent of Materios.
 
 ## 6. What supporters are actually supporting
 
@@ -320,15 +322,16 @@ No universal Cormia agent operation should be routed through IMMORTAL merely bec
 
 ## 10. Implementation sequencing
 
-1. **Core-first contract:** define the standalone Cormia Core interfaces for project, mandate, agent, task, capability, resource offer, evidence and journal. Keep money/chain fields out of mandatory Core types.
-2. **Two leadership modes:** define creator/team-led, agent-led and hybrid configurations against the same mandate and stewardship interfaces.
-3. **Resource abstraction:** unify local resources, donated resources, model providers and service quotas behind typed Resource Provider interfaces; scheduling and safety stay in Cormia.
-4. **Team collaboration and internal integration:** build the Team Room, Project Workbench, local repository/worktrees, patch exchange, integration workspace and verification bench before wiring any GitHub publication adapter.
-5. **Project support registry:** model support target, contribution type, restrictions, status, custodian, benefits and reporting. Do not assume payment settlement.
-6. **Optional financial adapter:** connect one provider only after support semantics, custody, refunds and spending policy are explicit.
-7. **Optional in-kind mesh:** add opt-in resource discovery, offers, leases, preemption, privacy and reliability evidence.
-8. **Optional AEP/IMMORTAL/Cardano profiles:** connect only the task classes and economic perimeters that require them.
-9. **Conformance:** test that Core runs without all optional adapters, that adapter failure does not halt local work, that sponsors cannot increase agent authority, that funds never enter agent wallets by default, and that financial/resource ledgers remain separate.
+1. **Prior-art composition gate:** complete the bounded PA-01…PA-06 comparisons in [Cormia Prior-Art Composition Review](../research/CORMIA_PRIOR_ART_COMPOSITION_REVIEW_2026-11-03.md); record ADOPT/ADAPT/SPIKE/REFERENCE decisions and exact source/license/trust boundaries before building new subsystems.
+2. **Core-first contract:** define only the Cormia-specific standalone interfaces for project, mandate, task binding, resource offer, acceptance and journal. Keep money/chain fields out of mandatory Core types.
+3. **Two leadership modes:** define creator/team-led, agent-led and hybrid configurations against the same mandate and stewardship interfaces.
+4. **Runtime and resource adapters:** select a durable execution engine and wrap native host controls; preserve the existing Agent, local store, Flux Point DoD and JEV.
+5. **Team collaboration and internal integration:** compose A2A/MCP, Git worktrees and the selected CI/DoD/JEV stack. Add Matrix/Zulip or a CRDT editor only if a measured two-agent workflow requires them.
+6. **Project support registry:** model support target, contribution type, restrictions, status, custodian, benefits and reporting. Do not assume payment settlement.
+7. **Optional financial adapter:** connect one provider/fiscal host only after support semantics, custody, refunds and spending policy are explicit.
+8. **Optional in-kind mesh:** add remote resource discovery, offers, leases, preemption, privacy and reliability evidence only after the local Node is enforceable and revocable.
+9. **Optional AEP/IMMORTAL/Cardano/Materios profiles:** connect only task classes and economic/evidence perimeters that require them.
+10. **Conformance:** test that Core runs without optional adapters, adapter failure does not halt local work, sponsors cannot increase agent authority, funds never enter agent wallets by default, and financial/resource ledgers remain separate.
 
 ## 11. Open decisions — keep separate from Core
 
