@@ -127,8 +127,9 @@ function validateDescriptor(descriptor, expectedProjectRef) {
 }
 
 function validateStewardResolution(result, descriptor) {
-  if (!hasExactKeys(result, ["status", "principalRef", "principalType"]) ||
+  if (!hasExactKeys(result, ["status", "principalStatus", "principalRef", "principalType"]) ||
       result.status !== "verified" ||
+      result.principalStatus !== "active" ||
       result.principalRef !== descriptor.stewardRef ||
       !["human", "organization"].includes(result.principalType)) {
     throw new TrustedProjectResolutionError(
@@ -140,8 +141,9 @@ function validateStewardResolution(result, descriptor) {
 }
 
 function validateAccountabilityResolution(result, descriptor) {
-  if (!hasExactKeys(result, ["status", "arrangementRef", "accountablePrincipalRefs"]) ||
+  if (!hasExactKeys(result, ["status", "arrangementStatus", "arrangementRef", "accountablePrincipalRefs"]) ||
       result.status !== "verified" ||
+      result.arrangementStatus !== "active" ||
       result.arrangementRef !== descriptor.accountabilityRef ||
       !Array.isArray(result.accountablePrincipalRefs) ||
       !result.accountablePrincipalRefs.every(item => isText(item)) ||
@@ -179,7 +181,8 @@ function validateMandateResolution(result, descriptor, hostContext, nowMs) {
     );
   }
   const claims = result.claims;
-  if (claims.issuerId !== hostContext.issuerId ||
+  if (claims.mandateId !== descriptor.mandateRef.mandateId ||
+      claims.issuerId !== hostContext.issuerId ||
       claims.project.projectRef !== descriptor.projectRef ||
       claims.project.repositoryRef !== hostContext.repositoryRef ||
       claims.workspace.workspaceRef !== hostContext.workspaceRef ||
@@ -239,7 +242,8 @@ function validateConsentResolution(result, mandateClaims, mandateDigest, descrip
       !Number.isFinite(parseTime(consent.issuedAt)) ||
       !Number.isFinite(parseTime(consent.expiresAt)) ||
       parseTime(consent.issuedAt) > nowMs ||
-      parseTime(consent.expiresAt) <= nowMs) {
+      parseTime(consent.expiresAt) <= nowMs ||
+      parseTime(consent.issuedAt) >= parseTime(consent.expiresAt)) {
     throw new TrustedProjectResolutionError(
       "Project mandate consent receipt does not bind the approved mandate, project, workspace, operator or challenge.",
       "PROJECT_CONSENT_BINDING_MISMATCH"
@@ -248,11 +252,15 @@ function validateConsentResolution(result, mandateClaims, mandateDigest, descrip
   return consent;
 }
 
-function validateRevocationResolution(result) {
+function validateRevocationResolution(result, mandateClaims, mandateDigest) {
   if (!hasExactKeys(result, [
-    "status", "mandateState", "anchorProviderId", "sequence", "headEventDigest"
+    "status", "issuerId", "mandateId", "mandateDigest", "mandateState",
+    "anchorProviderId", "sequence", "headEventDigest"
   ]) ||
       result.status !== "HEALTHY" ||
+      result.issuerId !== mandateClaims.issuerId ||
+      result.mandateId !== mandateClaims.mandateId ||
+      result.mandateDigest !== mandateDigest ||
       result.mandateState !== "active" ||
       !isText(result.anchorProviderId) ||
       !Number.isSafeInteger(result.sequence) || result.sequence < 0 ||
@@ -267,13 +275,19 @@ function validateRevocationResolution(result) {
 }
 
 function validateLifecycleProjection(result, projectRef) {
-  if (!isPlainObject(result) ||
+  if (!hasOnlyKeys(result, ["projectRef", "state", "revision"], [
+        "lastEventId", "lastEventDigest", "events"
+      ]) ||
       result.projectRef !== projectRef ||
       !Number.isSafeInteger(result.revision) || result.revision < 0 ||
       !Object.hasOwn(result, "state") ||
       !(result.state === null || PROJECT_STATES.has(result.state)) ||
       (result.revision === 0 && result.state !== null) ||
-      (result.revision > 0 && result.state === null)) {
+      (result.revision > 0 && result.state === null) ||
+      (result.lastEventId !== undefined && !isText(result.lastEventId)) ||
+      (result.lastEventDigest !== undefined &&
+        (typeof result.lastEventDigest !== "string" || !DIGEST_PATTERN.test(result.lastEventDigest))) ||
+      (result.events !== undefined && !Array.isArray(result.events))) {
     throw new TrustedProjectResolutionError(
       "Project lifecycle journal projection is invalid or belongs to another project.",
       "PROJECT_LIFECYCLE_PROJECTION_INVALID"
@@ -411,7 +425,9 @@ export function createTrustedProjectResolver({
           mandateId: mandateClaims.mandateId,
           mandateDigest: mandateResolution.claimsDigest,
           now: new Date(nowMs).toISOString()
-        })
+        }),
+        mandateClaims,
+        mandateResolution.claimsDigest
       );
 
       const lifecycle = validateLifecycleProjection(
