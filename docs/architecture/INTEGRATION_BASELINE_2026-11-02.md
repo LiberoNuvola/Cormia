@@ -426,3 +426,17 @@ The assurance model keeps separate evidence dimensions: receipt integrity, evide
 CRC mint is gated on a task-bound accepted useful-work receipt and the declared workload verification profile; raw GPU-hours, worker signatures or receipt availability alone are insufficient. CRC remains distinct from Materios MATRA/MOTRA and from financial reward pools.
 
 **Status:** architecture proposal only. No Work Completion Receipt schema, live Cormia Node meter, independent task verifier, Materios adapter, Materios protocol change, CRC mint/burn ledger or end-to-end certification path is implemented. No Cormia Core dependency on Materios is introduced.
+
+## 6AB. Cormia prior-art composition review — 2026-11-03
+
+Adds [Cormia Prior-Art Composition Review v0.1](../research/CORMIA_PRIOR_ART_COMPOSITION_REVIEW_2026-11-03.md), the current component-level prior-art crosswalk for the Core-first, Coordination Plane, local worker/resource and Work Completion Evidence proposals. It extends the existing [prior-art register](../research/PRIOR_ART.md), [reuse/composition matrix](../research/REUSE_AND_COMPOSITION_MATRIX.md) and [decentralized inference prior-art review](../research/DECENTRALIZED_INFERENCE_PRIOR_ART.md).
+
+The review establishes **Gate 0A** in ROADMAP.md and six bounded spikes before new generic subsystems are created:
+- PA-01 — Temporal vs LangGraph/current local store for durable task execution;
+- PA-02 — Cedar/OPA and UCAN/Biscuit against existing mandate/grant boundaries;
+- PA-03 — Windows/Linux native host controls and optional stronger sandbox tiers;
+- PA-04 — in-toto/DSSE/SLSA, Orynq, OpenTelemetry and SCITT/Materios composition for work evidence;
+- PA-05 — collaboration backend only if the first A2A/MCP + Git-worktree flow leaves a real gap;
+- PA-06 — resource-market/compute-credit comparison before remote mesh or reward issuance.
+
+The architecture documents now prefer adoption/adapters over custom chat protocol, VCS, sandbox, workflow engine, CI system, signed-evidence envelope, transparency log or compute marketplace. This is a documentation/research alignment only: no runtime code, new schema, sandbox, workflow service, chat backend, remote provider network or certification adapter was added or deployed. Existing CI evidence remains bound to the previously tested code commits; no new CI run is claimed for this doc-only review.
