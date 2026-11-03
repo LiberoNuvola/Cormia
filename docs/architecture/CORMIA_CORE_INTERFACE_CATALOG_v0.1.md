@@ -115,6 +115,8 @@ The proposed [Work Completion Evidence and Materios Certification Adapter](./COR
 
 No new JSON Schema is frozen here. Before schema creation, the project must decide the receipt/task/attempt binding, evidence dimensions, meter source/limitations, privacy references, verifier profile, challenge/revocation semantics and certification-state vocabulary. Do not add Materios-specific fields to mandatory Core records: Materios remains an optional adapter.
 
+The schema decision is now gated by PA-04 in [Cormia Prior-Art Composition Review v0.1](../research/CORMIA_PRIOR_ART_COMPOSITION_REVIEW_2026-11-03.md). The comparison must test an in-toto Statement/DSSE envelope, SLSA provenance for build outputs, Orynq process-trace/tool receipts and optional SCITT/Materios transparency/availability receipts. Cormia should add only a narrow typed predicate for mandate/task/attempt/lease/verifier/acceptance bindings if the established formats do not already express the required facts. It must not create a competing signature envelope or transparency log by default.
+
 A future receipt should carry typed references and commitments, not private prompt/output contents. It must distinguish local meter observations from independent task-outcome verification, hardware execution attestation, proof-system evidence and chain finality. A signature over a meter report is not proof that ordinary OS counters are honest.
 
 The current Materios receipt/availability path can support commitment integrity and availability certification. It must not be described as a general task-completion verifier. Execution evidence types whose verifiers are stubs or whose challenge binding is not enabled are unsupported for production certification.
