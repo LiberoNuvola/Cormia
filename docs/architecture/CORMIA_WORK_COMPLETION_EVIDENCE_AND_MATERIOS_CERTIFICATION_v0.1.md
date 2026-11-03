@@ -136,7 +136,7 @@ The current Materios architecture describes:
 - threshold-based receipt certification and optional Cardano checkpoint anchoring;
 - a Midnight coprocessor intended to produce ZK attestations about batched receipt integrity.
 
-The current cert daemon requires ROOT_VERIFIED: fetched chunks must match their declared hashes and the recomputed Merkle root must match the on-chain base_root_sha256. This is a meaningful integrity/availability check, not a semantic task-completion verifier.
+The current cert daemon requires ROOT_VERIFIED: fetched chunks must match their declared hashes and the recomputed Merkle root must match the on-chain base_root_sha256. This is a meaningful integrity/availability check, not a semantic task-completion verifier. There is also a specific self-rooted shortcut for compute_metering_v2: when the manifest declares chunks=[] and the on-chain base_root_sha256 equals content_hash, the verifier returns ROOT_VERIFIED without fetching chunks. Its source comments explicitly state that this path relies on the gateway as manifest authority. It therefore validates the self-rooted receipt under that trust model; it is not an independent proof that the declared GPU/CPU work took place.
 
 The current pallet-tee-attestation types include AMD SEV-SNP, Intel TDX, ARM TrustZone, reproducible-build and ZK-VM execution evidence types. In the source examined for this proposal, only the ARM TrustZone verifier is implemented; the other verifier branches return NotImplemented. The pallet's source also records that challenge binding is a prerequisite to enabling the evidence submission path, and its Disabled storage defaults to true. Therefore the listed types must not be represented as fully operational certifications.
 
