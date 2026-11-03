@@ -46,6 +46,19 @@ function validateConfiguredOffer(offer, providerRef) {
   if (!offer || typeof offer !== "object" || Array.isArray(offer)) {
     throw new TypeError("Each local offer must be an object.");
   }
+  const allowedKeys = new Set([
+    "schemaVersion", "recordType", "offerId", "providerRef", "resourceType",
+    "capabilityProfileRef", "capacity", "availability", "privacyProfileRef",
+    "constraintsRef", "offerState", "ownerAccepted", "ownerAcceptanceRef",
+    "validated", "validationEvidenceRefs", "createdAt", "updatedAt", "operation"
+  ]);
+  if (Object.keys(offer).some(key => !allowedKeys.has(key))) {
+    throw new Error("local-offer-contains-undeclared-property");
+  }
+  if (Object.keys(offer.capacity ?? {}).some(key => !["quantity", "unit"].includes(key)) ||
+      Object.keys(offer.availability ?? {}).some(key => !["notBefore", "expiresAt"].includes(key))) {
+    throw new Error("local-offer-contains-undeclared-nested-property");
+  }
 
   requireText(offer.offerId, "offerId");
   if (offer.providerRef !== providerRef) throw new Error("offer-provider-mismatch");
@@ -65,7 +78,10 @@ function validateConfiguredOffer(offer, providerRef) {
 
   const notBefore = asDate(offer.availability.notBefore, "availability.notBefore");
   const expiresAt = asDate(offer.availability.expiresAt, "availability.expiresAt");
+  const createdAt = asDate(offer.createdAt, "createdAt");
+  const updatedAt = asDate(offer.updatedAt, "updatedAt");
   if (expiresAt <= notBefore) throw new Error("offer-expiry-must-follow-start");
+  if (updatedAt < createdAt) throw new Error("offer-updatedAt-precedes-createdAt");
 
   if (offer.schemaVersion !== "0.1.0" || offer.recordType !== "cormia.core.resource-offer") {
     throw new Error("unsupported-resource-offer-version");
@@ -228,11 +244,24 @@ export function createLocalResourceProvider({
           activatedAt: activatedAt.toISOString(),
           expiresAt: leaseExpiresAt.toISOString()
         };
+        const assertActive = () => {
+          const currentState = stateOf(offer);
+          if (currentState === "revoked") throw new Error("local-resource-offer-revoked");
+          if (currentState !== "available" || now() >= leaseExpiresAt) {
+            throw new Error("local-resource-lease-expired");
+          }
+          return true;
+        };
+        assertActive();
         const result = await input.run({
           lease: copyLease(activeLease),
           resource: executionContext?.resource ?? null,
-          resourceKind: executionContext?.resourceKind ?? null
+          resourceKind: executionContext?.resourceKind ?? null,
+          assertActive
         });
+        // The trusted executor should also call assertActive before each
+        // side-effecting tool operation, not just once around the whole task.
+        assertActive();
         return { taskResult: result, activeLease };
       }
     });
