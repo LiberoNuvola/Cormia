@@ -355,3 +355,12 @@ The existing ADR-008 signed grant verifier is not a Project Mandate verifier. Th
 [GitHub Actions run #105](https://github.com/LiberoNuvola/Cormia/actions/runs/41586377831) passed 41 Python Core/schema tests, 31 EXP tests and 38 Node tests (journal + resolver): **110 total, 0 failures**. The separate [grant/authority regression run #37](https://github.com/LiberoNuvola/Cormia/actions/runs/41586377749) passed all 65 existing crypto/schema/mandate/revocation model tests. Latest resolver tests bind revocation-provider results to the exact issuer, mandate ID and digest and bind the verified mandate ID to the descriptor.
 
 This is an orchestration contract validated with synthetic in-memory provider doubles, not a production trusted Project Resolver. It does not enable the real Agent, change ADR-0010 trust semantics, or activate autonomous project execution.
+
+
+## 6W. Cormia Coordination Plane and multi-node topology — architecture proposal
+
+The new [Cormia Coordination Plane and Multi-Node Topology v0.1](CORMIA_COORDINATION_PLANE_AND_MULTI_NODE_TOPOLOGY_v0.1.md) clarifies where multi-agent/multi-PC coordination lives: in a Cormia Runtime service, not in GitHub, a blockchain or a shared sandbox. One logically authoritative coordinator per project schedules tasks and leases; worker runtimes on each PC expose only host-approved capabilities/resources and execute inside isolated task workspaces.
+
+The coordinator may be hosted on the primary PC, an always-on home server or an owner-controlled VPS/cloud instance. The recommended first topology is one owner-controlled hub plus multiple local worker nodes. GitHub remains source/version-control and review; artifact storage holds larger outputs/evidence; a ledger is only an optional AEP/economic adapter for commitments, escrow, dispute or settlement. Standalone Cormia Core must operate without that adapter.
+
+The proposal explicitly separates project/mandate/task state, coordinator state, worker-local execution and artifact storage. It also records offline/failure behavior and a phased path from one local coordinator to a second machine. This is a design clarification only: no generic coordinator, AEP scheduler, authenticated multi-node transport, peer mesh, persistent shared lease registry or multi-PC execution loop exists yet. The existing local Resource Manager wrapper remains process-local and unconnected.
