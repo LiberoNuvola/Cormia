@@ -92,7 +92,7 @@ A mounted shared filesystem MAY be used for selected immutable datasets or artif
 
 ## 5. How coordination actually happens
 
-The coordinator and workers need an authenticated network protocol. The concrete transport and identity technology remain open; this document does not choose a cloud vendor, VPN, message broker or cryptographic profile.
+The coordinator and workers need an authenticated network protocol. Use A2A as the candidate interoperability protocol for agent discovery, task messages, streaming updates and artifact references; use MCP for worker/tool/resource access. Neither A2A discovery nor MCP tool exposure is Cormia mandate authorization or evidence of task correctness. The concrete transport deployment, identity provider and cryptographic profile remain open; this document does not choose a cloud vendor, VPN or message broker. See the [prior-art composition review](../research/CORMIA_PRIOR_ART_COMPOSITION_REVIEW_2026-11-03.md).
 
 The logical exchange is:
 
@@ -123,11 +123,11 @@ Agents in the same project can communicate in natural language through project/w
 - coordinate sequencing and integration work;
 - keep the human owner in the loop when the project policy requires a decision.
 
-The Team Room maintains references to tasks, artifacts, decisions and evidence. Important decisions are promoted from conversation into structured, attributable project decision records. Conversation alone is not authority: a chat message cannot widen a mandate, change resource permissions, approve a protected action or silently rewrite the project plan.
+The Team Room maintains references to tasks, artifacts, decisions and evidence. Its conversation backend should be an adapter to an existing system (Matrix or Zulip are candidates), not a new Cormia chat protocol. A2A is for agent-to-agent interoperability; it does not require Cormia to build a custom chat UI. Important decisions are promoted from conversation into structured, attributable project decision records. Conversation alone is not authority: a chat message cannot widen a mandate, change resource permissions, approve a protected action or silently rewrite the project plan.
 
 ### 6.2 Project Workbench — actual teamwork
 
-The Workbench is the project-level working environment shared by the team. It is the place where agents exchange and combine real work products, not merely messages.
+The Workbench is the project-level working environment shared by the team. It is the place where agents exchange and combine real work products, not merely messages. The default implementation should compose Git worktrees, branches/patches and an integration worktree; Git already supports multiple linked working trees for parallel branches. A CRDT such as Yjs is a later option only if real simultaneous editing of the same document is demonstrated to be necessary. Do not create a custom VCS or shared filesystem protocol.
 
 For software and structured-artifact projects it contains:
 - the project source tree and shared project documents;
@@ -147,7 +147,8 @@ This does not mean an uncontrolled shared folder where every agent can overwrite
 
 ### 6.3 Integration & Verification Bench — combine before publishing
 
-The integration stage is an internal release candidate pipeline:
+The integration stage is an internal release candidate pipeline. Reuse the selected existing CI runner, Flux Point DoD gates and JEV evidence vocabulary; Cormia binds the source revision, declared profile, outputs and result rather than implementing a parallel build/test engine. A CI runner is a remote-code-execution boundary and must run under the selected host isolation/resource profile.
+
 1. collect accepted patches/components from the Workbench;
 2. compose them in the integration workspace;
 3. compile/build/package the combined project;
@@ -301,15 +302,15 @@ Consequently, no multi-agent team collaboration, pre-publication integration pip
 
 ## 13. Implementation sequence
 
-1. Freeze the Coordinator ↔ Worker protocol boundary and typed task/attempt/lease events, preserving the separate Project, Mandate and Task lifecycles.
-2. Define the worker registration and local Resource Provider port; expose only owner-accepted, validated capacity with a bounded privacy profile.
-3. Add durable task/attempt state and idempotent assignment/lease reconciliation at the coordinator.
-4. Implement the Team Room message/thread model and structured decision records; keep conversation separate from authority.
-5. Implement the Project Workbench with local repository history, task worktrees, contribution patches, pair-edit controls and an integration worktree.
-6. Implement the Integration & Verification Bench: candidate snapshots, build/test profiles, evidence, independent review and repair loops.
+1. Complete PA-01…PA-04 in the [Cormia Prior-Art Composition Review](../research/CORMIA_PRIOR_ART_COMPOSITION_REVIEW_2026-11-03.md) before selecting the durable workflow engine, mandate/policy stack, host isolation and work-evidence envelope.
+2. Freeze the Cormia-specific Coordinator ↔ Worker task/attempt/lease binding and lifecycle events; use A2A/MCP rather than creating new general-purpose agent/tool protocols.
+3. Define the worker registration and local Resource Provider port; expose only owner-accepted, validated capacity with a bounded privacy profile, enforced by native host controls.
+4. Add durable task/attempt state and idempotent assignment/lease reconciliation using the runtime selected by PA-01.
+5. Start the Workbench with isolated Git worktrees, patches and an integration worktree. Evaluate Matrix/Zulip only if the first flow needs persistent discussion; evaluate Yjs only if simultaneous shared editing is required.
+6. Reuse the selected CI runner, Flux Point DoD and JEV for candidate snapshots, build/test profiles, evidence, independent review and repair loops.
 7. Add project delivery profiles; default GitHub publication to a candidate-level owner authorization, separately from protected merge/release/deploy.
-8. Bind one local worker to the current host adapters without changing the legacy Agent approval path; prove a solo local task (such as PC cleanup) does not require repository or team infrastructure.
-9. Prove a two-agent/two-workspace team flow with synthetic workers: agent discussion, shared artifact work, integration, tests and local candidate completion with no per-operation prompts.
+8. Bind one local worker to the current host adapters without changing the legacy Agent approval path; prove a solo local task (such as PC cleanup) does not require repository, Team Room or economic infrastructure.
+9. Prove a two-agent/two-workspace team flow with synthetic workers: A2A/MCP or local adapters, isolated worktrees, integration, tests and local candidate completion with no per-operation prompts.
 10. Add a second machine over an authenticated network path; test disconnect, lease expiry, duplicate delivery, worker crash and recovery.
 11. Only after local collaboration/integration is sound, consider remote/community providers and optional AEP/ledger integration.
 
@@ -320,9 +321,9 @@ No blockchain, cloud vendor, transport, broker, consensus algorithm, key format,
 
 The [Work Completion Evidence and Materios Certification Adapter proposal](./CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md) defines a separate evidence path for tasks that need auditable completion or compute-contribution accounting.
 
-The worker-local Cormia Node remains the enforcement boundary: it admits a task-bound Resource Lease, isolates execution, measures host-approved resource counters, retains task evidence and signs a canonical receipt. The coordinator and remote project receive only task-scoped artifacts and references; resource donation never grants host shell, desktop, filesystem, credential or unrestricted network access.
+The worker-local Cormia Node remains the enforcement boundary: it admits a task-bound Resource Lease, applies selected native host isolation/resource controls, measures host-approved counters and retains task evidence. The coordinator and remote project receive only task-scoped artifacts and references; resource donation never grants host shell, desktop, filesystem, credential or unrestricted network access.
 
-Work Completion Receipts bind project/task/attempt, assignment, worker, lease, workload, input/output commitments, meter profile, acceptance predicate and verification evidence. A signature authenticates the receipt issuer, not the truth of its measurements. Ordinary OS/driver GPU counters remain host-observed data unless a stronger declared verification profile applies.
+The Work Completion Receipt remains a logical Cormia claim model, not a frozen wire schema or a new canonical signature envelope. Before schema freeze, PA-04 must map the task/attempt/assignment/lease/verifier/acceptance binding to in-toto/DSSE, SLSA provenance, Orynq traces/tool receipts and optional SCITT/Materios transparency receipts. A signature authenticates the receipt issuer, not the truth of its measurements. Ordinary OS/driver GPU counters remain host-observed data unless a stronger declared verification profile applies. See the [prior-art composition review](../research/CORMIA_PRIOR_ART_COMPOSITION_REVIEW_2026-11-03.md).
 
 Materios is an optional evidence/certification adapter, not the resource controller or project authority. Its current receipt/availability path can certify committed data integrity and availability under its verification process. This is not equivalent to proving task execution or semantic correctness. Hardware/execution-evidence types and verifier support are qualified individually; unsupported or disabled paths fail closed. See the linked proposal for the current source audit, profile boundaries and residual assumptions.
 
