@@ -1,4 +1,5 @@
 import {
+  authorizeLocalProjectOperation,
   deriveLocalProjectTaskAuthority,
   validateLocalAutonomousProjectMandateClaims
 } from "../reference-worker/local-autonomous-project-authority.mjs";
@@ -16,6 +17,10 @@ const CONSENT_KEYS = [
   "mandateId", "mandateDigest", "projectRef", "workspaceRef", "decision",
   "interactionMode", "interactionId", "displayedChallenge", "confirmedChallenge",
   "issuedAt", "expiresAt", "nonce", "sequence"
+];
+const HOST_POLICY_KEYS = [
+  "issuerId", "projectRef", "repositoryRef", "workspaceRef", "workerId", "runtimeId",
+  "allowedOperations", "excludedPaths", "allowedExecutionProfiles", "allowedHttpsHosts"
 ];
 
 export class TrustedProjectResolutionError extends Error {
@@ -77,7 +82,7 @@ function resolveNow(clock) {
   if (!Number.isFinite(milliseconds)) {
     throw new TrustedProjectResolutionError("Trusted host clock is invalid.", "PROJECT_RESOLVER_CLOCK_INVALID");
   }
-  return { milliseconds, iso: new Date(milliseconds).toISOString() };
+  return milliseconds;
 }
 
 function validateHostContext(hostContext) {
@@ -265,7 +270,7 @@ function validateLifecycleProjection(result, projectRef) {
   if (!isPlainObject(result) ||
       result.projectRef !== projectRef ||
       !Number.isSafeInteger(result.revision) || result.revision < 0 ||
-      !("state" in result) ||
+      !Object.hasOwn(result, "state") ||
       !(result.state === null || PROJECT_STATES.has(result.state)) ||
       (result.revision === 0 && result.state !== null) ||
       (result.revision > 0 && result.state === null)) {
@@ -273,6 +278,29 @@ function validateLifecycleProjection(result, projectRef) {
       "Project lifecycle journal projection is invalid or belongs to another project.",
       "PROJECT_LIFECYCLE_PROJECTION_INVALID"
     );
+  }
+  return result;
+}
+
+function validateHostPolicy(result, hostContext) {
+  if (!hasExactKeys(result, HOST_POLICY_KEYS) ||
+      result.issuerId !== hostContext.issuerId ||
+      result.projectRef !== hostContext.projectRef ||
+      result.repositoryRef !== hostContext.repositoryRef ||
+      result.workspaceRef !== hostContext.workspaceRef ||
+      result.workerId !== hostContext.workerId ||
+      result.runtimeId !== hostContext.runtimeId) {
+    throw new TrustedProjectResolutionError(
+      "Host policy is missing or bound to another host/project/workspace context.",
+      "PROJECT_HOST_POLICY_BINDING_MISMATCH"
+    );
+  }
+  for (const field of ["allowedOperations", "excludedPaths", "allowedExecutionProfiles", "allowedHttpsHosts"]) {
+    if (!Array.isArray(result[field]) ||
+        !result[field].every(item => isText(item, field === "excludedPaths" ? 512 : 256)) ||
+        new Set(result[field]).size !== result[field].length) {
+      throw new TrustedProjectResolutionError("Host policy contains an invalid " + field + " set.", "PROJECT_HOST_POLICY_INVALID");
+    }
   }
   return result;
 }
@@ -285,9 +313,9 @@ function requireProviderFunction(provider, method, label) {
 
 /**
  * Build a host-only project resolver. All providers are trusted Runtime ports,
- * captured at construction and must never be supplied by a task or model.
+ * captured at construction and never supplied by a task or model.
  *
- * This module is an orchestration contract, not a cryptographic implementation:
+ * This is an orchestration boundary, not a cryptographic implementation:
  * ADR-0009's mandate-signature, authenticated-consent, identity and independent
  * mandate-revocation providers are not yet implemented in this repository.
  */
@@ -298,6 +326,7 @@ export function createTrustedProjectResolver({
   mandateAuthority,
   consentAuthority,
   revocationAuthority,
+  hostPolicyProvider,
   projectLifecycleJournal,
   clock = () => new Date()
 } = {}) {
@@ -309,13 +338,13 @@ export function createTrustedProjectResolver({
   requireProviderFunction(mandateAuthority, "verifyAndLoad", "mandate authority");
   requireProviderFunction(consentAuthority, "verifyActiveReceipt", "consent authority");
   requireProviderFunction(revocationAuthority, "reconcileMandate", "mandate revocation");
+  requireProviderFunction(hostPolicyProvider, "readPolicy", "host policy");
   requireProviderFunction(projectLifecycleJournal, "read", "project lifecycle journal");
   if (typeof clock !== "function") throw new TypeError("clock must be a trusted host function.");
 
-  async function resolve() {
-    let now;
+  async function loadTrustedContext() {
     try {
-      now = resolveNow(clock).milliseconds;
+      const nowMs = resolveNow(clock);
       const descriptor = validateDescriptor(
         await projectStore.readProjectDescriptor(expectedHost.projectRef),
         expectedHost.projectRef
@@ -335,10 +364,10 @@ export function createTrustedProjectResolver({
         claimsSchemaId: descriptor.mandateRef.claimsSchemaId,
         expectedClaimsDigest: descriptor.mandateRef.claimsDigest,
         expectedHost,
-        now: new Date(now).toISOString()
+        now: new Date(nowMs).toISOString()
       });
       const mandateClaims = validateMandateResolution(
-        mandateResolution, descriptor, expectedHost, now
+        mandateResolution, descriptor, expectedHost, nowMs
       );
 
       const operatorAuthority = await identityProvider.authorizeMandateOperator({
@@ -365,7 +394,7 @@ export function createTrustedProjectResolver({
         mandateClaims,
         projectRef: descriptor.projectRef,
         workspaceRef: expectedHost.workspaceRef,
-        now: new Date(now).toISOString()
+        now: new Date(nowMs).toISOString()
       });
       const consentClaims = validateConsentResolution(
         consentResolution,
@@ -373,7 +402,7 @@ export function createTrustedProjectResolver({
         mandateResolution.claimsDigest,
         descriptor,
         expectedHost,
-        now
+        nowMs
       );
 
       const revocation = validateRevocationResolution(
@@ -381,7 +410,7 @@ export function createTrustedProjectResolver({
           issuerId: mandateClaims.issuerId,
           mandateId: mandateClaims.mandateId,
           mandateDigest: mandateResolution.claimsDigest,
-          now: new Date(now).toISOString()
+          now: new Date(nowMs).toISOString()
         })
       );
 
@@ -397,63 +426,136 @@ export function createTrustedProjectResolver({
         consentVerified: true,
         revocationState: "healthy"
       });
-      const readyForExecution = lifecycle.state === "active" &&
-        mandateClaims.issuerId === expectedHost.issuerId &&
-        parseTime(mandateClaims.expiresAt) > now;
 
-      return Object.freeze({
-        resolved: true,
-        status: "TRUSTED_PROJECT_CONTEXT_RESOLVED",
-        project: Object.freeze({
-          projectRef: descriptor.projectRef,
-          leadershipMode: descriptor.leadershipMode,
-          stewardRef: descriptor.stewardRef,
-          accountabilityRef: descriptor.accountabilityRef,
-          lifecycleState: lifecycle.state,
-          lifecycleRevision: lifecycle.revision,
-          activationEligible: lifecycle.state === "configured",
-          executionReady: readyForExecution
-        }),
-        identity: Object.freeze({
-          stewardPrincipalType: steward.principalType,
-          accountabilityPrincipalCount: accountability.accountablePrincipalRefs.length,
-          mandateOperatorPrincipalId: mandateClaims.operatorPrincipalId
-        }),
-        consent: Object.freeze({
-          consentId: consentClaims.consentId,
-          consentBrokerId: consentClaims.consentBrokerId,
-          sequence: consentClaims.sequence
-        }),
-        revocation: Object.freeze({
-          status: revocation.status,
-          anchorProviderId: revocation.anchorProviderId,
-          sequence: revocation.sequence,
-          headEventDigest: revocation.headEventDigest
-        }),
+      return {
+        ok: true,
+        nowMs,
+        descriptor,
+        steward,
+        accountability,
+        mandateClaims,
         trustedMandate,
-        deriveTaskAuthority(task) {
-          if (!readyForExecution) {
-            return { authorized: false, reason: "project-not-active-for-autonomous-execution" };
-          }
-          return deriveLocalProjectTaskAuthority({
-            trustedMandate,
-            expectedHost,
-            task,
-            now: new Date(now)
-          });
-        }
-      });
+        consentClaims,
+        revocation,
+        lifecycle
+      };
     } catch (error) {
       const code = error instanceof TrustedProjectResolutionError
         ? error.code
         : "PROJECT_RESOLUTION_PROVIDER_FAILURE";
-      return Object.freeze({
-        resolved: false,
-        status: "BLOCKED",
-        reason: code
-      });
+      return { ok: false, code };
     }
   }
 
-  return Object.freeze({ resolve });
+  return Object.freeze({
+    async resolve() {
+      const context = await loadTrustedContext();
+      if (!context.ok) {
+        return Object.freeze({ resolved: false, status: "BLOCKED", reason: context.code });
+      }
+      const lifecycleState = context.lifecycle.state;
+      return Object.freeze({
+        resolved: true,
+        status: "TRUSTED_PROJECT_CONTEXT_RESOLVED",
+        project: Object.freeze({
+          projectRef: context.descriptor.projectRef,
+          leadershipMode: context.descriptor.leadershipMode,
+          stewardRef: context.descriptor.stewardRef,
+          accountabilityRef: context.descriptor.accountabilityRef,
+          lifecycleState,
+          lifecycleRevision: context.lifecycle.revision,
+          activationEligible: lifecycleState === "configured",
+          executionReady: lifecycleState === "active"
+        }),
+        authority: Object.freeze({
+          mandateId: context.mandateClaims.mandateId,
+          mandateDigest: context.trustedMandate.mandateDigest,
+          issuerId: context.mandateClaims.issuerId,
+          state: "active",
+          expiresAt: context.mandateClaims.expiresAt
+        }),
+        identity: Object.freeze({
+          stewardPrincipalType: context.steward.principalType,
+          accountabilityPrincipalCount: context.accountability.accountablePrincipalRefs.length,
+          mandateOperatorPrincipalId: context.mandateClaims.operatorPrincipalId
+        }),
+        consent: Object.freeze({
+          consentId: context.consentClaims.consentId,
+          consentBrokerId: context.consentClaims.consentBrokerId,
+          sequence: context.consentClaims.sequence
+        }),
+        revocation: Object.freeze({
+          status: context.revocation.status,
+          anchorProviderId: context.revocation.anchorProviderId,
+          sequence: context.revocation.sequence,
+          headEventDigest: context.revocation.headEventDigest
+        })
+      });
+    },
+
+    /**
+     * Create a Runtime-only task session. Every operation call re-resolves
+     * descriptor, identity, mandate signature/key, consent and mandate
+     * revocation/anchor state before the existing ADR-0010 operation evaluator
+     * is invoked. No human approval callback or bearer token is introduced.
+     */
+    async createTaskSession(task) {
+      const context = await loadTrustedContext();
+      if (!context.ok) return { authorized: false, reason: context.code };
+      if (context.lifecycle.state !== "active") {
+        return { authorized: false, reason: "PROJECT_NOT_ACTIVE" };
+      }
+
+      const initialAuthority = deriveLocalProjectTaskAuthority({
+        trustedMandate: context.trustedMandate,
+        expectedHost,
+        task,
+        now: new Date(context.nowMs)
+      });
+      if (!initialAuthority.authorized) return initialAuthority;
+
+      return Object.freeze({
+        authorized: true,
+        taskId: task.taskId,
+        manifestDigest: task.manifestDigest,
+        childDigest: initialAuthority.childDigest,
+
+        async authorizeOperation(request) {
+          if (!hasOnlyKeys(request, ["operation"], [
+            "relativePath", "executionProfileId", "branchName", "remoteHost"
+          ]) || !isText(request.operation, 128)) {
+            return { allowed: false, reason: "INVALID_OPERATION_REQUEST" };
+          }
+          const current = await loadTrustedContext();
+          if (!current.ok) return { allowed: false, reason: current.code };
+          if (current.lifecycle.state !== "active") {
+            return { allowed: false, reason: "PROJECT_NOT_ACTIVE" };
+          }
+
+          try {
+            const hostPolicy = validateHostPolicy(
+              await hostPolicyProvider.readPolicy(),
+              expectedHost
+            );
+            return authorizeLocalProjectOperation({
+              childAuthority: initialAuthority,
+              trustedMandate: current.trustedMandate,
+              hostPolicy,
+              expectedTaskId: task.taskId,
+              expectedManifestDigest: task.manifestDigest,
+              ...request,
+              now: new Date(current.nowMs)
+            });
+          } catch (error) {
+            return {
+              allowed: false,
+              reason: error instanceof TrustedProjectResolutionError
+                ? error.code
+                : "PROJECT_HOST_POLICY_UNAVAILABLE"
+            };
+          }
+        }
+      });
+    }
+  });
 }
