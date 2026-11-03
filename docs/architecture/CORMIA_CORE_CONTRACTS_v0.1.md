@@ -414,6 +414,22 @@ GitHub publication is an optional delivery adapter. Local work, internal commits
 
 The project mode and delivery profile determine which components are instantiated. This is not an obligation to run every task through all stages.
 
+### 7.4 Work completion evidence and optional certification
+
+A task's completion claim is separate from Project Lifecycle, Task state, Resource Offer/Lease and mandate authority. A successful task status or worker signature is not, by itself, a certificate that useful work was performed.
+
+For tasks that require auditable completion, the Runtime may produce a versioned Work Completion Receipt binding project/task/attempt, committed assignment, worker/runtime, capability profile, exact Resource Lease, workload, input/output commitments, resource-meter profile, acceptance predicate, verifier evidence and challenge state. This is a proposed logical interface, not an approved schema or production API.
+
+The local Cormia Node remains the resource enforcement boundary. It admits and revokes work under owner-controlled limits, isolates execution and produces host-observed meter evidence. Remote projects do not receive general host access. A node signature authenticates the meter issuer but does not independently prove the truth of ordinary OS/driver counters.
+
+Verification must state exactly which claim is supported: receipt integrity/availability, task-outcome acceptance, execution-environment attestation, resource metering or a supported execution proof. These dimensions are not interchangeable and must not be collapsed into a generic certified flag.
+
+An optional Materios adapter may commit receipts and submit evidence to Materios. Materios certifies only what its deployed verifier profile actually checks; receipt/Merkle integrity is not semantic task correctness. Unsupported evidence types, missing challenge bindings, absent committee thresholds or unavailable verifiers fail closed. Cormia remains responsible for project authority, local resource admission, acceptance policy and CRC accounting.
+
+CRC minting, where enabled, requires an accepted task-bound contribution receipt and the evidence profile required for that workload. Raw GPU-hours, a worker signature or receipt-availability certification alone must not automatically mint CRC. CRC remains distinct from Materios MATRA/MOTRA and from any financial Project Compute Reward Pool.
+
+See [CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md](./CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md). Local Core remains independent of Materios, Cardano, Midnight and CRC.
+
 ## 8. Conformance matrix
 
 | Test | Expected result |
