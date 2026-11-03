@@ -7,6 +7,14 @@
 - **Related PRs:** [Cormia PR #1 — PNC / ADR-0011](https://github.com/LiberoNuvola/Cormia/pull/1); [Cormia PR #2 — EXP crosswalk](https://github.com/LiberoNuvola/Cormia/pull/2)
 - **Purpose:** specify a testable economic boundary and conformance obligations for EXP-06, EXP-12, EXP-10 and EXP-11 without changing either protocol's semantics.
 
+
+
+## 0.1. Core independence and optional scope
+
+This document addresses only the optional AEP economic-contract and Cormia↔IMMORTAL composition profile. It does not define the architecture or prerequisites of general-purpose Cormia Core. The separate [General-Purpose Autonomous Agent & Mixed Community-Support Architecture v0.1](../architecture/CORMIA_GENERAL_PURPOSE_AUTONOMOUS_AGENT_AND_MIXED_SUPPORT_ARCHITECTURE_v0.1.md) defines the Core-first model: creator/team-led and agent-led projects share one Core; supporters may contribute money or in-kind resources; agents use available resources and do not need wages, wallets or token balances. Payment, AEP settlement, Cardano and IMMORTAL are optional adapters.
+
+The C0–C4 routing classes and EXP-06/12/10/11 economic tests apply only after a deployment/task has explicitly entered the relevant optional economic profile. They must not be used to force all Cormia project tasks through an economic gate. No supporter payment grants agent authority, and no donated resource offer changes a Project Mandate.
+
 ## 1. Executive result
 
 The current source set supports a clear separation of responsibilities:
@@ -18,7 +26,7 @@ The current source set supports a clear separation of responsibilities:
 
 This follows the IMMORTAL Constitution's root requirements: accepted obligations and material unresolved exposure must be represented before the creating action is executable; protected capital cannot become discretionary surplus; execution requires a certified concrete kernel; and economic changes are atomic. The normative C-COMP further rejects automatic composition of local safety guarantees when economic resources or obligations are shared.
 
-**Recommended integration default:** when an AEP task creates asset-denominated escrow, bonds, compensation, fees, claims or exposure against resources/capital within an IMMORTAL-governed deployment, model the AEP economics as a versioned Cormia application economic profile and route every economically material transition through the applicable IMMORTAL admission gate. Keep AEP task execution and task outcome determination in Cormia.
+**Optional integration boundary — not a Core dependency:** the AEP economic profile and IMMORTAL gate apply only when a deployment explicitly chooses funded AEP task contracts or places economic obligations/shared protected resources inside an IMMORTAL-governed perimeter. Ordinary Cormia Core operation, creator/team-led projects, agent-led projects, unfunded tasks, local execution, patronage, donated compute and resource scheduling do not require IMMORTAL. Cormia remains general-purpose and useful with no Cardano, wallet, token, CRC, payment provider or IMMORTAL connection.
 
 **Not decided:** whether an entirely separate Cormia AEP deployment, with no shared IMMORTAL resources, reserves, collateral, obligations or economic claims, should operate as an independent economic jurisdiction. That would be a separate protocol/deployment perimeter with its own complete safety and solvency model; it must not be described as IMMORTAL-conformant merely because it reuses Cormia AEP.
 
