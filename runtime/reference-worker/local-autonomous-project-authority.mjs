@@ -91,7 +91,7 @@ function parseTime(value) {
   return Number.isFinite(result) ? result : NaN;
 }
 
-function validateMandateClaims(claims) {
+export function validateLocalAutonomousProjectMandateClaims(claims) {
   if (!isPlainObject(claims) ||
       claims.schemaVersion !== "0.1.0" ||
       typeof claims.mandateId !== "string" ||
