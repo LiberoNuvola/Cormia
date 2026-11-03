@@ -179,6 +179,8 @@ Provides project pages and support intents such as:
 
 The support layer records what was offered, accepted, restricted, consumed or returned, within its declared trust model. It should be possible to disable it completely without affecting Cormia Core.
 
+A project may optionally create a finite Project Compute Reward Pool for a campaign/workstream. Compute providers opt in with a bounded resource offer; only completed and verified useful work can qualify for a proportional share of a funded reward pool. This is not part of the current support schemas or CRC v1 and is not adopted until its allocation, custody and anti-abuse rules are defined. See [Compute Reciprocity, section 14](../economics/COMPUTE_RECIPROCITY.md).
+
 A Patreon-like recurring pledge is one support option, not the governing model for all projects. Bounties and in-kind donations are first-class alternatives. The system must distinguish a pledge from settled money and distinguish a declared compute offer from actually available capacity.
 
 ### 5.5 Optional financial and settlement integrations
@@ -191,6 +193,34 @@ Financial custody, payments, refunds, contracts and settlement belong behind opt
 - An agent may request a pre-authorized external purchase or service allocation only under a separately configured spending/consent policy; it must not obtain an unrestricted wallet by default.
 - Cardano is one optional settlement adapter, not the protocol's required substrate.
 - IMMORTAL is one optional economic governance/admissibility integration when a deployment deliberately places economic obligations or shared protected capital under IMMORTAL rules. It is not the agent's general authority engine and is not required for project creation, task execution, patronage or in-kind support.
+
+### 5.6 Team Collaboration Plane — the agents work as a team
+
+A multi-agent project needs more than task dispatch and isolated worker sandboxes. The Coordination Plane includes a Team Room in which agents discuss, debate, ask each other for help, share progress and conduct peer review. Significant decisions are recorded as structured project decisions linked to tasks and artifacts; a chat message alone never grants authority or changes the mandate.
+
+The Team Room is paired with a Project Workbench:
+- a shared project context and artifact index;
+- isolated task worktrees for parallel contributions;
+- local repository/version history, independent of any GitHub remote;
+- patch exchange and a common integration worktree;
+- pair/team editing through host-controlled file/module claims, short-lived edit leases or conflict-aware editing;
+- accepted contributions, conflict resolution and attribution.
+
+Agents can work independently, pair on the same component or contribute modules to a common project. The system prevents uncontrolled concurrent overwrites; "shared work" means shared visibility and integration, not unrestricted write access to every host file.
+
+### 5.7 Integration & Verification Bench and optional delivery
+
+Contributions are composed in an internal integration workspace before any external publication. The team can compile/build, run declared tests, validate documents/data, conduct independent review, fix failures and rerun within its mandate and resource budget. The output is a digest-bound candidate with evidence and unresolved risks.
+
+Each project declares a delivery profile:
+- local action only (for example, organize/clean a PC);
+- local files or reports;
+- project artifacts/datasets;
+- local software repository with local commits;
+- optional GitHub publication;
+- optional AEP/network publication.
+
+A GitHub remote is not a prerequisite for team collaboration, local commits, integration or testing. By default, publishing a verified candidate to GitHub requires an owner authorization at the external boundary. A narrowly scoped standing publication mandate can opt into automatic push/PR. Protected merge, release and production deployment remain separate actions. A one-agent local task can bypass Team Room, Workbench, build/test and publication stages it does not need.
 
 ## 6. What supporters are actually supporting
 
@@ -272,6 +302,8 @@ A Cormia Core task may be local, private, unfunded and outside AEP settlement. A
 
 Compute Reciprocity is an optional mechanism for shared inference/service quotas. Local-only inference must remain possible at zero CRC. The Core should schedule available capacity even without CRC. Do not treat CRC as a base token, universal project currency, financial contribution, salary or mandatory account balance.
 
+The proposed Project Compute Reward Pool is a separate, project-specific incentive model: it can distribute a funded bucket among contributors pro-rata to accepted useful work. It is not already implemented by CRC or by the sponsored-capacity pool, and it must not turn CRC into cash or a transferable asset. Allocation/verification/funding rules remain open.
+
 ### IMMORTAL
 
 IMMORTAL can govern an explicitly integrated economic perimeter, protected capital, obligations, exposure and settlement admissibility. It does not decide whether an agent may read a project file, run a test, delegate a task or use a donated GPU unless that action separately creates an obligation/resources within a declared IMMORTAL-governed economic perimeter.
@@ -283,11 +315,12 @@ No universal Cormia agent operation should be routed through IMMORTAL merely bec
 1. **Core-first contract:** define the standalone Cormia Core interfaces for project, mandate, agent, task, capability, resource offer, evidence and journal. Keep money/chain fields out of mandatory Core types.
 2. **Two leadership modes:** define creator/team-led, agent-led and hybrid configurations against the same mandate and stewardship interfaces.
 3. **Resource abstraction:** unify local resources, donated resources, model providers and service quotas behind typed Resource Provider interfaces; scheduling and safety stay in Cormia.
-4. **Project support registry:** model support target, contribution type, restrictions, status, custodian, benefits and reporting. Do not assume payment settlement.
-5. **Optional financial adapter:** connect one provider only after support semantics, custody, refunds and spending policy are explicit.
-6. **Optional in-kind mesh:** add opt-in resource discovery, offers, leases, preemption, privacy and reliability evidence.
-7. **Optional AEP/IMMORTAL/Cardano profiles:** connect only the task classes and economic perimeters that require them.
-8. **Conformance:** test that Core runs without all optional adapters, that adapter failure does not halt local work, that sponsors cannot increase agent authority, that funds never enter agent wallets by default, and that financial/resource ledgers remain separate.
+4. **Team collaboration and internal integration:** build the Team Room, Project Workbench, local repository/worktrees, patch exchange, integration workspace and verification bench before wiring any GitHub publication adapter.
+5. **Project support registry:** model support target, contribution type, restrictions, status, custodian, benefits and reporting. Do not assume payment settlement.
+6. **Optional financial adapter:** connect one provider only after support semantics, custody, refunds and spending policy are explicit.
+7. **Optional in-kind mesh:** add opt-in resource discovery, offers, leases, preemption, privacy and reliability evidence.
+8. **Optional AEP/IMMORTAL/Cardano profiles:** connect only the task classes and economic perimeters that require them.
+9. **Conformance:** test that Core runs without all optional adapters, that adapter failure does not halt local work, that sponsors cannot increase agent authority, that funds never enter agent wallets by default, and that financial/resource ledgers remain separate.
 
 ## 11. Open decisions — keep separate from Core
 
@@ -297,6 +330,8 @@ No universal Cormia agent operation should be routed through IMMORTAL merely bec
 - How financial custodians/providers and refunds are selected.
 - Whether project budgets can authorize bounded automatic purchases, and what spending caps/approval rules apply.
 - How donated compute capacity is measured, leased, preempted, rewarded or reciprocated.
+- Whether a project uses a finite compute-reward bucket and which contribution/verification rule distributes it.
+- How project-team discussion, structured decisions, pair editing, integration and independent test gates are represented.
 - Whether a support layer includes recurring pledges, milestone bounties, or both in its first release.
 - Whether CRC is enabled as an optional access/quota mechanism; no token is assumed.
 - Which external payment, storage, compute and chain adapters are supported first.
