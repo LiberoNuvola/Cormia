@@ -102,3 +102,6 @@ The workflow `.github/workflows/exp-boundary-reference-model.yml` installs the p
 The next implementation slice should consume these schemas in a trusted local Core adapter, bind the existing mandate evaluator without changing its approval semantics, and add a durable project journal plus a local Resource Provider wrapper. A complete end-to-end autonomous task must still prove restart/reconciliation and zero per-operation approval prompts under a one-time mandate. Remote resources and financial adapters remain later optional integrations.
 
 No existing mandate claims schema, AEP Task Manifest, ADR, runtime execution path, wallet, chain or economic policy is modified by this catalog.
+
+
+The latest PR verification is [GitHub Actions run #58](https://github.com/LiberoNuvola/Cormia/actions/runs/41584236062): **40 Core tests** (22 abstract predicate + 18 JSON Schema conformance) and **31 EXP boundary tests**, **71 total, zero failures**. The suite confirms that steward and accountability reference fields are mandatory; it does not prove the identity or legal/accountable role behind an opaque reference. A trusted identity/policy resolver remains required.
