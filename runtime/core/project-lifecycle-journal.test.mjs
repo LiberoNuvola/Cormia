@@ -151,6 +151,32 @@ test("expectedRevision prevents stale and concurrent lifecycle writes", async t 
   assert.equal((await h.journal.read()).revision, 1);
 });
 
+test("journal command rejects authority, task and economic fields", async t => {
+  const h = await makeHarness();
+  t.after(h.cleanup);
+  for (const field of ["authorityState", "taskState", "paymentRef", "walletRef"]) {
+    await assert.rejects(
+      () => h.journal.append(command("project_created", 0, { [field]: "must-not-cross-core-boundary" })),
+      error => error instanceof TypeError && /undeclared property/.test(error.message)
+    );
+  }
+  assert.equal((await h.journal.read()).revision, 0);
+});
+
+test("journal refuses a different project stream", async t => {
+  const h = await makeHarness();
+  t.after(h.cleanup);
+  await h.journal.append(command("project_created", 0));
+  const otherProject = createProjectLifecycleJournal({
+    journalPath: h.journalPath,
+    projectRef: "project:another-project"
+  });
+  await assert.rejects(
+    () => otherProject.read(),
+    error => error.code === "PROJECT_JOURNAL_CORRUPT"
+  );
+});
+
 test("invalid lifecycle commands are not appended", async t => {
   const h = await makeHarness();
   t.after(h.cleanup);
