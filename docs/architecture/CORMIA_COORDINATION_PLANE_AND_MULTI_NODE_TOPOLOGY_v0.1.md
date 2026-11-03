@@ -314,6 +314,8 @@ Consequently, no multi-agent team collaboration, pre-publication integration pip
 11. Only after local collaboration/integration is sound, consider remote/community providers and optional AEP/ledger integration.
 
 
+No blockchain, cloud vendor, transport, broker, consensus algorithm, key format, economic parameter or production trust provider is selected by this document. Those decisions remain separately versioned and evidence-driven.
+
 ## 14. Work completion evidence and optional Materios certification
 
 The [Work Completion Evidence and Materios Certification Adapter proposal](./CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md) defines a separate evidence path for tasks that need auditable completion or compute-contribution accounting.
@@ -325,4 +327,3 @@ Work Completion Receipts bind project/task/attempt, assignment, worker, lease, w
 Materios is an optional evidence/certification adapter, not the resource controller or project authority. Its current receipt/availability path can certify committed data integrity and availability under its verification process. This is not equivalent to proving task execution or semantic correctness. Hardware/execution-evidence types and verifier support are qualified individually; unsupported or disabled paths fail closed. See the linked proposal for the current source audit, profile boundaries and residual assumptions.
 
 **Status:** proposal only. No Cormia Node meter, Work Completion Receipt schema, independent task-verifier service, Materios adapter or end-to-end certification/CRC path is implemented. Local Core remains usable without Materios.
-No blockchain, cloud vendor, transport, broker, consensus algorithm, key format, economic parameter or production trust provider is selected by this document. Those decisions remain separately versioned and evidence-driven.
