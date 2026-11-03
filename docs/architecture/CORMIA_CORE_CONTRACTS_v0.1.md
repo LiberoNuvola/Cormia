@@ -60,7 +60,7 @@ No model, supporter, task requester or resource provider may create or widen the
 
 The current Resource Manager adapter wraps existing snapshot(), acquire() and release() behavior with a fixed trusted operation map and finally-based release. It is explicitly not connected to the Agent execution loop, does not provide OS-level quotas, durable leases, remote worker scheduling or a peer resource protocol.
 
-The Resource Provider Contract below generalizes the interface, not the implementation status.
+The Resource Provider Contract below generalizes the interface, not the implementation status. A generic worker-local adapter now exists at `runtime/core/local-resource-provider.mjs`: it maps host-preaccepted/validated offers to callback-scoped lease records through an injected trusted local execution port. It remains isolated from any coordinator, has no durable lease registry or OS quota enforcement, and does not import the IMMORTAL ResourceManager.
 
 ### 2.4 Keep existing task stores and task contracts separate
 
