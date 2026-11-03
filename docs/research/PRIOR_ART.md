@@ -5,6 +5,12 @@
 
 This is a living register, not a legal opinion or exhaustive novelty search. Internet-Drafts are work in progress. Versions and licenses must be checked again before implementation or release.
 
+## 0. Current Cormia architecture composition review — 3 November 2026
+
+The architecture added on 2026-11-03 now has a component-by-component prior-art review. Read [Cormia Prior-Art Composition Review v0.1](CORMIA_PRIOR_ART_COMPOSITION_REVIEW_2026-11-03.md) before creating a new Runtime, Team Room, Workbench, Resource Broker, receipt schema, sandbox, evidence log or support service. That review maps each current proposal to upstream systems, records adopt/adapt/spike/reference decisions and defines six bounded implementation spikes.
+
+The existing register below remains the broad baseline for AEP/IMMORTAL prior art. The 3 November review is the current crosswalk for the newer Cormia Core-first, Coordination Plane and Materios work-completion proposals. It does not authorize code vendoring or claim production conformance.
+
 ## 1. Standards and protocol proposals
 
 | Prior art | Existing problem it addresses | Reuse / integration strategy | Boundary: what IMMORTAL must still define |
