@@ -125,7 +125,7 @@ A profile may require R1+R2, R1+R3, R1+R2+R3, or R1+R4, for example. The selecte
 
 ## 6. Materios: current capability versus target integration
 
-Materios is a natural certification/receipt layer for this design, but the present code must be described precisely.
+Materios is a natural certification/receipt layer for this design, but the present code must be described precisely. Its current README describes Materios as an Alpha/MVP prototype purpose-built for gaming micro-transaction settlement and AI audit receipts. This is a promising foundation for agent-work evidence, but it is not evidence that general-purpose agent task-completion certification is already a completed capability.
 
 ### Existing capabilities observed in the repositories
 
