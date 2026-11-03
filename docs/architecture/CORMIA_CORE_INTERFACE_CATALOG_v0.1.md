@@ -95,6 +95,18 @@ Financial contribution records exist only as an optional Community Support surfa
 
 The workflow `.github/workflows/exp-boundary-reference-model.yml` installs the pinned JSON Schema test dependency and runs the schema suite alongside the EXP and abstract Core predicate suites.
 
+## 10. Work completion evidence and Materios adapter — not yet a schema
+
+The proposed [Work Completion Evidence and Materios Certification Adapter](./CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md) defines a logical Work Completion Receipt, evidence manifest and workload-specific verification profiles. This is **not** included in the current seven-schema v0.1.0 record slice.
+
+No new JSON Schema is frozen here. Before schema creation, the project must decide the receipt/task/attempt binding, evidence dimensions, meter source/limitations, privacy references, verifier profile, challenge/revocation semantics and certification-state vocabulary. Do not add Materios-specific fields to mandatory Core records: Materios remains an optional adapter.
+
+A future receipt should carry typed references and commitments, not private prompt/output contents. It must distinguish local meter observations from independent task-outcome verification, hardware execution attestation, proof-system evidence and chain finality. A signature over a meter report is not proof that ordinary OS counters are honest.
+
+The current Materios receipt/availability path can support commitment integrity and availability certification. It must not be described as a general task-completion verifier. Execution evidence types whose verifiers are stubs or whose challenge binding is not enabled are unsupported for production certification.
+
+**Not implemented:** Work Completion Receipt schema, evidence-manifest schema, Cormia Node metering, task-verifier profiles, Materios adapter, certified CRC mint/burn ledger or end-to-end integration. The current Resource Offer/Lease schemas and local Resource Provider do not implement any of those capabilities.
+
 ## 9. Implementation status and next boundary
 
 **Implemented in this proposal:** seven JSON Schema documents, schema conformance tests and CI wiring.
