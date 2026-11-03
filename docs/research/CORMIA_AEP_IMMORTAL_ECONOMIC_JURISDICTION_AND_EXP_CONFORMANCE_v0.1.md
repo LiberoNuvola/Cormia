@@ -457,3 +457,104 @@ This document does not approve these decisions. JUR-01 is the recommended route 
 **Cross-domain**
 - [IMMORTAL–Cormia EXP crosswalk v1.0](https://github.com/LiberoNuvola/Cormia/blob/work/exp-generalization-crosswalk/docs/research/IMMORTAL_CORMIA_EXP_GENERALIZATION_CROSSWALK_v1.0.md)
 - [Existing IMMORTAL–Cormia Boundary research page](https://app.notion.com/p/3e3c4454d6d58136a85cfcdbc0e287f3)
+
+
+## 7. AEP lifecycle → economic-effect → authority routing matrix (v0.2 research addendum)
+
+**Status:** non-normative routing proposal; it does not adopt JUR-01, add an AEP schema field, or change the v0.1.0 task lifecycle. It maps the existing SPEC lifecycle to the already-defined C0–C4 boundary.
+
+### 7.1 Routing rule
+
+Do not invoke IMMORTAL for every AEP state transition. Invoke the applicable economic authority **before** a transition that creates, increases, reallocates, commits, releases, refunds or slashes an asset-denominated obligation or a shared economic resource. A task-state change, evidence event, verifier statement or operational resource decision is not itself an economic effect.
+
+The gate evaluates the *economic effect set*, not the name of the UI action. One AEP event can contain a task-state change and a separate economic sub-transition; the latter must be admitted before the adapter realizes it. Each material effect needs a unique transition identity and exact task/manifest binding. A previously admitted funding transition is not a standing authorization for later bond locks, claims, fees, refunds or settlement.
+
+### 7.2 Lifecycle matrix
+
+| AEP lifecycle point | Cormia-owned action / evidence | Economic effect that may arise | Default authority route |
+| --- | --- | --- | --- |
+| **Draft** | Requester drafts and signs the manifest; task terms and commitments are proposed | None; SPEC says no economic obligation is active | Cormia only. No IMMORTAL gate. |
+| **Funded** | Escrow is funded and manifest digest is committed | Requester escrow lock; any fee or other obligation accrued at funding | In C2, IMMORTAL gate before the task can become Open. In C3, joint C-COMP admission. Missing escrow-lock effect is fail-closed. |
+| **Open** | Task is published to eligible workers | Normally none beyond the already admitted funding | Cormia task-state transition. Re-gate only for a new listing fee, sponsor commitment, claim or other new material effect. |
+| **Assigned** | Cormia selects a worker under capability, privacy, assurance and capacity rules | Worker bond lock; a newly allocated/vested claim or other funded entitlement | Selection alone is Cormia. Gate each bond lock or claim accrual if required by the committed profile. |
+| **Running** | Worker execution, checkpointing, Resource Manager lease and preemption | A new paid resource reservation, incremental claim, or commitment against a shared economic pool | Ordinary CPU/GPU/RAM/network/disk admission is Cormia Resource Manager work, not an IMMORTAL budget. Gate only a material economic effect; shared cross-system resource commitments are C3/C-COMP. |
+| **Submitted** | Worker submits delivery and evidence commitment bound to task, manifest and worker | Normally none; submission is not payment, acceptance or settlement | Cormia evidence/task transition. Gate only if a versioned profile explicitly makes submission itself create an economic claim. |
+| **Verifying** | Verifiers check the committed delivery and submit signed, delivery-bound verdicts | Verifier bond lock or verifier reward/claim accrual, if created at selection or verdict | Verdict is evidence, not authority to transfer escrow. Gate the bond/claim sub-transition, not the verdict itself. |
+| **ChallengeWindow** | Challenge timer opens; result is contestable | Normally none merely from opening the window | Cormia timer/state transition. A submitted challenge that locks a bond or creates paid dispute cost is a separate gated economic effect. |
+| **Disputed** | Cormia holds the affected settlement path while the declared dispute procedure runs | Arbiter/verifier fee, new bond, or other claim/exposure created to resolve the dispute | A hold/freeze with no new economic commitment is Cormia state. Gate any new bond, fee or claim; preserve the already represented unresolved exposure. |
+| **Settled** | Cormia derives outcome from manifest, ledger state, delivery, verdicts and dispute outcome | Worker/verifier payout, fee transfer, bond return, escrow release or other settlement movement | In C2, gate the exact settlement effect before adapter realization. In C3, joint gate and C-COMP. No adapter or verifier may infer admission from a verdict. |
+| **Failed / Expired** | Cormia classifies objective failure, timeout or missing valid delivery | None from classification alone; later refund or slash is a separate effect | Outcome classification is Cormia. Gate the refund, slash, fee or other transfer when it is actually proposed. Missing data is not automatically fraud. |
+| **Cancelled / Refunded** | Cormia applies the precommitted cancellation/refund policy | Refund, cancellation fee, bond release or other transfer | Each material release/refund/fee is gated. Preserve the policy version committed at funding; no retroactive rewrite. |
+| **Slashed** | Cormia records an enumerated, evidenced violation and applies the declared process | Bond forfeiture or penalty allocation | Gate the slash and its destination/allocation. A model, observer or verifier statement alone cannot authorize it. |
+
+The AEP SPEC's required ordering remains intact: a task is not Open before full funding and manifest commitment; a required worker bond must be locked before execution; submission binds to the assigned worker and manifest; final payment cannot precede verification and the applicable challenge window; terminal transitions cannot be unilaterally reopened; economic transitions must be replay-safe/idempotent.
+
+### 7.3 Effect vocabulary and preflight model
+
+The bounded reference model added under `verification/exp_boundary/transition_routing.py` recognizes these economic effects:
+
+- `escrow_lock`
+- `bond_lock`
+- `claim_accrual`
+- `fee_accrual`
+- `settlement_release`
+- `refund`
+- `slash`
+- `shared_resource_reservation`
+- `shared_resource_release`
+
+The model applies the following preflight routes:
+
+| Declared perimeter | No material economic effect | Material economic effect |
+| --- | --- | --- |
+| C0 — local non-economic | Cormia only | Reclassification required; do not silently introduce asset claims |
+| C1 — internal CRC use accounting | Cormia reciprocal-use accounting | Reclassification required if value becomes transferable, redeemable, collateral, cash-like or an external claim |
+| C2 — asset-denominated task contract | Cormia task event only | Route to the applicable IMMORTAL profile gate |
+| C3 — shared/cross-system economic resource | Cormia task event only, unless the resource itself is newly committed | Require canonical exhaustive partition **and** joint certificate, then route to the joint IMMORTAL/C-COMP gate |
+| C4 — independent AEP jurisdiction | Cormia/independent task event | Require the separately declared independent authority; IMMORTAL admission or certification is not implied |
+
+A C3 action is blocked when either the canonical partition or joint certificate is missing. A shared economic-resource reservation/release declared as C2 is a perimeter mismatch and must be reclassified to C3. Unknown events, perimeters and effects fail closed. The preflight model chooses a route; it never returns “admitted” and is not an implementation of the IMMORTAL gate.
+
+### 7.4 Mapping to the current Task Manifest schema
+
+The actual draft schema is `schemas/task-manifest.schema.json`, `urn:immortal:aep:task-manifest:v0.1.0`. The following existing fields are relevant:
+
+| Current schema field | Boundary use | Important limitation |
+| --- | --- | --- |
+| `budget.assetId`, `budget.maxAmount`, `budget.refundAddress` | Asset identity, maximum task budget and refund destination at funding | Does not by itself define the liability profile, protected-capital treatment or settlement allocation |
+| `budget.protocolFee` | Fee amount supplied by the manifest | Does not decide JUR-03 fee identity, recipient or whether it is the IMMORTAL Protocol Usage Fee |
+| `workerBondProfile`, `verifierBondProfile` | Profile references for conditional worker/verifier bonds | Profile semantics and amounts are not encoded in this schema |
+| `assuranceProfile`, `verifierSelectionProfile` | Assurance and verifier selection inputs | Does not by itself authorize a payout or define a quorum value |
+| `deadline`, `submissionWindow`, `challengeWindow` | Task deadlines and challenge timing | Timeout outcome and economic fallback still depend on the versioned failure/dispute policy |
+| `failurePolicy`, `cancellationPolicy`, `disputePolicy` | Cormia outcome and dispute procedures | Currently opaque strings, not a typed payout/penalty transition table |
+| `resourceProfile.cpu/memory/gpu/maxWallTimeSeconds` | Operational demand for Resource Manager admission | Must not be converted into economic exposure by inference or by a hidden CPU/GPU price |
+
+Schema/contract gaps to resolve before production binding; **no fields are added by this proposal**:
+
+1. The schema description says it is a draft, not a finalized canonical encoding or signing envelope.
+2. `taskId` is declared as a property but is not in the schema's required list. A canonical protocol task identity must nevertheless exist and be bound to every transition/evidence item.
+3. There is no explicit C0–C4 or economic-profile identity field. JUR-01 and the deployment/profile registry must decide how perimeter classification is bound; a task or adapter must not self-select its jurisdiction.
+4. The SPEC discusses a challenge bond, but the schema has no explicit `challengeBondProfile`; `disputePolicy` is an opaque string and must not be guessed as an equivalent typed field.
+5. There is no explicit verifier-reward profile, settlement-allocation profile, fee recipient/identity, or typed economic-effect list. These cannot be inferred from `budget.protocolFee` or `verifierBondProfile`.
+6. Shared-resource owner, canonical partition, joint certificate and concurrent-reservation state are not represented in this Task Manifest schema; they belong to the C3 composition evidence/registry boundary, not to an assumed local manifest field.
+
+These gaps are implementation blockers for a production AEP↔IMMORTAL adapter, not permission to improvise new economics or silently extend the schema.
+
+### 7.5 Transition request/response binding (conceptual, not an approved schema)
+
+For any material effect, the request to the economic authority must be bound to: canonical task ID; manifest digest and schema version; deployment-registered perimeter/profile; unique transition ID and exact predecessor state/version; the effect type and exact asset/amount or obligation delta; the relevant committed policy version; evidence references/digests required for that effect; and, for C3, the canonical resource ID/partition, concurrent commitments and joint-certificate reference.
+
+The gate response must identify the exact admitted/denied transition and the policy/certificate context used. The adapter may serialize/submit only that exact admitted transition; it cannot change the amount, destination, manifest, effect, or transition ID. On-chain or external observation must then reconcile the resulting state before the task journal marks the economic effect as completed. A retry must be idempotent and must not double-create, release or pay an obligation.
+
+### 7.6 EXP implications
+
+- **EXP-06 — Evidence-as-Input:** submission and verdict evidence must bind to the exact task, manifest digest, worker and delivery digest. A receipt/verdict is an input; it does not itself create a gate admission or prove a different artifact.
+- **EXP-12 — Observer/authority separation:** observer, model, worker, verifier and AEP scheduler may report/propose/advance task-local state within their authority. Only the designated economic gate can admit an IMMORTAL-governed effect. The adapter realizes exactly that admission and does not create a second authority.
+- **EXP-10 — Risk budget:** Cormia operational budgets (CPU/GPU/RAM/time/storage/network) remain separate from asset exposure, obligations, protected capital and worst-case economic commitments. The Resource Manager's capacity decision is not an economic solvency decision.
+- **EXP-11 — Allocation:** worker/verifier allocation checks capability, privacy, assurance and operational capacity. Allocation alone does not spend escrow or authorize claims; any bond lock or claim accrual is a separately routed economic effect. Fairness, sponsor and anti-Sybil policy remain JUR-06.
+
+### 7.7 Verification and limits
+
+The new tests check: funding and settlement cannot omit their mandatory effects; task-only lifecycle events do not trigger a gate by themselves; bond/claim/fee/refund/slash effects route to the appropriate authority; C0/C1 cannot silently acquire external economic claims; C4 does not borrow IMMORTAL authority; C3 fails closed without the canonical partition and joint certificate; and unknown event/effect/perimeter values fail closed.
+
+These are finite reference-model checks only. They do not prove the actual AEP state machine, current schema enforcement, IMMORTAL kernel, C-COMP certificate, Cardano adapter, production solvency, or all possible event interleavings.
