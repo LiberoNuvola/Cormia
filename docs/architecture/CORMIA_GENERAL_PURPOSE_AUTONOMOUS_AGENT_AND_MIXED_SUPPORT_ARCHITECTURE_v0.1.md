@@ -323,3 +323,14 @@ The mandatory project, lifecycle and resource records do not contain payment, Ca
 The initial local event journal and deterministic Project Lifecycle reducer are documented in [runtime/core/README.md](../../runtime/core/README.md). This is a separate Core component; the existing Local Agent Task Store v1 remains a read-only compatibility inspector and is not modified or adopted as the project journal.
 
 The hosted [GitHub Actions run #77](https://github.com/LiberoNuvola/Cormia/actions/runs/41585273487) passed 15 Node tests for append/reopen/replay, digest chaining, idempotent retry, revision conflicts, transition rejection, explicit torn-tail repair, complete-record corruption handling and stale-lock fail-closed behavior. This does not prove end-to-end Runtime integration, power-loss recovery on the user's host, mandate/identity authentication, task checkpoint recovery, durable resource leases or OS-level quotas.
+
+
+## Trusted Project Context Resolver slice — 2026-11-03
+
+An isolated host-port orchestration contract now lives in `runtime/core/trusted-project-context-resolver.mjs`. It binds the project descriptor to a host-resolved steward/accountability arrangement, existing ADR-0010 mandate claims, the one-time project consent receipt, a mandate-specific revocation/anchor decision and the Project Lifecycle journal. It reuses the existing mandate validator and child-authority evaluator rather than creating a second approval or grant system.
+
+For an active project, the Runtime can create a task session from a host-verified task. Every operation re-resolves trust state and current host policy before reusing the existing operation evaluator. These are automatic machine checks, not per-operation human prompts.
+
+This is not yet a production resolver. The repository still lacks real host key/bootstrap and mandate-signature providers, OS-authenticated operator/consent broker, trusted steward/accountability registry, mandate-specific persistent revocation/monotonic-anchor provider, project descriptor registry and host-policy store. The tests use synthetic in-memory provider doubles; missing or unhealthy provider results fail closed. The resolver does not integrate with Agent/Granite or start the autonomous project loop.
+
+Verification: [run #93](https://github.com/LiberoNuvola/Cormia/actions/runs/41586046506) passed 108 tests (41 Python Core/schema + 31 EXP + 36 Node journal/reducer/resolver); [grant/authority regression run #30](https://github.com/LiberoNuvola/Cormia/actions/runs/41586046555) passed 65 existing crypto/authority/revocation tests.
