@@ -312,11 +312,11 @@ test("rethrows execution failures so the trusted task journal can record the fai
 
 test("rejects owner-unaccepted, unvalidated or evidence-free offers", () => {
   assert.throws(() => makeProvider({ offer: makeOffer({ ownerAccepted: false }) }),
-    /owner-accepted and validated/);
+    /owner-accepted-and-validated/);
   assert.throws(() => makeProvider({ offer: makeOffer({ validated: false }) }),
-    /owner-accepted and validated/);
+    /owner-accepted-and-validated/);
   assert.throws(() => makeProvider({ offer: makeOffer({ validationEvidenceRefs: [] }) }),
-    /requires evidence references/);
+    /requires-evidence-references/);
 });
 
 test("rejects malformed, mismatched and duplicate provider offers", () => {
