@@ -378,3 +378,37 @@ The implementation is a worker-side building block only. It is not evidence of a
 
 
 **Latest worker-local provider verification — run #124:** [GitHub Actions](https://github.com/LiberoNuvola/Cormia/actions/runs/41676501029) passed 41 Python Core/schema + 31 EXP + 54 Node tests = **126 total, 0 failures**. This includes composition with the existing fixed-operation ResourceManager wrapper using a synthetic manager double. Separate [grant/authority run #50](https://github.com/LiberoNuvola/Cormia/actions/runs/41676500879) passed 65 tests. These are hosted CI contract checks, not a live Windows ResourceManager test or a multi-PC integration test.
+
+
+## 6Y. Team Collaboration Plane, Project Workbench and pre-publication integration
+
+The coordination topology has been expanded in [Cormia Coordination Plane, Team Collaboration and Multi-Node Topology v0.1](CORMIA_COORDINATION_PLANE_AND_MULTI_NODE_TOPOLOGY_v0.1.md). The Coordination Plane is no longer described as only a scheduler/dispatcher. It includes four explicit project-team stages:
+
+1. **Team Room:** agents communicate naturally, discuss plans, request help, report blockers and peer-review work. Important decisions are promoted to attributable structured records; chat itself is not authority.
+2. **Project Workbench:** a common project environment with isolated task worktrees, local source/version history, contribution patches, pair/team work under conflict controls and a shared integration workspace. Local commits do not require GitHub.
+3. **Integration & Verification Bench:** accepted contributions are composed, compiled/built, tested, reviewed and packaged into a digest-bound candidate with evidence and unresolved risks.
+4. **Delivery Gate:** a project-defined profile determines whether the output is a local action/report/artifact, a local repository result, an optional GitHub publication or another explicitly configured adapter.
+
+GitHub is now explicitly an optional external publication destination, not the place where agents first collaborate or where integration must occur. Default behavior is to request owner authorization before a verified candidate is pushed/opened as a GitHub PR; a narrow standing publication mandate may be configured explicitly. Merge, release and production deploy are distinct protected actions. Solo local tasks (for example, PC cleanup) bypass team/repository/publication stages they do not need.
+
+**Status:** architecture proposal only. Team Room, Workbench, integration worktree, conflict-managed pair editing, candidate pipeline, project delivery profiles and publication gate are not implemented. The current Local Resource Provider and Coordination Plane docs do not constitute an integrated team runtime. No production collaboration, build/test or publication pipeline is claimed.
+
+## 6Z. Project Compute Reward Pool — proposed economic extension
+
+The current Compute Reciprocity design already has:
+- CRC for non-transferable access/quota to shared inference or eligible compute after accepted useful work;
+- a community-sponsored capacity pool;
+- contribution receipts, NUWU as a measurement concept, randomized audits and optional epoch commitments as design elements.
+
+It does **not** yet define the proposed project-specific reward bucket that is funded for a project/workstream and distributed proportionally to users who contribute compute to that pool.
+
+[Compute Reciprocity Economy, section 14](../economics/COMPUTE_RECIPROCITY.md) now records a non-normative Project Compute Reward Pool candidate. It separates:
+- a host-owned Resource Offer and actual task-bound Resource Lease;
+- an accepted, verified Contribution Receipt for completed useful work;
+- a finite funded reward pool with a predeclared campaign, eligible workload and allocation policy;
+- an optional usage-right, financial/asset-denominated or non-financial benefit adapter.
+
+The candidate allocation is pro-rata over accepted useful work, not advertised capacity, uptime or raw unverified GPU time. Each user chooses a bounded amount of capacity and can revoke it. An unfunded pledge is not a distributable bucket. CRC does not become cash or a transferable asset. Financial reward requires a separate custodian/economic adapter; IMMORTAL is relevant only where the project explicitly selects an applicable governed economic profile.
+
+This is not yet a schema or runtime service. No percentage, NUWU conversion ratio, weighting factor, pool duration, payout cadence, anti-Sybil threshold or dispute parameter has been selected. JUR-05 (shared-resource ownership/partition) and JUR-06 (worker/verifier allocation, fairness, sponsor and anti-Sybil rules) remain open. No IMMORTAL/PRE-RICH normative parameter has been changed.
+
