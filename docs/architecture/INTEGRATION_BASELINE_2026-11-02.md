@@ -411,6 +411,8 @@ It does **not** yet define the proposed project-specific reward bucket that is f
 The candidate allocation is pro-rata over accepted useful work, not advertised capacity, uptime or raw unverified GPU time. Each user chooses a bounded amount of capacity and can revoke it. An unfunded pledge is not a distributable bucket. CRC does not become cash or a transferable asset. Financial reward requires a separate custodian/economic adapter; IMMORTAL is relevant only where the project explicitly selects an applicable governed economic profile.
 
 
+This is not yet a schema or runtime service. No percentage, NUWU conversion ratio, weighting factor, pool duration, payout cadence, anti-Sybil threshold or dispute parameter has been selected. JUR-05 (shared-resource ownership/partition) and JUR-06 (worker/verifier allocation, fairness, sponsor and anti-Sybil rules) remain open. No IMMORTAL/PRE-RICH normative parameter has been changed.
+
 ## 6AA. Work Completion Evidence and Materios certification — architecture proposal
 
 Adds [CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md](CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md).
@@ -424,5 +426,3 @@ The assurance model keeps separate evidence dimensions: receipt integrity, evide
 CRC mint is gated on a task-bound accepted useful-work receipt and the declared workload verification profile; raw GPU-hours, worker signatures or receipt availability alone are insufficient. CRC remains distinct from Materios MATRA/MOTRA and from financial reward pools.
 
 **Status:** architecture proposal only. No Work Completion Receipt schema, live Cormia Node meter, independent task verifier, Materios adapter, Materios protocol change, CRC mint/burn ledger or end-to-end certification path is implemented. No Cormia Core dependency on Materios is introduced.
-This is not yet a schema or runtime service. No percentage, NUWU conversion ratio, weighting factor, pool duration, payout cadence, anti-Sybil threshold or dispute parameter has been selected. JUR-05 (shared-resource ownership/partition) and JUR-06 (worker/verifier allocation, fairness, sponsor and anti-Sybil rules) remain open. No IMMORTAL/PRE-RICH normative parameter has been changed.
-
