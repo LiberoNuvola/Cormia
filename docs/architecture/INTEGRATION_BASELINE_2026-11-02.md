@@ -309,6 +309,6 @@ The four Core contracts now have an initial JSON record-schema slice, catalogued
 
 The Project Descriptor contains a digest-bound reference to the existing mandate claims, not a second mandate representation. Project lifecycle, mandate authority and task lifecycle remain separate. Resource offers cannot become available without owner acceptance and validation evidence. Financial and in-kind support remain distinct; a settled financial contribution requires provider confirmation, while an in-kind record has no monetary equivalent.
 
-GitHub Actions [run #48](https://github.com/LiberoNuvola/Cormia/actions/runs/41583912440) passed **39 Core tests** (22 abstract predicate tests + 17 JSON Schema conformance tests) and **31 EXP boundary tests**: 70 total, zero failures.
+GitHub Actions [run #58](https://github.com/LiberoNuvola/Cormia/actions/runs/41584236062) passed **40 Core tests** (22 abstract predicate tests + 18 JSON Schema conformance tests) and **31 EXP boundary tests**: 71 total, zero failures. The suite now also confirms steward/accountability reference fields are mandatory; it does not verify the identity behind those references.
 
 This is contract/schema evidence only. No schema-generated Runtime types, durable project journal, lifecycle reducer, mandate resolver, persistent Resource Lease store, Community Support service or integrated autonomous Core Runtime is present. Existing signed mandate/consent schemas, ADR-0010, AEP Task Manifest and production runtime behavior remain unchanged.
