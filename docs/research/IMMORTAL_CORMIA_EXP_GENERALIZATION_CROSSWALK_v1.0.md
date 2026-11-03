@@ -18,10 +18,16 @@ The correct conclusion is:
 1. **The EXP axes are relevant to Cormia and should be part of its architecture review.**
 2. **Cormia already covers some of their structural concerns in draft form.** Rewriting those concerns as new independent Cormia subsystems would create duplication.
 3. **Several semantic gaps remain open**, notably the distinction between task assignment and novation, operational resource limits and economic risk budgets, and compute-credit accounting versus obligation netting.
-4. **The economic jurisdiction between Cormia AEP and IMMORTAL must be made explicit** before Cormia's escrow, bonds, fees, CRC or settlement are integrated with IMMORTAL's economic kernel.
+4. **The economic jurisdiction between Cormia AEP and IMMORTAL must be made explicit only for deployments that opt into AEP-funded contracts or shared IMMORTAL-governed economic resources.** This optional integration must not define or constrain general-purpose Cormia Core, local tasks, agent autonomy, project patronage or donated compute.
 5. **This crosswalk does not establish that the three projects implement one proven universal algorithm or theorem.** The common research object remains under investigation.
 
 This document is a mapping and gap register. It does not amend AEP, ADR-0010, the proposed ADR-0011, IMMORTAL's Constitution, PRE-RICH semantics, or any EXP contract.
+
+
+
+## 1.1. Core-first architecture correction (2026-11-03)
+
+The economic composition analysis below is an optional integration profile, not the Cormia product's foundation. Cormia must remain a general-purpose autonomous agent and project-execution Core that works without Cardano, wallets, tokens, CRC, payment providers or IMMORTAL. The combined creator/team-led and agent-led community-support model is defined separately in [CORMIA_GENERAL_PURPOSE_AUTONOMOUS_AGENT_AND_MIXED_SUPPORT_ARCHITECTURE_v0.1.md](../architecture/CORMIA_GENERAL_PURPOSE_AUTONOMOUS_AGENT_AND_MIXED_SUPPORT_ARCHITECTURE_v0.1.md). The EXP comparison must therefore keep authority/action generalization distinct from optional economic-contract composition. An agent executes using available compute and tools; community money supports the project/resource pool and does not pay an agent a wage or grant it financial custody.
 
 ## 2. What “generalization” means here
 
