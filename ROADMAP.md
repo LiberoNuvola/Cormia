@@ -102,7 +102,7 @@ No gate is passed solely by code compilation, model self-report, or a single hap
 - local-only user experience works without wallet, account, network or model API key;
 - first node can donate only opt-in spare capacity under Resource Manager policy;
 - whole-model serving on one peer is measured before split-model inference;
-- CRC balance can be reconstructed from signed receipts and challenged;
+- CRC balance can be reconstructed from accepted, task-bound contribution receipts and challenged; the receipt includes the required workload-specific verification profile, not merely a worker-signed usage claim;
 - no silent paid/cloud fallback;
 - model identity, prompt privacy disclosure and node revocation are tested;
 - published benchmark compares local inference, peer inference and contribution/consumption fairness.
