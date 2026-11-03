@@ -315,4 +315,11 @@ The bounded abstract contract model is under [verification/core_contracts](../..
 
 The four Core contracts now have an initial versioned record-schema proposal catalogued in [CORMIA_CORE_INTERFACE_CATALOG_v0.1.md](./CORMIA_CORE_INTERFACE_CATALOG_v0.1.md). It covers project identity and mandate reference, separate project lifecycle projection/event records, resource offers/leases, and separate financial/in-kind support records.
 
-The mandatory project, lifecycle and resource records do not contain payment, Cardano, wallet, token, CRC, AEP or IMMORTAL requirements. The mandate reference points to the existing signed claims rather than creating a second authority system. JSON Schema conformance is tested in GitHub Actions; no integrated Core Runtime or production persistence is claimed.
+The mandatory project, lifecycle and resource records do not contain payment, Cardano, wallet, token, CRC, AEP or IMMORTAL requirements. The mandate reference points to the existing signed claims rather than creating a second authority system. JSON Schema conformance is tested in GitHub Actions. An isolated local append-only Project Lifecycle journal and deterministic reducer now exist under `runtime/core/`; this is not an integrated Core Runtime and does not authenticate mandates or stewards, manage tasks or enforce OS resources.
+
+
+## Local Project Lifecycle journal slice (2026-11-03)
+
+The initial local event journal and deterministic Project Lifecycle reducer are documented in [runtime/core/README.md](../../runtime/core/README.md). This is a separate Core component; the existing Local Agent Task Store v1 remains a read-only compatibility inspector and is not modified or adopted as the project journal.
+
+The hosted [GitHub Actions run #77](https://github.com/LiberoNuvola/Cormia/actions/runs/41585273487) passed 15 Node tests for append/reopen/replay, digest chaining, idempotent retry, revision conflicts, transition rejection, explicit torn-tail repair, complete-record corruption handling and stale-lock fail-closed behavior. This does not prove end-to-end Runtime integration, power-loss recovery on the user's host, mandate/identity authentication, task checkpoint recovery, durable resource leases or OS-level quotas.
