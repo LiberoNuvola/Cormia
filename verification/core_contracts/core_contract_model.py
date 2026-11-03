@@ -41,6 +41,7 @@ class ExecutionEnvironment:
     remote_privacy_accepted: bool = False
     # Optional integration health is deliberately outside the Core decision.
     optional_adapters: Mapping[str, bool] = field(default_factory=dict)
+    host_policy_operations: FrozenSet[str] = frozenset({"read", "write", "test"})
 
 
 @dataclass(frozen=True)
@@ -106,7 +107,7 @@ def may_execute_core_task(
     effective = derive_child_authority(
         project.mandate_operations,
         request.requested_operations,
-        project.mandate_operations,
+        environment.host_policy_operations,
     )
     if not request.requested_operations or effective != request.requested_operations:
         return False
