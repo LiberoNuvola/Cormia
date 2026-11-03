@@ -5,6 +5,7 @@ on:
     branches: ["**"]
     paths:
       - "verification/exp_boundary/**"
+      - "verification/core_contracts/**"
       - ".github/workflows/exp-boundary-reference-model.yml"
   pull_request:
     branches: [main]
@@ -18,7 +19,7 @@ permissions:
 
 jobs:
   bounded-reference-model:
-    name: Bounded EXP boundary checks (abstract model)
+    name: Bounded Cormia Core and EXP contract checks (abstract models)
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -26,5 +27,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Run bounded reference-model tests
+      - name: Run bounded EXP boundary tests
         run: python -m unittest discover -s verification/exp_boundary -p "test_*.py" -v
+      - name: Run bounded Cormia Core contract tests
+        run: python -m unittest discover -s verification/core_contracts -p "test_*.py" -v
