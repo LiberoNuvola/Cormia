@@ -136,5 +136,26 @@
       "type": "string",
       "pattern": "^sha256:[a-f0-9]{64}$"
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "eventType": {
+            "const": "project_metadata_updated"
+          }
+        },
+        "required": [
+          "eventType"
+        ]
+      },
+      "then": {
+        "properties": {
+          "evidenceRefs": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ]
 }
