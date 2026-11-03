@@ -29,6 +29,21 @@ class ProjectAuthorityContractTests(unittest.TestCase):
         )
         return replace(base, **changes)
 
+    def test_host_policy_can_narrow_a_valid_project_mandate(self):
+        env = ExecutionEnvironment(
+            host_policy_operations=frozenset({"read", "test"})
+        )
+        self.assertFalse(may_execute_core_task(
+            self.project(),
+            ExecutionRequest(frozenset({"write"})),
+            env,
+        ))
+        self.assertTrue(may_execute_core_task(
+            self.project(),
+            ExecutionRequest(frozenset({"read"})),
+            env,
+        ))
+
     def test_same_core_supports_all_three_leadership_modes(self):
         for mode in ("creator_team_led", "agent_led", "hybrid"):
             with self.subTest(mode=mode):
