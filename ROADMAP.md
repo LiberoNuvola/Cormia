@@ -54,6 +54,17 @@
 - resource manager and sandbox;
 - evidence package generation.
 
+## Gate 4A — Team Collaboration and Internal Delivery
+
+- Build the Cormia Team Room: persistent agent-to-agent threads, project context, task discussion and structured decision records.
+- Build the Project Workbench: local project repository/history, isolated task worktrees, contribution patches, shared artifact index and controlled integration workspace.
+- Support independent contributions and pair/team editing under explicit file/module claims, edit leases or conflict-aware operations; never unrestricted shared writes.
+- Build the Integration & Verification Bench: compose contributions, compile/build/package, run named tests, conduct peer review and create an evidence-backed candidate.
+- Add project delivery profiles: local action, local artifact, local repository, optional GitHub publication or other adapter.
+- Request owner authorization by default before publishing a verified candidate to GitHub; keep protected merge, release and production deploy as separate actions.
+- Prove a solo local-maintenance task can finish without Team Room, repository, GitHub or economic adapters.
+- Prove a two-agent team flow with discussion, collaborative edits, integration, build/test, repair and local candidate delivery before adding a second PC.
+
 ## Gate 5 — Independent verifier network
 
 - permissionless verifier admission under public profiles;
@@ -87,5 +98,8 @@ No gate is passed solely by code compilation, model self-report, or a single hap
 - no silent paid/cloud fallback;
 - model identity, prompt privacy disclosure and node revocation are tested;
 - published benchmark compares local inference, peer inference and contribution/consumption fairness.
+- Keep the existing CRC usage-right model distinct from a project-specific compute reward pool.
+- Specify an optional funded reward bucket for accepted useful compute only after contribution receipts, NUWU benchmarking, allocation rules, sponsor custody, dispute handling and anti-Sybil controls are evidenced.
+- Do not pay for advertised capacity or raw uptime; do not promise a share of an unfunded bucket.
 
-Split-model inference, TEE, ZKML and monetary provider payouts are later optional profiles, not prerequisites for the first pilot.
+Split-model inference, TEE, ZKML and monetary provider payouts are later optional profiles, not prerequisites for the first pilot. A project-specific compute reward pool remains a separate optional economic profile and is not a prerequisite for local or team collaboration.
