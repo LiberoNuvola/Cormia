@@ -115,11 +115,11 @@ This slice does not implement:
 - a task journal, task engine, checkpoint executor or crash-safe side-effect reconciliation;
 - schema-generated runtime types or a database projection store;
 - snapshotting, compaction, retention, backup rotation or bounded journal growth;
-- persistent Resource Lease storage, the Local Resource Provider or OS-level quotas;
+- durable/cross-process Resource Lease storage, OS-level quotas and remote provider discovery; the partial worker-local offer/lease adapter is described in section 10;
 - Community Support, payment custody, remote worker mesh or cross-host replication;
 - Agent/Granite integration, autonomous task execution or project-loop activation.
 
-The next layer is to implement the production providers required by the resolver contract: host-pinned mandate signature/key verification, authenticated operator consent, steward/accountability resolution, mandate-specific revocation with an independent monotonic anchor, and a durable Project Descriptor/host-policy registry. The current resolver is only a fail-closed orchestration contract over those host ports. The Local Resource Provider remains a separate adapter step; it must not be conflated with project lifecycle state.
+The next layer is to implement the production providers required by the resolver contract: host-pinned mandate signature/key verification, authenticated operator consent, steward/accountability resolution, mandate-specific revocation with an independent monotonic anchor, and a durable Project Descriptor/host-policy registry. The current resolver is only a fail-closed orchestration contract over those host ports. The worker-local Resource Provider described in section 10 is separate from project lifecycle and does not substitute for the missing Coordination Plane or durable cross-worker lease registry.
 
 ## 8. Tests
 
@@ -186,3 +186,33 @@ The repository does **not** yet contain production implementations for the follo
 The existing ADR-008 Ed25519 helper verifies the separate local capability-grant/revocation JWS profile; it is not silently treated as a project-mandate signature verifier. The existing ADR-009 reconciliation model is in-memory and synthetic, and its revocation-event schema binds grant revocations, not the project mandate. Neither is claimed as a production provider for this resolver.
 
 Consequently, this module is a fail-closed orchestration contract and test harness, **not a production trusted resolver**. With no real providers configured, no trusted context can be resolved. The unit tests use synthetic in-memory provider doubles and test the boundary logic only; they do not prove key custody, consent authenticity, operator authentication, anti-rollback persistence, or host integration.
+
+
+## 10. Local worker-side Resource Provider — callback-scoped adapter
+
+Implementation:
+- `local-resource-provider.mjs`
+- `local-resource-provider.test.mjs`
+
+This module is a generic Cormia Core worker-side adapter. It does not import the existing IMMORTAL ResourceManager or the reference-worker wrapper. The trusted host injects:
+- a provider identity;
+- preconfigured Resource Offer records that already have owner acceptance and validation evidence;
+- an `executeWithLocalLease({ operation, run })` port bound to the actual local ResourceManager adapter;
+- an explicit `leaseTtlMs` from host policy, plus host clock and ID generation.
+
+The local configuration contains a host-only `operation` mapping for each offer. That value is stripped from public Resource Offer records and cannot be selected by a task/model caller. The module validates the offer's version, provider binding, availability window, owner acceptance, validation evidence, capacity and capability profile. `discover()` exposes only the bounded offer record; it does not expose raw host telemetry. Actual resource admission is rechecked by the injected execution port when the task is run.
+
+`withLease()` binds an offer to a verified task reference and exact capability profile, checks requested quantity/unit and delegates acquisition to the host execution port. The callback receives a task-bound active Resource Lease record, a bounded resource summary and `assertActive()`. The trusted executor should call `assertActive()` before each side-effecting tool operation. Expiry or local offer revocation then fails closed at that boundary. On successful callback completion the module returns a `released` lease record; the injected local ResourceManager wrapper releases its underlying process-local lease in `finally`.
+
+`revokeOffer()` prevents new admissions and causes the next `assertActive()` check in an existing callback to fail. It is in-memory only; it does not persist a revocation event or forcibly terminate an OS process. Lease renewal is not implemented.
+
+### Explicit limits
+
+- No durable lease registry, cross-process reservation, scheduler, coordinator, worker registration or network dispatch.
+- No OS-level CPU/RAM/GPU quotas, process kill, resource preemption or guarantee that a long-running callback stops unless the trusted executor checks `assertActive()` at operation boundaries.
+- No live capacity sampling during `discover()`; the actual local ResourceManager admission is authoritative at `withLease()` time.
+- No remote resource provider or shared writable workspace.
+- No automatic import or dependency from Cormia Core to IMMORTAL; host composition injects the adapter.
+- No claim of production Agent integration or multi-PC execution.
+
+The tests use injected execution-port doubles. They verify host-bound operation mapping, offer/lease binding, time-window and revocation checks, fail-closed admission and release/error boundaries. They do not test the user's Windows ResourceManager or create a persistent lease.
