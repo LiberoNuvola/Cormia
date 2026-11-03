@@ -410,5 +410,19 @@ It does **not** yet define the proposed project-specific reward bucket that is f
 
 The candidate allocation is pro-rata over accepted useful work, not advertised capacity, uptime or raw unverified GPU time. Each user chooses a bounded amount of capacity and can revoke it. An unfunded pledge is not a distributable bucket. CRC does not become cash or a transferable asset. Financial reward requires a separate custodian/economic adapter; IMMORTAL is relevant only where the project explicitly selects an applicable governed economic profile.
 
+
+## 6AA. Work Completion Evidence and Materios certification — architecture proposal
+
+Adds [CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md](CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md).
+
+The proposal connects the worker-local Cormia Node, task-specific verifiers, Materios receipt/attestation adapter and Cormia CRC accounting. It treats completion as an evidence-bearing claim, not a task status or agent self-report. The Work Completion Receipt is intended to bind project/task/attempt, assignment, worker, exact Resource Lease, workload, input/output commitments, meter profile, acceptance predicate and verification evidence.
+
+The assurance model keeps separate evidence dimensions: receipt integrity, evidence availability, assignment/provenance, resource metering, execution-environment attestation, task-outcome acceptance, execution proof and chain finality. A signature authenticates its issuer but does not prove the truth of a contributor-controlled OS/driver meter. A Merkle proof establishes correspondence to a commitment, not semantic correctness.
+
+**Materios source boundary checked 2026-11-03:** the current Orinq/cert-daemon path supports receipt commitment integrity and availability attestation (including chunk/Merkle-root verification). This does not establish that an agent executed the declared work or that the output is correct. The TEE pallet types additional evidence families, but only ARM TrustZone has a verifier implementation in the inspected source; AMD SEV-SNP, Intel TDX, reproducible-build and ZK-VM verifier paths return NotImplemented. The pallet source also records challenge-binding work as a prerequisite to enabling evidence submission. These are not production certification guarantees today.
+
+CRC mint is gated on a task-bound accepted useful-work receipt and the declared workload verification profile; raw GPU-hours, worker signatures or receipt availability alone are insufficient. CRC remains distinct from Materios MATRA/MOTRA and from financial reward pools.
+
+**Status:** architecture proposal only. No Work Completion Receipt schema, live Cormia Node meter, independent task verifier, Materios adapter, Materios protocol change, CRC mint/burn ledger or end-to-end certification path is implemented. No Cormia Core dependency on Materios is introduced.
 This is not yet a schema or runtime service. No percentage, NUWU conversion ratio, weighting factor, pool duration, payout cadence, anti-Sybil threshold or dispute parameter has been selected. JUR-05 (shared-resource ownership/partition) and JUR-06 (worker/verifier allocation, fairness, sponsor and anti-Sybil rules) remain open. No IMMORTAL/PRE-RICH normative parameter has been changed.
 
