@@ -67,12 +67,14 @@
         "project",
         "named_custodian",
         "resource_pool"
-      ]
+      ],
+      "description": "named_custodian must resolve through a trusted identity registry to a human, organization or otherwise accountable legal custodian; an agent principal is not an eligible personal beneficiary."
     },
     "beneficiaryRef": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 512
+      "maxLength": 512,
+      "description": "Opaque beneficiary reference; trusted identity resolution is required, especially for named_custodian. The schema cannot prove who controls the reference."
     },
     "amountMinor": {
       "type": "integer",
