@@ -52,6 +52,17 @@ class LifecycleTransitionRoutingTests(unittest.TestCase):
             "IMMORTAL_GATE_REQUIRED",
         )
 
+    def test_bond_claim_and_fee_events_fail_closed_when_effect_is_omitted(self):
+        for event in (
+            "worker_bond_lock", "verifier_bond_lock", "challenge_bond_lock",
+            "claim_accrual", "fee_accrual",
+        ):
+            with self.subTest(event=event):
+                self.assertEqual(
+                    self.route(event).route,
+                    "BLOCKED_MISSING_REQUIRED_EFFECT",
+                )
+
     def test_settlement_refund_and_slash_require_their_economic_effects(self):
         self.assertEqual(self.route("settlement").route, "BLOCKED_MISSING_REQUIRED_EFFECT")
         self.assertEqual(
@@ -84,7 +95,7 @@ class LifecycleTransitionRoutingTests(unittest.TestCase):
         for perimeter in ("C0", "C1"):
             for effect in effects:
                 with self.subTest(perimeter=perimeter, effect=effect):
-                    result = self.route("claim_accrual", perimeter=perimeter, effects={effect})
+                    result = self.route("assignment", perimeter=perimeter, effects={effect})
                     self.assertEqual(result.route, "RECLASSIFICATION_REQUIRED")
 
     def test_c4_requires_independent_authority_not_immortal(self):
