@@ -1,4 +1,4 @@
-# Cormia Coordination Plane and Multi-Node Topology v0.1
+# Cormia Coordination Plane, Team Collaboration and Multi-Node Topology v0.1
 
 - **Date:** 2026-11-03
 - **Status:** architecture proposal / non-normative / not implemented as a production coordinator
@@ -8,9 +8,11 @@
 
 ## 1. Decision in one sentence
 
-The coordination layer is a **Cormia Runtime service (the Coordination Plane)**. It is a logical control plane that may be hosted on a primary PC, an always-on home server, or a VPS/cloud instance. It is **not** GitHub, a blockchain, or a shared sandbox.
+The coordination layer is a **Cormia Runtime service (the Coordination Plane)**. It is a logical project environment that may be hosted on a primary PC, an always-on home server, or a VPS/cloud instance. It is **not** GitHub, a blockchain, or a single shared sandbox.
 
-The Core contracts define project identity, authority, lifecycle and resource/support boundaries. The Coordination Plane is the running service that consumes those contracts to coordinate project work. Worker Runtime instances execute tasks on the machines that actually provide CPU, GPU, memory, storage and local models.
+The Coordination Plane is more than a task scheduler. It contains an agent-to-agent **Team Room** for verbal coordination, a **Project Workbench** for shared collaborative work, an **Integration & Verification Bench** where contributions are composed and tested, and a **Delivery Gate** that decides whether the finished result stays local or is published to an external destination. The scheduler, authority checks, resource leases, shared state and event journal support all four stages.
+
+Worker Runtime instances execute tasks on the machines that actually provide CPU, GPU, memory, storage and local models. They can work independently, pair on the same artifact under conflict controls, or contribute modules to a common integration workspace.
 
 A project has one logically authoritative coordinator for task assignment and lease state in v0.1. The service can move between hosts; its physical host is a deployment choice, not part of the project's identity.
 
@@ -19,10 +21,14 @@ A project has one logically authoritative coordinator for task assignment and le
 | Plane | Responsibility | Typical location |
 |---|---|---|
 | **Cormia Core / project authority** | Project Descriptor, mandate reference, steward/accountability, project lifecycle and host policy | Authoritative coordinator store; trusted host services |
-| **Coordination Plane** | Task decomposition, dependency tracking, worker selection, dispatch, lease coordination, progress, recovery and project-level observability | One coordinator service per project in the initial topology |
+| **Coordination Plane / Control** | Task graph, dependency tracking, agent/worker registry, scheduling, authority checks, lease coordination, durable state and recovery | One logical coordinator per project initially |
+| **Team Collaboration Plane** | Agent-to-agent discussion, shared project context, proposals, decisions, peer review and collaboration sessions | Team Room hosted with the coordinator; local clients on each node |
+| **Project Workbench** | Common project files/artifacts, isolated task workspaces, patch exchange, local commits and a controlled integration workspace | Owner-controlled project storage plus worker-local worktrees |
+| **Integration & Verification Bench** | Compose contributions, compile/build, run tests, review results and create a verified candidate with evidence | Local or owner-controlled execution/storage; may use several workers |
 | **Worker / execution plane** | Local agent/model, tools, capability enforcement, resource admission and task execution | Each participating PC/server |
-| **Workspace and artifact plane** | Isolated task worktrees, source, datasets, outputs, checkpoints and evidence objects | Worker-local storage plus explicitly configured artifact storage |
-| **Version-control plane** | Source history, branches, commits, pull requests and human review | Git repository such as GitHub |
+| **Workspace and artifact plane** | Task worktrees, common integration workspace, datasets, outputs, checkpoints and evidence objects | Worker-local storage plus explicitly configured project artifact storage |
+| **Local version-control plane** | Local source history, task branches/worktrees, integration commits and snapshots; can exist without any remote | A local Git repository or another versioned project store |
+| **External publication plane (optional)** | Push/publish a verified candidate, open a PR, release or deploy under a project delivery policy | GitHub or another explicitly configured destination |
 | **Optional protocol/economic plane** | Public task commitments, open worker/verifier participation, escrow, dispute and settlement when explicitly selected | AEP adapter and its selected ledger; execution remains off-chain |
 
 These planes exchange typed, bounded references and events. None silently becomes another plane's authority.
@@ -101,7 +107,115 @@ The logical exchange is:
 
 A model may suggest a task assignment, but only the trusted coordinator and worker policy boundaries authorize it. Task text cannot select arbitrary machine paths, resource classes, network peers or credentials.
 
-## 6. What each of the commonly confused components does
+## 6. Team collaboration, shared workbench and pre-publication integration
+
+The missing stage is a **project team environment between the agents and any external Git host**. The agents must be able to converse, exchange partial work, co-develop artifacts, integrate components and test the combined result before a remote publication decision exists.
+
+This is part of the Coordination Plane, but it is not the same thing as the scheduler. It has four cooperating surfaces:
+
+### 6.1 Team Room — verbal coordination
+
+Agents in the same project can communicate in natural language through project/workstream/task threads. They can:
+- discuss the goal, architecture and implementation options;
+- ask another agent for help or a second opinion;
+- explain blockers and propose task reassignments;
+- review another agent's patch, design or test result;
+- coordinate sequencing and integration work;
+- keep the human owner in the loop when the project policy requires a decision.
+
+The Team Room maintains references to tasks, artifacts, decisions and evidence. Important decisions are promoted from conversation into structured, attributable project decision records. Conversation alone is not authority: a chat message cannot widen a mandate, change resource permissions, approve a protected action or silently rewrite the project plan.
+
+### 6.2 Project Workbench — actual teamwork
+
+The Workbench is the project-level working environment shared by the team. It is the place where agents exchange and combine real work products, not merely messages.
+
+For software and structured-artifact projects it contains:
+- the project source tree and shared project documents;
+- a local repository/version history, independent of GitHub;
+- individual task worktrees or component branches for parallel contributions;
+- a common integration worktree/branch where accepted contributions are composed;
+- build inputs, datasets, generated outputs, patches and review notes.
+
+The agents have three collaboration modes:
+1. **Parallel contribution:** each agent works on an isolated task worktree and submits a patch/artifact to the Workbench.
+2. **Pair/team work:** agents can work on the same module or document through explicit file/module ownership, short-lived edit leases or a conflict-aware collaboration backend. They can see one another's changes and discuss them in the Team Room.
+3. **Integration work:** an integrator agent (or a trusted integration service) applies accepted patches to the common integration workspace, resolves conflicts with the contributing agents, and preserves attribution and source snapshots.
+
+This does not mean an uncontrolled shared folder where every agent can overwrite every file. The Workbench provides controlled shared visibility and collaboration, while the host enforces workspace boundaries, file/module claims and conflict resolution. A shared filesystem may be one storage backend, but is not the coordination protocol.
+
+**Local Git is allowed here.** Agents may create local commits, branches and tags in the project's local repository. Those commits remain private to the project until the owner selects an external publication destination. GitHub is not required for local history or teamwork.
+
+### 6.3 Integration & Verification Bench — combine before publishing
+
+The integration stage is an internal release candidate pipeline:
+1. collect accepted patches/components from the Workbench;
+2. compose them in the integration workspace;
+3. compile/build/package the combined project;
+4. run the declared test, lint, audit, simulation or validation profiles;
+5. request independent agent review where the assurance profile requires it;
+6. record failures, fixes, reruns and evidence;
+7. freeze a candidate snapshot with source/artifact digests, test results, environment identity and unresolved risks.
+
+The output is a **Verified Project Candidate**, not automatically a GitHub commit, release or deployment. Failed tests remain visible; the team may repair and repeat within its mandate and resource budget. A coordinator cannot convert a failed or missing test into a pass.
+
+The bench applies to code projects, but is not hard-coded to code. A non-software project can compose and validate documents, datasets, plans, images, research or other deliverables using its own validation profile.
+
+### 6.4 Delivery Gate — GitHub is an optional destination
+
+Every project declares a delivery profile. Examples:
+- **Local action only:** carry out a bounded local task, then report what changed. Example: clean and organize a PC. No Team Room, repository, GitHub account or publication stage is necessary for a single-agent task.
+- **Local deliverable:** save files, reports or packages to a chosen local destination.
+- **Project artifact:** produce a dataset, document, build or evidence package in project storage.
+- **Software repository:** maintain local source history and a tested integration branch; no remote host is required.
+- **GitHub publication:** publish a verified candidate to a named repository/branch or open a pull request only after the project's delivery authorization.
+- **AEP/network task:** optionally publish a task or offer work to an external worker/verifier network under its separate protocol and privacy/economic profile.
+
+**Default publication rule:** completing local work, merging contributions into the internal integration workspace and passing the local test profile do not require a new human prompt. Publishing to GitHub is a separate external boundary and, by default, the Runtime presents the candidate and asks the owner to authorize the push/PR. A project owner may instead grant a narrow standing publication mandate for a specific repository, branch and operation set; absent that explicit delegation, the Runtime does not publish.
+
+Pushing a branch/opening a PR, merging to a protected branch, releasing a package and deploying to production are distinct actions. Authorization for one does not imply authorization for the others. A GitHub PR is not the same as a production deployment.
+
+### 6.5 End-to-end team flow
+
+```text
+PROJECT OWNER / MANDATE
+          |
+          v
+CORMIA COORDINATION PLANE
+          |
+          +---- Team Room <----> agents discuss / plan / peer-review
+          |
+          +---- task graph + scheduler + resource leases
+          |
+          v
+WORKER NODES (one or many PCs)
+          |
+          +---- isolated task worktrees
+          +---- pair/team editing under conflict controls
+          +---- patches, commits and artifacts
+          |
+          v
+PROJECT WORKBENCH
+          |
+          v
+INTEGRATION & VERIFICATION BENCH
+          |
+          +---- compose / build / test / review
+          +---- evidence + candidate digest
+          |
+          v
+VERIFIED PROJECT CANDIDATE
+          |
+          +---- local action/report/artifact -> DONE
+          |
+          +---- GitHub publish -> owner authorization by default
+          |
+          +---- other optional delivery adapter
+```
+
+The same Core supports solo and team execution. The team stages are activated only when the project's task needs multiple agents or collaborative integration. A local maintenance task must not be forced through repository, build, GitHub or economic infrastructure it does not need.
+
+
+## 7. What each of the commonly confused components does
 
 ### GitHub
 
@@ -115,13 +229,13 @@ The standalone Cormia Core must continue to plan and execute local tasks when no
 
 ### Sandbox
 
-A sandbox is an execution boundary on a worker machine, not a meeting place for agents and not the global coordinator. Each task receives an isolated workspace and bounded tools. Agents coordinate through the Coordination Plane and exchange typed results/artifact references; they do not need simultaneous write access to one shared directory.
+A sandbox is an execution boundary on a worker machine, not the Team Room, the Workbench or the global coordinator. Each task receives an isolated workspace and bounded tools. Agents coordinate through the Team Room, exchange patches/artifact references through the Workbench and compose accepted contributions in the integration workspace. Pair work is supported through host-controlled edit leases or conflict-aware operations; unrestricted shared writes are not.
 
 ### Cloud
 
 Cloud is one possible host for the coordinator and/or artifact storage, not an architectural requirement. The owner may self-host on a PC or home server. Remote workers can connect to a self-hosted coordinator through an authenticated encrypted network path. No remote/cloud inference fallback is implicit.
 
-## 7. Hosting choices
+## 8. Hosting choices
 
 | Deployment | Coordinator location | Suitable use | Main trade-off |
 |---|---|---|---|
@@ -132,7 +246,7 @@ Cloud is one possible host for the coordinator and/or artifact storage, not an a
 
 **Recommended first topology:** one owner-controlled coordinator on the primary PC or an always-on home server, with one worker process per participating machine. Add a VPS only when real availability or geographic reach requires it. Keep the coordinator's data portable so the host can be moved without changing project identity.
 
-## 8. Failure and offline behavior
+## 9. Failure and offline behavior
 
 - If the coordinator is unavailable, workers do not accept new assignments or invent work outside their current mandate.
 - An already-running task may continue only within its existing, unexpired assignment/lease and local policy; operations that require fresh trust/revocation checks stop at a safe boundary.
@@ -141,7 +255,7 @@ Cloud is one possible host for the coordinator and/or artifact storage, not an a
 - A lost worker does not erase project state. The coordinator can mark the attempt interrupted/expired and schedule a new attempt after checking side effects and checkpoints.
 - Coordinator persistence and backup/restore are required before claiming crash-safe multi-node orchestration. A replicated/high-availability coordinator is a later profile, not assumed by v0.1.
 
-## 9. Authority and privacy boundaries
+## 10. Authority and privacy boundaries
 
 1. Project mandate and host policy remain the upper authority bounds. Registering a worker or donating capacity never widens either.
 2. Each host owner decides which resources, capabilities, data classes and time windows are offered.
@@ -152,7 +266,7 @@ Cloud is one possible host for the coordinator and/or artifact storage, not an a
 7. Financial patronage, in-kind compute support, task priority, governance and operational authority remain separate.
 8. No public ledger receives prompts, private task payloads, secrets, full telemetry or private artifact bytes.
 
-## 10. Relationship between Cormia Core and IMMORTAL-AEP
+## 11. Relationship between Cormia Core and IMMORTAL-AEP
 
 Cormia Core is the general-purpose project and agent coordination foundation. It supports local-only projects and can coordinate privately owned agents/resources without any payment or blockchain integration.
 
@@ -163,7 +277,7 @@ IMMORTAL-AEP is an optional protocol profile for open task publication/assignmen
 
 When a task opts into AEP, its AEP manifest/economic state is handled by the protocol adapter and applicable ledger. Private project authority, local host policy, workspaces, model calls and execution remain off-chain. The AEP adapter cannot silently broaden the project mandate.
 
-## 11. Current implementation status — critical distinction
+## 12. Current implementation status — critical distinction
 
 This topology is an architecture proposal, not a report of an existing deployed service.
 
@@ -171,6 +285,10 @@ The Cormia repository currently has proposal-level Core contracts and schemas, a
 
 The repository does **not** yet implement:
 - the generic Cormia Coordination Plane service;
+- the agent Team Room with durable project threads and structured decision records;
+- the shared Project Workbench/integration worktree with pair-editing, patch exchange and conflict management;
+- the Integration & Verification Bench and Verified Project Candidate lifecycle;
+- project delivery profiles and the external publication authorization gate;
 - an AEP task engine/state reducer, scheduler or worker registration protocol;
 - a multi-node authenticated message/dispatch channel or peer mesh;
 - a durable project task/attempt journal and checkpoint/restart reconciler;
@@ -179,17 +297,20 @@ The repository does **not** yet implement:
 - a production trusted mandate/key/consent/identity/revocation provider stack;
 - an end-to-end multi-agent, multi-PC autonomous execution loop.
 
-Consequently, no multi-PC coordination, remote scheduling or production autonomous worker network is claimed today. Existing CI tests validate bounded contracts and isolated components only.
+Consequently, no multi-agent team collaboration, pre-publication integration pipeline, multi-PC coordination, remote scheduling or production autonomous worker network is claimed today. Existing CI tests validate bounded contracts and isolated components only.
 
-## 12. Implementation sequence
+## 13. Implementation sequence
 
 1. Freeze the Coordinator ↔ Worker protocol boundary and typed task/attempt/lease events, preserving the separate Project, Mandate and Task lifecycles.
 2. Define the worker registration and local Resource Provider port; expose only owner-accepted, validated capacity with a bounded privacy profile.
 3. Add durable task/attempt state and idempotent assignment/lease reconciliation at the coordinator.
-4. Bind one local worker to the current host adapters without changing the legacy Agent approval path.
-5. Prove a two-process, two-workspace local task flow with synthetic workers and no per-operation human prompts after one mandate.
-6. Add a second machine over an authenticated network path; test disconnect, lease expiry, duplicate delivery, worker crash and recovery.
-7. Add artifact transfer and Git integration with per-task worktrees.
-8. Only after local multi-node behavior is sound, consider remote/community providers and optional AEP/ledger integration.
+4. Implement the Team Room message/thread model and structured decision records; keep conversation separate from authority.
+5. Implement the Project Workbench with local repository history, task worktrees, contribution patches, pair-edit controls and an integration worktree.
+6. Implement the Integration & Verification Bench: candidate snapshots, build/test profiles, evidence, independent review and repair loops.
+7. Add project delivery profiles; default GitHub publication to a candidate-level owner authorization, separately from protected merge/release/deploy.
+8. Bind one local worker to the current host adapters without changing the legacy Agent approval path; prove a solo local task (such as PC cleanup) does not require repository or team infrastructure.
+9. Prove a two-agent/two-workspace team flow with synthetic workers: agent discussion, shared artifact work, integration, tests and local candidate completion with no per-operation prompts.
+10. Add a second machine over an authenticated network path; test disconnect, lease expiry, duplicate delivery, worker crash and recovery.
+11. Only after local collaboration/integration is sound, consider remote/community providers and optional AEP/ledger integration.
 
 No blockchain, cloud vendor, transport, broker, consensus algorithm, key format, economic parameter or production trust provider is selected by this document. Those decisions remain separately versioned and evidence-driven.
