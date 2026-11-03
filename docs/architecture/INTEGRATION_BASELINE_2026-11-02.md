@@ -375,3 +375,6 @@ The adapter binds a lease to an exact task reference, capability profile and req
 **Limits:** offers are configured by the trusted host; discovery does not perform live telemetry sampling. Leases are not persisted or shared across processes. Revocation is in-memory and checked at the next protected operation boundary; it does not terminate an OS process. There is no lease renewal, OS quota enforcement, remote provider, scheduler, coordinator or Agent integration. The module is generic and does not import IMMORTAL code.
 
 The implementation is a worker-side building block only. It is not evidence of a functioning multi-PC network or an integrated autonomous Runtime.
+
+
+**Latest worker-local provider verification — run #124:** [GitHub Actions](https://github.com/LiberoNuvola/Cormia/actions/runs/41676501029) passed 41 Python Core/schema + 31 EXP + 54 Node tests = **126 total, 0 failures**. This includes composition with the existing fixed-operation ResourceManager wrapper using a synthetic manager double. Separate [grant/authority run #50](https://github.com/LiberoNuvola/Cormia/actions/runs/41676500879) passed 65 tests. These are hosted CI contract checks, not a live Windows ResourceManager test or a multi-PC integration test.
