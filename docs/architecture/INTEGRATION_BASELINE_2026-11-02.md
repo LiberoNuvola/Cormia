@@ -363,4 +363,15 @@ The new [Cormia Coordination Plane and Multi-Node Topology v0.1](CORMIA_COORDINA
 
 The coordinator may be hosted on the primary PC, an always-on home server or an owner-controlled VPS/cloud instance. The recommended first topology is one owner-controlled hub plus multiple local worker nodes. GitHub remains source/version-control and review; artifact storage holds larger outputs/evidence; a ledger is only an optional AEP/economic adapter for commitments, escrow, dispute or settlement. Standalone Cormia Core must operate without that adapter.
 
-The proposal explicitly separates project/mandate/task state, coordinator state, worker-local execution and artifact storage. It also records offline/failure behavior and a phased path from one local coordinator to a second machine. This is a design clarification only: no generic coordinator, AEP scheduler, authenticated multi-node transport, peer mesh, persistent shared lease registry or multi-PC execution loop exists yet. The existing local Resource Manager wrapper remains process-local and unconnected.
+The proposal explicitly separates project/mandate/task state, coordinator state, worker-local execution and artifact storage. It also records offline/failure behavior and a phased path from one local coordinator to a second machine. This is a design clarification only: no generic coordinator, AEP scheduler, authenticated multi-node transport, peer mesh, persistent shared lease registry or multi-PC execution loop exists yet. The local Resource Manager wrapper remains process-local; the new generic worker-side Resource Provider adapter is callback-scoped and not connected to a coordinator or Agent.
+
+
+## 6X. Local worker-side Resource Provider adapter — isolated prototype
+
+A generic Core module now exists at `runtime/core/local-resource-provider.mjs`, with Node-native contract tests in `runtime/core/local-resource-provider.test.mjs`. It consumes only host-configured Resource Offers that already carry owner acceptance and validation evidence, and a trusted injected `executeWithLocalLease` port. A host-only operation mapping is captured at construction and stripped from the public offer; task/model input cannot choose a ResourceManager class.
+
+The adapter binds a lease to an exact task reference, capability profile and requested capacity. It exposes a short-lived callback-scoped lease record and an `assertActive()` check for trusted tool boundaries. Underlying local admission/release remains the responsibility of the injected existing Resource Manager adapter, which releases in `finally`.
+
+**Limits:** offers are configured by the trusted host; discovery does not perform live telemetry sampling. Leases are not persisted or shared across processes. Revocation is in-memory and checked at the next protected operation boundary; it does not terminate an OS process. There is no lease renewal, OS quota enforcement, remote provider, scheduler, coordinator or Agent integration. The module is generic and does not import IMMORTAL code.
+
+The implementation is a worker-side building block only. It is not evidence of a functioning multi-PC network or an integrated autonomous Runtime.
