@@ -132,7 +132,7 @@ export function reduceProjectLifecycle(events, { projectRef } = {}) {
   let lastEventDigest = null;
 
   for (const event of events) {
-    if (projectRef && event.projectRef !== projectRef) {
+    if (projectRef && event?.projectRef !== projectRef) {
       throw new ProjectLifecycleTransitionError("Journal contains an event for a different project.", "PROJECT_LIFECYCLE_PROJECT_MISMATCH");
     }
     state = applyProjectLifecycleEvent(state, event);
