@@ -82,6 +82,21 @@ function sameIntent(left, right) {
   return stableStringify(intentOf(left)) === stableStringify(intentOf(right));
 }
 
+async function syncDirectoryBestEffort(directoryPath) {
+  let handle;
+  try {
+    handle = await open(directoryPath, "r");
+    await handle.sync();
+  } catch (error) {
+    // Windows and some filesystems do not allow opening/fsyncing directories.
+    if (!["EINVAL", "EPERM", "EISDIR", "ENOTSUP", "EACCES"].includes(error?.code)) {
+      throw error;
+    }
+  } finally {
+    await handle?.close().catch(() => {});
+  }
+}
+
 async function ensureJournalDirectory(journalPath) {
   await mkdir(path.dirname(journalPath), { recursive: true });
 }
@@ -146,13 +161,21 @@ async function acquireLock(journalPath, timeoutMs) {
 
 function validateEventShape(event, expectedProjectRef, expectedSequence, previousDigest) {
   if (!isPlainObject(event)) throw new ProjectLifecycleJournalCorruptionError("Journal line is not a JSON object.");
+  const allowedKeys = new Set([
+    "schemaVersion", "recordType", "eventId", "projectRef", "sequence", "eventType",
+    "fromState", "toState", "actorRef", "occurredAt", "reasonCode", "evidenceRefs",
+    "causationRef", "correlationRef", "previousEventDigest", "recordDigest"
+  ]);
+  if (Object.keys(event).some(key => !allowedKeys.has(key))) {
+    throw new ProjectLifecycleJournalCorruptionError("Journal event contains an undeclared property.");
+  }
   if (event.schemaVersion !== SCHEMA_VERSION || event.recordType !== RECORD_TYPE) {
     throw new ProjectLifecycleJournalCorruptionError("Journal event schema or record type is unsupported.");
   }
   if (event.projectRef !== expectedProjectRef) {
     throw new ProjectLifecycleJournalCorruptionError("Journal event is bound to a different project.");
   }
-  if (typeof event.eventId !== "string" || event.eventId.length < 1 || event.eventId.length > 256) {
+  if (typeof event.eventId !== "string" || event.eventId.length < 1 || event.eventId.length > 512) {
     throw new ProjectLifecycleJournalCorruptionError("Journal eventId is missing or invalid.");
   }
   if (event.sequence !== expectedSequence) {
@@ -161,17 +184,18 @@ function validateEventShape(event, expectedProjectRef, expectedSequence, previou
     });
   }
   if (typeof event.eventType !== "string" || typeof event.actorRef !== "string" ||
-      !event.actorRef.trim() || typeof event.reasonCode !== "string" ||
-      !event.reasonCode.trim() || !isDateTime(event.occurredAt)) {
+      !event.actorRef.trim() || event.actorRef.length > 512 ||
+      typeof event.reasonCode !== "string" || !event.reasonCode.trim() ||
+      event.reasonCode.length > 128 || !isDateTime(event.occurredAt)) {
     throw new ProjectLifecycleJournalCorruptionError("Journal event is missing required identity, reason or timestamp fields.");
   }
   if (!Array.isArray(event.evidenceRefs) ||
-      event.evidenceRefs.some(item => typeof item !== "string" || !item.trim()) ||
+      event.evidenceRefs.some(item => typeof item !== "string" || !item.trim() || item.length > 512) ||
       new Set(event.evidenceRefs).size !== event.evidenceRefs.length) {
     throw new ProjectLifecycleJournalCorruptionError("Journal evidenceRefs must be unique non-empty strings.");
   }
   for (const field of ["causationRef", "correlationRef"]) {
-    if (event[field] !== undefined && (typeof event[field] !== "string" || !event[field].trim())) {
+    if (event[field] !== undefined && (typeof event[field] !== "string" || !event[field].trim() || event[field].length > 512)) {
       throw new ProjectLifecycleJournalCorruptionError(field + " must be a non-empty string when present.");
     }
   }
@@ -258,10 +282,10 @@ function validateCommand(command) {
   if (typeof command.eventType !== "string" || !command.eventType.trim()) {
     throw new TypeError("eventType must be a non-empty string.");
   }
-  if (typeof command.actorRef !== "string" || !command.actorRef.trim()) {
+  if (typeof command.actorRef !== "string" || !command.actorRef.trim() || command.actorRef.length > 512) {
     throw new TypeError("actorRef must be a non-empty trusted actor reference.");
   }
-  if (typeof command.reasonCode !== "string" || !command.reasonCode.trim()) {
+  if (typeof command.reasonCode !== "string" || !command.reasonCode.trim() || command.reasonCode.length > 128) {
     throw new TypeError("reasonCode must be a non-empty stable reason code.");
   }
   if (command.eventId !== undefined &&
@@ -273,12 +297,12 @@ function validateCommand(command) {
   }
   if (command.evidenceRefs !== undefined &&
       (!Array.isArray(command.evidenceRefs) ||
-       command.evidenceRefs.some(item => typeof item !== "string" || !item.trim()) ||
+       command.evidenceRefs.some(item => typeof item !== "string" || !item.trim() || item.length > 512) ||
        new Set(command.evidenceRefs).size !== command.evidenceRefs.length)) {
     throw new TypeError("evidenceRefs must be an array of unique non-empty references.");
   }
   for (const field of ["causationRef", "correlationRef"]) {
-    if (command[field] !== undefined && (typeof command[field] !== "string" || !command[field].trim())) {
+    if (command[field] !== undefined && (typeof command[field] !== "string" || !command[field].trim() || command[field].length > 512)) {
       throw new TypeError(field + " must be a non-empty string when present.");
     }
   }
@@ -442,6 +466,7 @@ export function createProjectLifecycleJournal({
         } finally {
           await handle.close();
         }
+        if (!exists) await syncDirectoryBestEffort(path.dirname(absolutePath));
 
         const snapshot = {
           projectRef,
