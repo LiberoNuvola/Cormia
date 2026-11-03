@@ -43,7 +43,7 @@ function isPlainObject(value) {
 function isDateTime(value) {
   return typeof value === "string" &&
     Number.isFinite(Date.parse(value)) &&
-    /^\\d{4}-\\d{2}-\\d{2}T/.test(value);
+    /^\d{4}-\d{2}-\d{2}T/.test(value);
 }
 
 function stableValue(value) {
@@ -136,7 +136,7 @@ async function acquireLock(journalPath, timeoutMs) {
         await handle.writeFile(JSON.stringify({
           pid: process.pid,
           acquiredAt: new Date().toISOString()
-        }) + "\\n", "utf8");
+        }) + "\n", "utf8");
         await handle.sync();
       } catch (error) {
         await handle.close().catch(() => {});
@@ -221,14 +221,14 @@ async function readEventsUnlocked(journalPath, projectRef) {
   } catch {
     throw new ProjectLifecycleJournalCorruptionError("Journal is not valid UTF-8.");
   }
-  if (!text.endsWith("\\n")) {
+  if (!text.endsWith("\n")) {
     throw new ProjectLifecycleJournalError(
       "Journal has an incomplete final line. Run explicit recover({ repairTornTail: true }) to discard only the uncommitted tail.",
       "PROJECT_JOURNAL_TORN_TAIL"
     );
   }
 
-  const lines = text.slice(0, -1).split("\\n");
+  const lines = text.slice(0, -1).split("\n");
   const events = [];
   const eventIds = new Set();
   let state = null;
@@ -456,7 +456,7 @@ export function createProjectLifecycleJournal({
           ...unsignedEvent,
           recordDigest: digestRecord(unsignedEvent)
         };
-        const line = JSON.stringify(event) + "\\n";
+        const line = JSON.stringify(event) + "\n";
 
         const exists = await assertSafeJournalFile(absolutePath);
         const handle = await open(absolutePath, "a", 0o600);
