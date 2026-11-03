@@ -48,13 +48,14 @@
     "stewardRef": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 512
+      "maxLength": 512,
+      "description": "Opaque principal reference. Trusted identity resolution must confirm the declared steward role and accountability arrangement; schema validity alone is not authorization."
     },
     "accountabilityRef": {
       "type": "string",
       "minLength": 1,
       "maxLength": 512,
-      "description": "Reference to the declared accountability arrangement; governance semantics are not inferred from this identifier."
+      "description": "Reference to the declared accountability arrangement. Trusted policy must resolve and validate it; governance semantics are not inferred from this identifier."
     },
     "mandateRef": {
       "type": "object",
