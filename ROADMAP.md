@@ -69,19 +69,20 @@ Before building any newly proposed Core subsystem, map it to an existing standar
 
 ## Gate 4A — Team Collaboration and Internal Delivery
 
-- Build the Cormia Team Room: persistent agent-to-agent threads, project context, task discussion and structured decision records.
-- Build the Project Workbench: local project repository/history, isolated task worktrees, contribution patches, shared artifact index and controlled integration workspace.
-- Support independent contributions and pair/team editing under explicit file/module claims, edit leases or conflict-aware operations; never unrestricted shared writes.
-- Build the Integration & Verification Bench: compose contributions, compile/build/package, run named tests, conduct peer review and create an evidence-backed candidate.
-- Add project delivery profiles: local action, local artifact, local repository, optional GitHub publication or other adapter.
+- Compose agent interoperability through A2A and tool/resource access through MCP; do not invent a new agent messaging protocol.
+- Start collaboration with isolated Git worktrees, branches/patches, shared artifact references and an explicit integration task; do not build a custom VCS or shared filesystem protocol.
+- Evaluate Matrix or Zulip only if the first two-agent workflow demonstrates a need for a persistent Team Room. Yjs or another CRDT is optional only for proven simultaneous same-document editing.
+- Reuse the selected CI runner, existing Flux Point DoD gates and JEV evidence vocabulary for build/test/review; do not build a parallel CI engine.
+- Keep local actions, artifacts, repository history and optional GitHub publication as separate delivery profiles.
 - Request owner authorization by default before publishing a verified candidate to GitHub; keep protected merge, release and production deploy as separate actions.
-- Prove a solo local-maintenance task can finish without Team Room, repository, GitHub or economic adapters.
-- Prove a two-agent team flow with discussion, collaborative edits, integration, build/test, repair and local candidate delivery before adding a second PC.
+- Prove a solo local-maintenance task can finish without Team Room, repository remote, GitHub or economic adapters.
+- Prove a two-agent team flow with A2A/MCP or local adapters, isolated worktrees, integration, build/test, repair and local candidate delivery before adding a second PC.
 
 Gate 4 also includes the first Cormia Node evidence slice:
 - local Resource Broker remains the host authority for each machine; remote project agents never receive general host access;
-- create a Work Completion Receipt bound to task/attempt/assignment/lease and committed inputs/outputs, following the [Work Completion Evidence and Materios Certification proposal](docs/architecture/CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md);
-- meter source, units, interval, precision and tamper limitations are explicit;
+- wrap native Windows or Linux resource/isolation mechanisms behind a task-bound Cormia lease; do not create a new sandbox or claim GPU enforcement where the host cannot provide it;
+- do not freeze a bespoke Work Completion Receipt schema before PA-04. First test in-toto/DSSE/SLSA, Orynq traces/tool receipts and optional SCITT/Materios anchoring; add only a narrow Cormia predicate for mandate/task/attempt/lease/verifier/acceptance binding if needed;
+- meter source, units, interval, precision, host controls and tamper limitations must be explicit;
 - verify local revocation, lease expiry and process/workspace isolation before any remote certification adapter.
 
 ## Gate 5 — Independent verifier network
