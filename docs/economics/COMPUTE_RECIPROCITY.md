@@ -240,6 +240,8 @@ These classes are not interchangeable. CRC does not become cash or a transferabl
 8. Which reward types are purely internal usage rights and which require an optional financial/economic profile?
 
 This proposal is related to JUR-05 (canonical owner/partition for shared resources) and JUR-06 (worker/verifier allocation, fairness, sponsor and anti-Sybil parameters). Those decisions remain open. 
+No PRE-RICH parameter, IMMORTAL rule, CRC conversion ratio or payment mechanism is adopted by this section.
+
 ## 15. Work completion certification and Materios — proposed integration boundary
 
 The Project Compute Reward Pool and CRC contribution accounting need a reliable distinction between a **declared task completion**, an **integrity-preserved receipt**, and **accepted useful work**. This section links compute reciprocity to the proposed [Cormia Work Completion Evidence and Materios Certification Adapter](../architecture/CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md).
@@ -260,4 +262,3 @@ Do not treat all certification as one level:
 **CRC mint boundary:** the existing principle remains that credits are earned for accepted useful work, not declared capacity, uptime or raw GPU-hours. A task class must name its required verification profile before execution. Receipt integrity/availability alone does not qualify a task as completed useful work. No universal R2/R3/R4 profile, NUWU-to-CRC ratio, reward formula, tokenization, or Materios economic change is adopted here.
 
 CRC remains a Cormia usage-right unit; it is not MATRA or MOTRA. CRC mint for accepted contributions, CRC burn for service consumption, Materios network fees and financial Project Compute Reward Pool payouts remain separate accounting events.
-No PRE-RICH parameter, IMMORTAL rule, CRC conversion ratio or payment mechanism is adopted by this section.
