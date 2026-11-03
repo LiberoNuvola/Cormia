@@ -558,3 +558,23 @@ The gate response must identify the exact admitted/denied transition and the pol
 The new tests check: funding and settlement cannot omit their mandatory effects; task-only lifecycle events do not trigger a gate by themselves; bond/claim/fee/refund/slash effects route to the appropriate authority; C0/C1 cannot silently acquire external economic claims; C4 does not borrow IMMORTAL authority; C3 fails closed without the canonical partition and joint certificate; and unknown event/effect/perimeter values fail closed.
 
 GitHub Actions [run 41580626071](https://github.com/LiberoNuvola/Cormia/actions/runs/41580626071) passed the combined suite: 30 tests, 0 failures (15 EXP boundary tests plus 15 lifecycle-routing tests). These are finite reference-model checks only. GitHub Actions [run #19](https://github.com/LiberoNuvola/Cormia/actions/runs/41580764675) passed the expanded suite: 31 tests, 0 failures. They do not prove the actual AEP state machine, current schema enforcement, IMMORTAL kernel, C-COMP certificate, Cardano adapter, production solvency, or all possible event interleavings.
+
+
+## 7.8 Actual Cormia implementation boundary — no AEP Runtime hook exists yet
+
+A second source check against the current Cormia `main` was performed on 2026-11-03. The repository integration baseline states that the published tree contains the AEP specification, design records, schemas, examples and reference-worker/verifier documentation, but does not yet contain an implemented AEP Runtime, scheduler, peer mesh, task engine, Resource Manager or verifier service. The current [reference-worker README](https://github.com/LiberoNuvola/Cormia/blob/main/runtime/reference-worker/README.md) confirms that no local runtime source has been migrated into Cormia and that AEP manifest/signature parsing, protocol-state reconciliation, AEP capability enforcement, AEP evidence mapping and Cardano settlement remain unimplemented.
+
+The existing [Local Agent Task Store v1 contract](https://github.com/LiberoNuvola/Cormia/blob/main/runtime/reference-worker/LOCAL_AGENT_TASK_STORE_V1.md) is a separate compatibility surface. It is a local persistence format with statuses `pending/running/paused/failed/completed`; it is not the AEP lifecycle `Draft/Funded/Open/Assigned/Running/Submitted/Verifying/ChallengeWindow/Settled/Disputed/Failed/Expired/Cancelled/Refunded/Slashed`. It has no requester-signed AEP manifest, worker protocol identity, AEP state commitment or CRC balance. Its inspector is read-only and expressly does not launch tasks or issue AEP authority.
+
+**Consequence:** the new transition router is not wired to a production Cormia state reducer because no such AEP reducer/event API currently exists in the repository. Its `effects` set is an explicit reference-model input; it must not become a caller-/model-supplied production flag. A real implementation must derive the effect set deterministically from a typed AEP transition, the signed/committed manifest, current protocol state, applicable versioned profile and authoritative resource/ledger observations.
+
+The next production-integration sequence is therefore:
+
+1. Freeze canonical task identity, manifest signing envelope and deployment-registered economic profile/perimeter (resolve the schema gaps and JUR-01 as a project-owner decision).
+2. Define typed AEP lifecycle events and typed economic effects in the AEP protocol layer, including required-effect rules and a versioned transition reducer.
+3. Derive, validate and bind the effect set from the committed event/state/policy; reject caller/model/observer assertions that are not independently derivable.
+4. Define the narrow IMMORTAL gate request/response binding and C3 composition evidence interface.
+5. Let the adapter realize only the exact admitted transition and reconcile authoritative ledger state with an idempotent task journal.
+6. Add end-to-end transition, adversarial, replay, stale-state and concurrent C-COMP tests against the actual AEP reducer and adapter before claiming implementation conformance.
+
+Do not map the existing Local Agent statuses directly onto AEP states, reuse its read-only task-store inspector as the AEP event engine, or claim a live AEP↔IMMORTAL integration at this stage. No runtime, Task Store, schema, wallet or settlement code was changed by this research work.
