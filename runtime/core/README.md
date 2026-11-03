@@ -119,7 +119,7 @@ This slice does not implement:
 - Community Support, payment custody, remote worker mesh or cross-host replication;
 - Agent/Granite integration, autonomous task execution or project-loop activation.
 
-The next layer is a schema-backed projection/registry and trusted mandate/identity resolver. The Local Resource Provider remains a separate adapter step; it must not be conflated with project lifecycle state.
+The next layer is to implement the production providers required by the resolver contract: host-pinned mandate signature/key verification, authenticated operator consent, steward/accountability resolution, mandate-specific revocation with an independent monotonic anchor, and a durable Project Descriptor/host-policy registry. The current resolver is only a fail-closed orchestration contract over those host ports. The Local Resource Provider remains a separate adapter step; it must not be conflated with project lifecycle state.
 
 ## 8. Tests
 
