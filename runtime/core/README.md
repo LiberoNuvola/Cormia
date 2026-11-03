@@ -132,3 +132,57 @@ node --test runtime/core/*.test.mjs
 ```
 
 The contract tests cover pure transition replay, journal reconstruction after a fresh instance, digest chain, idempotent retry, revision conflicts under concurrent writes, invalid transitions, metadata artifact references, tamper detection, explicit torn-tail repair, preservation of complete corruption, stale-lock fail-closed behavior and symbolic-link rejection.
+
+
+## 9. Trusted Project Context Resolver — host-port orchestration slice
+
+Implementation:
+- `trusted-project-context-resolver.mjs`
+- `trusted-project-context-resolver.test.mjs`
+
+The resolver binds the versioned Core Project Descriptor to the existing ADR-0010 v0.1 mandate claims and reuses `local-autonomous-project-authority.mjs`. It does not introduce another mandate, child-grant, signature, consent or revocation format.
+
+### Resolution sequence
+
+1. Read the descriptor for the fixed host-selected `projectRef`; callers cannot pass a descriptor into `resolve()`.
+2. Resolve the declared steward and accountability arrangement through the trusted identity provider. v0.1 accepts a verified human or organization steward and requires that the accountability arrangement includes that steward. A community stewardship body is not yet defined and is rejected.
+3. Resolve the mandate by its ID/schema ID/digest through the host mandate authority provider. That provider must verify the signed representation, active host key and claims digest; the Core resolver independently invokes the existing ADR-0010 claims validator and checks project/repository/workspace/worker/Runtime binding and validity time.
+4. Resolve the mandate's one-time project-consent receipt through a trusted consent provider. The resolver checks the receipt digest, issuer/operator/mandate/project/workspace binding, explicit approval, challenge equality and challenge suffix, validity interval and nonce/sequence shape. The provider must verify the signature, authenticated broker/session, recomputed intent, and replay/revocation state.
+5. Reconcile mandate revocation and its independent monotonic anchor through a mandate-specific trusted provider.
+6. Replay/read the Project Lifecycle journal and confirm that it belongs to the host-selected project. Trust state and project state remain separate.
+
+### Runtime use
+
+`resolve()` returns a sanitized summary; it does not return raw mandate claims or the trusted-mandate boolean bundle.
+
+`createTaskSession(verifiedTask)` is a host-only operation. It creates a child authority using the existing ADR-0010 evaluator only while project lifecycle state is `active`. The returned session's `authorizeOperation()` reloads and revalidates descriptor, identity, mandate/key state, consent, revocation/anchor and project lifecycle before every operation. It then re-reads the host policy and calls the existing operation evaluator. These are automatic machine checks, not human prompts.
+
+The caller must supply a task object produced by a separate trusted Task Manifest verifier. This resolver does not parse or authenticate AEP Task Manifests.
+
+### Trusted provider ports
+
+The constructor captures these host-only providers:
+- `projectStore.readProjectDescriptor(projectRef)`;
+- `identityProvider.resolveSteward(stewardRef)`;
+- `identityProvider.resolveAccountability(accountabilityRef)`;
+- `identityProvider.authorizeMandateOperator(...)`;
+- `mandateAuthority.verifyAndLoad(...)`;
+- `consentAuthority.verifyActiveReceipt(...)`;
+- `revocationAuthority.reconcileMandate(...)`;
+- `hostPolicyProvider.readPolicy()`;
+- the local `projectLifecycleJournal.read()`.
+
+No provider, key, descriptor, path or host policy may be supplied by a model/task. The ports are trust boundaries: the resolver validates their outputs and bindings, but cannot make an untrusted implementation trusted.
+
+### Explicit implementation limitation
+
+The repository does **not** yet contain production implementations for the following providers:
+- host-pinned mandate JWS/signature verification and digest profile for the project mandate (ADR-0009 still leaves the exact signing provider/bootstrap and key lifecycle open);
+- authenticated OS/operator identity and consent broker, including signed project-consent receipt verification and replay registry;
+- trusted steward/accountability/mandate-operator identity registry;
+- mandate-specific revocation records, signed checkpoint and independent monotonic anchor provider;
+- persistent host policy store and project descriptor registry.
+
+The existing ADR-008 Ed25519 helper verifies the separate local capability-grant/revocation JWS profile; it is not silently treated as a project-mandate signature verifier. The existing ADR-009 reconciliation model is in-memory and synthetic, and its revocation-event schema binds grant revocations, not the project mandate. Neither is claimed as a production provider for this resolver.
+
+Consequently, this module is a fail-closed orchestration contract and test harness, **not a production trusted resolver**. With no real providers configured, no trusted context can be resolved. The unit tests use synthetic in-memory provider doubles and test the boundary logic only; they do not prove key custody, consent authenticity, operator authentication, anti-rollback persistence, or host integration.
