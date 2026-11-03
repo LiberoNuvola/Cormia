@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cormia:core:project-descriptor:0.1.0",
+  "title": "Cormia Core Project Descriptor",
+  "description": "Cormia Core record contract v0.1.0. This schema defines data shape only; trusted Runtime policy and durable storage semantics remain separate.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "recordType",
+    "projectRef",
+    "displayName",
+    "leadershipMode",
+    "stewardRef",
+    "accountabilityRef",
+    "mandateRef",
+    "createdAt",
+    "updatedAt",
+    "revision"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "recordType": {
+      "type": "string",
+      "const": "cormia.core.project-descriptor"
+    },
+    "projectRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "displayName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "leadershipMode": {
+      "type": "string",
+      "enum": [
+        "creator_team_led",
+        "agent_led",
+        "hybrid"
+      ]
+    },
+    "stewardRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "accountabilityRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "description": "Reference to the declared accountability arrangement; governance semantics are not inferred from this identifier."
+    },
+    "mandateRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mandateId",
+        "claimsSchemaId",
+        "claimsDigest"
+      ],
+      "properties": {
+        "mandateId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "claimsSchemaId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "claimsDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "description": "Opaque reference to the existing verified mandate claims. Does not duplicate claims, consent, authority status, credentials or revocation state."
+    },
+    "missionRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "visibilityPolicyRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}
