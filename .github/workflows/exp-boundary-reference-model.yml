@@ -7,6 +7,7 @@ on:
       - "verification/exp_boundary/**"
       - "verification/core_contracts/**"
       - "schemas/core/**"
+      - "runtime/core/**"
       - ".github/workflows/exp-boundary-reference-model.yml"
   pull_request:
     branches: [main]
@@ -36,3 +37,11 @@ jobs:
         run: python -m unittest discover -s verification/exp_boundary -p "test_*.py" -v
       - name: Run bounded Cormia Core contract tests
         run: python -m unittest discover -s verification/core_contracts -p "test_*.py" -v
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax-check Project Lifecycle Runtime
+        run: node --check runtime/core/project-lifecycle-reducer.mjs && node --check runtime/core/project-lifecycle-journal.mjs
+      - name: Run Project Lifecycle Runtime tests
+        run: node --test runtime/core/*.test.mjs
