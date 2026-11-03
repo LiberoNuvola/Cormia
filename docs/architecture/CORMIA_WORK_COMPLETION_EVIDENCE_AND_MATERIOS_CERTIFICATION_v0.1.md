@@ -207,7 +207,7 @@ No CRC conversion rate, mint formula, burn rate, reward distribution, token depl
 
 Recommended sequence:
 
-1. Freeze a versioned Cormia Work Completion Receipt and evidence-manifest contract without embedding Materios fields in mandatory Core records.
+1. Complete PA-04 in [Cormia Prior-Art Composition Review](../research/CORMIA_PRIOR_ART_COMPOSITION_REVIEW_2026-11-03.md): map in-toto/DSSE/SLSA, Orynq, OpenTelemetry and SCITT/Materios to the claims Cormia needs. Do **not** freeze a bespoke receipt envelope or schema yet. If a gap remains, define only a typed Cormia task/attempt/mandate/lease/verifier/acceptance predicate carried by an established envelope.
 2. Implement the local meter/receipt producer behind Cormia Node; tests must prove scope, revocation, lease binding and no access outside the isolated task workspace.
 3. Add deterministic task-verifier profiles (build/test/schema/transform) and negative/adversarial vectors before adding hardware-specific trust.
 4. Define the Materios adapter mapping to existing Orinq receipt/availability contracts; test readback and fail-closed behavior against a Materios test environment.
@@ -216,3 +216,23 @@ Recommended sequence:
 7. Test the complete lifecycle with one local worker, two independent verifiers where appropriate, a challenged receipt, an unsupported evidence type and a Materios outage.
 
 No Materios code, runtime, governance, token economics or deployment is changed by this Cormia proposal. Materios is an optional evidence/certification adapter; local Core remains usable without it.
+
+
+## 10. Prior-art composition gate — 2026-11-03
+
+The logical Work Completion Receipt in this proposal is a Cormia claim model, not a reason to invent a competing signed-evidence format.
+
+Before a schema is frozen, map the receipt to existing mechanisms:
+
+- **in-toto Statement / Attestation Framework + DSSE:** candidate standard envelope for authenticated metadata bound to a subject artifact; use a type-specific predicate for task/attempt/assignment/lease and verifier/acceptance references.
+- **SLSA provenance:** candidate predicate vocabulary for build provenance (builder, invocation, materials and subject outputs). It does not by itself establish general semantic correctness of a task.
+- **OpenTelemetry:** operational traces/spans and measurements; observability data is not a cryptographic truth claim.
+- **Orynq:** strong candidate for AI process-trace hash chains, Merkle bundles, model-manifest pinning and supported signed tool-call receipts. Its tool-receipt documentation distinguishes native API signatures from a signing proxy; a public key embedded in a receipt must be bound to a trusted identity. Orynq does not verify arbitrary task outcomes or host resource-counter truth.
+- **SCITT RFC 9942/9943:** standard transparency/receipt architecture for signed statements and verifiable data structures. A transparency receipt proves registration/inclusion under its contract, not semantic task correctness.
+- **Materios:** optional availability/receipt certification and anchoring adapter only. It must certify the exact claims its active verifier path implements, not a general Cormia "work completed" verdict.
+
+The Cormia-specific residual is the binding among the standing mandate, task manifest, attempt, exact worker and accepted Resource Lease, workload, input/output digests, predeclared acceptance predicate and verifier decision. The standard envelope, trace tooling and transparency service should remain independently replaceable.
+
+The evidence dimensions in this proposal are intentionally separate. R0–R4 are Cormia proposal labels, not an existing industry assurance standard. Do not collapse them into a single certified/completed flag, and do not freeze them as a universal ladder until PA-04 tests that composition. Prefer a per-workload matrix that says which claims are required and which verifier produces each one.
+
+**Decision:** no Work Completion Receipt JSON Schema, new canonical signature envelope, generic Cormia transparency log or Materios-specific mandatory Core field is authorized by this review. First complete PA-04 and record an ADR/reuse decision. See [Cormia Prior-Art Composition Review v0.1](../research/CORMIA_PRIOR_ART_COMPOSITION_REVIEW_2026-11-03.md).
