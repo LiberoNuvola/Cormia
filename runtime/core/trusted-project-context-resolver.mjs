@@ -391,9 +391,10 @@ export function createTrustedProjectResolver({
         leadershipMode: descriptor.leadershipMode
       });
       if (!hasExactKeys(operatorAuthority, [
-        "status", "operatorPrincipalId", "accountabilityRef"
+        "status", "operatorIdentityStatus", "operatorPrincipalId", "accountabilityRef"
       ]) ||
           operatorAuthority.status !== "authorized" ||
+          operatorAuthority.operatorIdentityStatus !== "authenticated" ||
           operatorAuthority.operatorPrincipalId !== mandateClaims.operatorPrincipalId ||
           operatorAuthority.accountabilityRef !== descriptor.accountabilityRef) {
         throw new TrustedProjectResolutionError(
