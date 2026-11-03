@@ -197,6 +197,13 @@ class CoreJsonSchemaTests(unittest.TestCase):
                 instance["leadershipMode"] = mode
                 self.assert_valid("project", instance)
 
+    def test_project_descriptor_requires_steward_and_accountability_references(self):
+        for field in ("stewardRef", "accountabilityRef"):
+            with self.subTest(field=field):
+                instance = self.project_descriptor()
+                del instance[field]
+                self.assert_invalid("project", instance)
+
     def test_project_descriptor_rejects_chain_or_payment_prerequisites(self):
         for field in ("cardanoPolicy", "walletRef", "paymentProviderRef", "crcBalance"):
             with self.subTest(field=field):
