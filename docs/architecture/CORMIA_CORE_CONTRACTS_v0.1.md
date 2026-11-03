@@ -447,3 +447,23 @@ The current AEP draft, task manifest and local Agent task store are not substitu
 - Which payment, compute, storage and chain adapters ship first.
 
 These decisions do not block a local general-purpose agent or creator/team-led / agent-led project operation under a valid local mandate.
+
+
+## 12. Bounded verification status
+
+The abstract Core reference model is in `verification/core_contracts/core_contract_model.py`; its tests are in `test_core_contract_model.py`. GitHub Actions [run #37](https://github.com/LiberoNuvola/Cormia/actions/runs/41583031982) passed **22 Core contract tests**. The same run passed all **31 existing EXP boundary tests**, for **53 tests total and zero failures**.
+
+The Core tests cover:
+- creator/team-led, agent-led and hybrid projects under the same Core contract;
+- steward, active project and active mandate requirements;
+- separate project and authority lifecycles;
+- child authority as the intersection of mandate, task request and host policy;
+- execution with no optional economic/chain adapters;
+- local-only execution without silent remote fallback;
+- explicit remote opt-in, provider/lease availability and privacy acceptance;
+- resource offer validation, owner acceptance, capacity, expiry and revocation;
+- no authority grant from financial or in-kind support;
+- provider-confirmed settled contributions versus unconfirmed pledges;
+- no default financial beneficiary that is an agent's personal wallet.
+
+These are finite reference-model checks only. They do not prove the actual Runtime, signed mandate store, consent broker, revocation anchor, durable project lifecycle, OS resource isolation, remote provider mesh, payment custody or end-to-end community support. No production schema or runtime was changed.
