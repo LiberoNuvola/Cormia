@@ -513,7 +513,7 @@ The model applies the following preflight routes:
 | C3 — shared/cross-system economic resource | Cormia task event only, unless the resource itself is newly committed | Require canonical exhaustive partition **and** joint certificate, then route to the joint IMMORTAL/C-COMP gate |
 | C4 — independent AEP jurisdiction | Cormia/independent task event | Require the separately declared independent authority; IMMORTAL admission or certification is not implied |
 
-A C3 action is blocked when either the canonical partition or joint certificate is missing. A shared economic-resource reservation/release declared as C2 is a perimeter mismatch and must be reclassified to C3. Unknown events, perimeters and effects fail closed. The preflight model chooses a route; it never returns “admitted” and is not an implementation of the IMMORTAL gate.
+A C3 action is blocked when either the canonical partition or joint certificate is missing. A shared economic-resource reservation/release declared as C2 is a perimeter mismatch and must be reclassified to C3. Unknown events, perimeters and effects fail closed. Funding, worker/verifier/challenge bond locks, claim accrual, fee accrual, settlement, refund, slash and shared-resource reservation/release events must carry their corresponding effect; omission blocks the transition. The preflight model chooses a route; it never returns “admitted” and is not an implementation of the IMMORTAL gate.
 
 ### 7.4 Mapping to the current Task Manifest schema
 
