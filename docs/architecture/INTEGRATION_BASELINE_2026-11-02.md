@@ -298,6 +298,6 @@ Reuse ADR-0010 and the existing mandate/consent claims schemas, ADR-0008/0009 tr
 
 The contract keeps project lifecycle, mandate/authority lifecycle and individual task lifecycle separate. It also keeps financial patronage separate from in-kind compute/storage/data/expertise, and makes explicit that supporters and resource providers do not gain agent capabilities or mandate authority.
 
-A bounded reference model and 20 standard-library tests were added in `verification/core_contracts/`. CI now runs the Core model alongside the existing EXP economic-boundary model. This verifies only the abstract contract predicates; it is not a production Core implementation, mandate/consent persistence, credential broker, Resource Provider mesh, Community Support registry or end-to-end agent loop.
+A bounded Core reference model and 22 standard-library tests were added in `verification/core_contracts/`. GitHub Actions [run #37](https://github.com/LiberoNuvola/Cormia/actions/runs/41583031982) passed 22 Core tests plus 31 EXP boundary tests (53 total, 0 failures). This verifies only abstract contract predicates; it is not a production Core implementation, mandate/consent persistence, credential broker, Resource Provider mesh, Community Support registry or end-to-end agent loop.
 
 No runtime, mandate schema, Task Manifest, payment provider, wallet, Cardano, token, CRC or IMMORTAL economic behavior was implemented or changed.
