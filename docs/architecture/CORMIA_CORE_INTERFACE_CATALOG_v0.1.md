@@ -44,7 +44,7 @@ effectiveChildAuthority =
   ∩ hostPolicy
 ```
 
-A schema-valid `ProjectDescriptor` is not proof that its referenced mandate is authentic, active or in scope. No second signer, approval prompt, grant token or revocation system is introduced here.
+A schema-valid `ProjectDescriptor` is not proof that its steward/accountability references resolve to an authorized principal, nor that its referenced mandate is authentic, active or in scope. Trusted identity and mandate resolution remain host responsibilities. No second signer, approval prompt, grant token or revocation system is introduced here.
 
 ## 4. Project lifecycle and journal boundary
 
@@ -70,7 +70,7 @@ The schemas do not implement OS-level quotas, local Resource Manager enforcement
 
 Financial and in-kind records are separate schemas and separate ledgers.
 
-- Financial records identify a provider, provider-side contribution reference, amount in minor units, currency and provider status. A `settled` record requires provider confirmation. A pledge or pending contribution is not settled available funds. The beneficiary is the project, a named custodian or a resource pool; an agent personal wallet is not a beneficiary type.
+- Financial records identify a provider, provider-side contribution reference, amount in minor units, currency and provider status. A `settled` record requires provider confirmation. A pledge or pending contribution is not settled available funds. The beneficiary kind is limited to the project, a named custodian or a resource pool; an agent personal wallet is not a beneficiary type. A `named_custodian` reference is not self-authenticating: a trusted identity/policy resolver must confirm that it denotes a human, organization or accountable custodian and not an agent acting as its own beneficiary. JSON Schema cannot prove the identity behind an opaque reference.
 - In-kind records describe the contribution kind, target, declared scope, status and acceptance. Compute/infrastructure contributions reference a Resource Offer. The schema has no currency or money-equivalent field.
 
 Neither contribution type grants capabilities, private-data access, governance authority, mandate widening or task priority by itself. A supporter can make an offer; the provider/host still determines whether a resource is valid and available. No implicit exchange rate converts compute, expertise or volunteer time into money.
