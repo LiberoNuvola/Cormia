@@ -309,3 +309,10 @@ These decisions must not block the Core architecture or its local-first general-
 The four versioned conceptual contracts — Project Mandate, Autonomous Project Lifecycle, Resource Provider and Community Support — are defined in [CORMIA_CORE_CONTRACTS_v0.1.md](./CORMIA_CORE_CONTRACTS_v0.1.md). They refine this architecture's Core-first sequence without changing the AEP SPEC or schemas. ADR-0010 remains the source for one-time project delegation and task-child authority; its existing v0.1 mandate is coding-worktree-specific, not a universal mandate schema. Local Resource Manager compatibility is not yet a remote resource-provider mesh. Financial patronage and in-kind support remain separate records and neither grants operational authority.
 
 The bounded abstract contract model is under [verification/core_contracts](../../verification/core_contracts). Its tests do not establish Runtime implementation or end-to-end conformance.
+
+
+## Versioned Core interface slice (2026-11-03)
+
+The four Core contracts now have an initial versioned record-schema proposal catalogued in [CORMIA_CORE_INTERFACE_CATALOG_v0.1.md](./CORMIA_CORE_INTERFACE_CATALOG_v0.1.md). It covers project identity and mandate reference, separate project lifecycle projection/event records, resource offers/leases, and separate financial/in-kind support records.
+
+The mandatory project, lifecycle and resource records do not contain payment, Cardano, wallet, token, CRC, AEP or IMMORTAL requirements. The mandate reference points to the existing signed claims rather than creating a second authority system. JSON Schema conformance is tested in GitHub Actions; no integrated Core Runtime or production persistence is claimed.
