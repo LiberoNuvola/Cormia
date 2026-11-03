@@ -239,4 +239,25 @@ These classes are not interchangeable. CRC does not become cash or a transferabl
 7. Does a pool distribute only to compute contributors, or also to task authors, verifiers, storage operators and maintainers under separately declared shares?
 8. Which reward types are purely internal usage rights and which require an optional financial/economic profile?
 
-This proposal is related to JUR-05 (canonical owner/partition for shared resources) and JUR-06 (worker/verifier allocation, fairness, sponsor and anti-Sybil parameters). Those decisions remain open. No PRE-RICH parameter, IMMORTAL rule, CRC conversion ratio or payment mechanism is adopted by this section.
+This proposal is related to JUR-05 (canonical owner/partition for shared resources) and JUR-06 (worker/verifier allocation, fairness, sponsor and anti-Sybil parameters). Those decisions remain open. 
+## 15. Work completion certification and Materios — proposed integration boundary
+
+The Project Compute Reward Pool and CRC contribution accounting need a reliable distinction between a **declared task completion**, an **integrity-preserved receipt**, and **accepted useful work**. This section links compute reciprocity to the proposed [Cormia Work Completion Evidence and Materios Certification Adapter](../architecture/CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md).
+
+A contributor's Cormia Node is the local resource authority and meter. It enforces the owner's offer/lease limits, isolates the workload and records host-observed CPU/GPU/RAM/VRAM/time counters with meter identity, units and interval. Its signature binds the report to the node key; it does not make an ordinary OS/driver reading cryptographically truthful.
+
+A task-bound Work Completion Receipt should bind the project, task and attempt, assignment/manifest, worker, exact lease, workload, committed input/output, meter profile, acceptance predicate, verifier evidence and replay-protection data. Private prompts, raw datasets, output payloads and telemetry remain off-chain and access-controlled; public commitments require privacy-aware input blinding.
+
+Do not treat all certification as one level:
+- receipt/hash/Merkle verification establishes integrity of committed evidence;
+- availability attestation establishes that the committed evidence was retrievable under the declared checks;
+- a task verifier establishes whether a workload-specific acceptance predicate passed;
+- hardware attestation establishes only the measured environment and claims supported by that hardware verifier;
+- a ZK/VM proof establishes only its explicitly specified computation and public-input bindings.
+
+**Current Materios boundary:** the existing Orinq/cert-daemon path verifies receipt data against its committed root and supports receipt availability attestation. That does not prove task execution or semantic correctness. The TEE pallet declares AMD SEV-SNP, Intel TDX, ARM TrustZone, reproducible-build and ZK-VM evidence types, but in the source examined only ARM TrustZone has a verifier implementation; the other verifier paths return NotImplemented. The source also records challenge-binding work as a prerequisite to enabling evidence submission. Treat the other evidence classes as planned/unsupported until their implementation and deployed configuration are independently verified. Materios source references and detailed caveats are in the linked architecture proposal.
+
+**CRC mint boundary:** the existing principle remains that credits are earned for accepted useful work, not declared capacity, uptime or raw GPU-hours. A task class must name its required verification profile before execution. Receipt integrity/availability alone does not qualify a task as completed useful work. No universal R2/R3/R4 profile, NUWU-to-CRC ratio, reward formula, tokenization, or Materios economic change is adopted here.
+
+CRC remains a Cormia usage-right unit; it is not MATRA or MOTRA. CRC mint for accepted contributions, CRC burn for service consumption, Materios network fees and financial Project Compute Reward Pool payouts remain separate accounting events.
+No PRE-RICH parameter, IMMORTAL rule, CRC conversion ratio or payment mechanism is adopted by this section.
