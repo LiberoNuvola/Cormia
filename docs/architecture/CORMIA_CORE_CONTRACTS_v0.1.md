@@ -408,13 +408,17 @@ No model, supporter, sponsor, resource provider or payment adapter can promote i
 - isolated authority evaluator and its 17 contract tests;
 - ADR-0008/0009 proposed cryptographic, consent and revocation lifecycle;
 - local Resource Manager compatibility wrapper;
+- an isolated append-only Project Lifecycle journal and deterministic reducer with Node contract tests;
+- a fail-closed Trusted Project Context Resolver orchestration contract that reuses the existing ADR-0010 claim validator and task-authority evaluator; it is not backed by real identity, mandate-signature, consent or mandate-revocation providers yet;
 - local-first, reciprocal-mesh and sponsored capacity design in Compute Reciprocity / No-Mandatory-Cash;
 - an isolated local append-only Project Lifecycle journal and deterministic reducer in `runtime/core/`, with 15 Node-native contract tests. It is not yet connected to a trusted project registry or the mandate/task Runtime.
 
 **Not yet present as one integrated Core:**
 - durable, signed Project Mandate store and consent/anchor lifecycle;
-- generalized project descriptor/leadership-mode registry;
-- lifecycle reducer/journal integration with the project registry, schema-backed projection, trusted mandate/identity resolver and autonomous project loop (the isolated local journal prototype is not this integration);
+- generalized project descriptor/leadership-mode registry and production identity/accountability registry;
+- production mandate JWS/key verification, authenticated operator-consent broker/receipt verifier and mandate-specific rollback-resistant revocation/anchor provider;
+- lifecycle journal integration with the project registry and schema-backed projection;
+- trusted project resolver provider wiring and autonomous project loop (the current resolver is a fail-closed port orchestrator; it does not make absent providers real);
 - task-scoped workspace/worktree manager with recovery;
 - integrated Runtime capability enforcement and credential broker;
 - generalized Resource Provider interface, remote resource discovery and lease registry;
@@ -426,8 +430,8 @@ The current AEP draft, task manifest and local Agent task store are not substitu
 ## 10. Implementation sequence
 
 1. **Core interfaces and types:** an initial versioned record-schema slice is now drafted in [CORMIA_CORE_INTERFACE_CATALOG_v0.1.md](./CORMIA_CORE_INTERFACE_CATALOG_v0.1.md): project descriptor, project lifecycle projection/event, resource offer/lease, and separate financial/in-kind support records. The descriptor references existing mandate claims by digest and does not duplicate them. A generic durable task record and production runtime bindings remain deferred.
-2. **Mandate alignment:** map the current ADR-0010 v0.1 local coding mandate into the generalized model; record unsupported general-project operations without widening the schema silently. Reuse ADR-0008/0009 trust decisions and ADR-0010 autonomy behavior.
-3. **Project lifecycle:** an isolated append-only local journal and deterministic project-state reducer now exist in `runtime/core/`. Next, integrate the journal projection with a host-resolved project registry and trusted mandate/identity checks; keep task-specific state machines separate.
+2. **Trusted Project Context Resolver:** an isolated orchestration contract now binds the Project Descriptor, resolved steward/accountability, ADR-0010 mandate claims, consent receipt, mandate revocation/anchor status and Project Lifecycle journal. It reuses the existing mandate validator and child-authority evaluator. Production identity, key/signature, authenticated consent and mandate-specific anti-rollback providers must be implemented before it can resolve a real trusted project.
+3. **Project lifecycle:** an isolated append-only local journal and deterministic project-state reducer now exist in `runtime/core/`. Next, integrate its projection with a host-resolved project registry; keep project, mandate and task state machines separate.
 4. **Local Resource Provider:** wrap the existing Resource Manager and local model/filesystem execution first; test no silent fallback and safe resource release.
 5. **Autonomous project loop:** connect the mandate, project journal, task decomposition, workspace isolation, resource lease and evidence package in a local-only end-to-end task.
 6. **Community Support Registry:** first record pledges/offers/restrictions and their provider/evidence references; do not implement payment custody or token issuance in the Core.
@@ -452,7 +456,7 @@ These decisions do not block a local general-purpose agent or creator/team-led /
 
 ## 12. Bounded verification status
 
-The abstract Core reference model is in `verification/core_contracts/core_contract_model.py`; its tests are in `test_core_contract_model.py`. The versioned record schemas are under `schemas/core/`; the local lifecycle implementation and Node tests are under `runtime/core/`. GitHub Actions [run #77](https://github.com/LiberoNuvola/Cormia/actions/runs/41585273487) passed **41 Python Core/schema tests**, **31 EXP boundary tests** and **15 Node Project Lifecycle tests**: **87 tests total, zero failures**. The schemas are validated against JSON Schema Draft 2020-12, including required steward/accountability references. Trusted identity resolution remains a separate host responsibility.
+The abstract Core reference model is in `verification/core_contracts/core_contract_model.py`; its tests are in `test_core_contract_model.py`. The versioned record schemas are under `schemas/core/`; the isolated local lifecycle and trusted project resolver contracts are under `runtime/core/`. GitHub Actions [run #93](https://github.com/LiberoNuvola/Cormia/actions/runs/41586046506) passed **41 Python Core/schema tests**, **31 EXP boundary tests** and **36 Node tests** (journal, reducer and resolver): **108 tests total, zero failures**. The separate [grant/authority regression run #30](https://github.com/LiberoNuvola/Cormia/actions/runs/41586046555) passed all **65** existing cryptographic, schema, mandate-authority and revocation-anchor model tests. These are contract/provider-double checks, not proof that real host trust providers exist or are configured.
 
 The Core tests cover:
 - JSON Schema shape/version validation for the project, lifecycle, resource and support records;
@@ -469,7 +473,7 @@ The Core tests cover:
 - provider-confirmed settled contributions versus unconfirmed pledges;
 - no default financial beneficiary that is an agent's personal wallet.
 
-These are finite contract and local-file-journal checks only. They do not prove integration into the actual Agent/Core Runtime, signed mandate store, consent broker, revocation anchor, identity resolution, OS resource isolation, remote provider mesh, payment custody or end-to-end community support. The hosted CI exercises file append/replay, locking, fsync calls and explicit torn-tail recovery on its runner; it is not a power-loss test or a Windows-host durability guarantee. No existing Agent/AEP execution path or mandate schema was modified.
+These are finite contract, local-file-journal and provider-orchestration checks only. The resolver tests use synthetic in-memory providers; they do not authenticate a real operator/steward, verify a real Project Mandate signature, protect consent replay, reconcile a mandate-specific independent monotonic anchor, or prove those providers are configured. Nor do the tests prove integration into the Agent/Core task loop, OS resource isolation, remote provider mesh, payment custody or end-to-end community support. The hosted CI exercises file append/replay, locking, fsync calls and explicit torn-tail recovery on its runner; it is not a power-loss test or a Windows-host durability guarantee. No existing Agent/AEP execution path or mandate schema was modified.
 
 
 ## 13. Versioned record interfaces — draft v0.1.0
