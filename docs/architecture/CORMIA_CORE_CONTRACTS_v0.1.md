@@ -408,12 +408,13 @@ No model, supporter, sponsor, resource provider or payment adapter can promote i
 - isolated authority evaluator and its 17 contract tests;
 - ADR-0008/0009 proposed cryptographic, consent and revocation lifecycle;
 - local Resource Manager compatibility wrapper;
-- local-first, reciprocal-mesh and sponsored capacity design in Compute Reciprocity / No-Mandatory-Cash.
+- local-first, reciprocal-mesh and sponsored capacity design in Compute Reciprocity / No-Mandatory-Cash;
+- an isolated local append-only Project Lifecycle journal and deterministic reducer in `runtime/core/`, with 15 Node-native contract tests. It is not yet connected to a trusted project registry or the mandate/task Runtime.
 
 **Not yet present as one integrated Core:**
 - durable, signed Project Mandate store and consent/anchor lifecycle;
 - generalized project descriptor/leadership-mode registry;
-- project lifecycle/state reducer and autonomous project loop;
+- lifecycle reducer/journal integration with the project registry, schema-backed projection, trusted mandate/identity resolver and autonomous project loop (the isolated local journal prototype is not this integration);
 - task-scoped workspace/worktree manager with recovery;
 - integrated Runtime capability enforcement and credential broker;
 - generalized Resource Provider interface, remote resource discovery and lease registry;
@@ -426,7 +427,7 @@ The current AEP draft, task manifest and local Agent task store are not substitu
 
 1. **Core interfaces and types:** an initial versioned record-schema slice is now drafted in [CORMIA_CORE_INTERFACE_CATALOG_v0.1.md](./CORMIA_CORE_INTERFACE_CATALOG_v0.1.md): project descriptor, project lifecycle projection/event, resource offer/lease, and separate financial/in-kind support records. The descriptor references existing mandate claims by digest and does not duplicate them. A generic durable task record and production runtime bindings remain deferred.
 2. **Mandate alignment:** map the current ADR-0010 v0.1 local coding mandate into the generalized model; record unsupported general-project operations without widening the schema silently. Reuse ADR-0008/0009 trust decisions and ADR-0010 autonomy behavior.
-3. **Project lifecycle:** add a durable reducer for project and authority states; keep task-specific state machines separate.
+3. **Project lifecycle:** an isolated append-only local journal and deterministic project-state reducer now exist in `runtime/core/`. Next, integrate the journal projection with a host-resolved project registry and trusted mandate/identity checks; keep task-specific state machines separate.
 4. **Local Resource Provider:** wrap the existing Resource Manager and local model/filesystem execution first; test no silent fallback and safe resource release.
 5. **Autonomous project loop:** connect the mandate, project journal, task decomposition, workspace isolation, resource lease and evidence package in a local-only end-to-end task.
 6. **Community Support Registry:** first record pledges/offers/restrictions and their provider/evidence references; do not implement payment custody or token issuance in the Core.
@@ -451,7 +452,7 @@ These decisions do not block a local general-purpose agent or creator/team-led /
 
 ## 12. Bounded verification status
 
-The abstract Core reference model is in `verification/core_contracts/core_contract_model.py`; its tests are in `test_core_contract_model.py`. GitHub Actions [run #58](https://github.com/LiberoNuvola/Cormia/actions/runs/41584236062) passed **40 Core tests** (22 abstract predicate tests + 18 JSON Schema conformance tests) and all **31 EXP boundary tests**, for **71 tests total and zero failures**. The schemas are validated against JSON Schema Draft 2020-12, including required steward/accountability references. Trusted identity resolution remains a separate host responsibility.
+The abstract Core reference model is in `verification/core_contracts/core_contract_model.py`; its tests are in `test_core_contract_model.py`. The versioned record schemas are under `schemas/core/`; the local lifecycle implementation and Node tests are under `runtime/core/`. GitHub Actions [run #77](https://github.com/LiberoNuvola/Cormia/actions/runs/41585273487) passed **41 Python Core/schema tests**, **31 EXP boundary tests** and **15 Node Project Lifecycle tests**: **87 tests total, zero failures**. The schemas are validated against JSON Schema Draft 2020-12, including required steward/accountability references. Trusted identity resolution remains a separate host responsibility.
 
 The Core tests cover:
 - JSON Schema shape/version validation for the project, lifecycle, resource and support records;
@@ -468,7 +469,7 @@ The Core tests cover:
 - provider-confirmed settled contributions versus unconfirmed pledges;
 - no default financial beneficiary that is an agent's personal wallet.
 
-These are finite reference-model checks only. They do not prove the actual Runtime, signed mandate store, consent broker, revocation anchor, durable project lifecycle, OS resource isolation, remote provider mesh, payment custody or end-to-end community support. No production schema or runtime was changed.
+These are finite contract and local-file-journal checks only. They do not prove integration into the actual Agent/Core Runtime, signed mandate store, consent broker, revocation anchor, identity resolution, OS resource isolation, remote provider mesh, payment custody or end-to-end community support. The hosted CI exercises file append/replay, locking, fsync calls and explicit torn-tail recovery on its runner; it is not a power-loss test or a Windows-host durability guarantee. No existing Agent/AEP execution path or mandate schema was modified.
 
 
 ## 13. Versioned record interfaces — draft v0.1.0
@@ -483,4 +484,4 @@ The slice includes:
 
 These schemas deliberately do not merge project, task and mandate authority lifecycles. The mandatory Core records reject undeclared economic/chain fields. Optional financial support is provider-referenced and cannot name an agent personal wallet as beneficiary; in-kind support contains no monetary equivalent.
 
-The new CI suite validates schema shape and fail-closed conditions. It does not establish durable journal semantics, signed mandate resolution, schema-generated Runtime types, OS quota enforcement, persistent leases or a support/payment service. The schemas remain proposals for review, not a normative runtime API.
+The CI suite validates the schemas and the isolated lifecycle journal/reducer. It does not establish schema-generated Runtime types, a trusted steward/mandate resolver, Agent integration, task journal/checkpoint recovery, OS quota enforcement, persistent Resource Leases or a Community Support/payment service. The record schemas remain proposals for review, not a normative production API.
