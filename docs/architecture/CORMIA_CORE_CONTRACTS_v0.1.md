@@ -424,7 +424,7 @@ The current AEP draft, task manifest and local Agent task store are not substitu
 
 ## 10. Implementation sequence
 
-1. **Core interfaces and types:** define project descriptor, mandate reference, lifecycle, task/journal reference, resource offer/lease and support record as versioned Core contracts. Do not add finance or chain fields to mandatory Core types.
+1. **Core interfaces and types:** an initial versioned record-schema slice is now drafted in [CORMIA_CORE_INTERFACE_CATALOG_v0.1.md](./CORMIA_CORE_INTERFACE_CATALOG_v0.1.md): project descriptor, project lifecycle projection/event, resource offer/lease, and separate financial/in-kind support records. The descriptor references existing mandate claims by digest and does not duplicate them. A generic durable task record and production runtime bindings remain deferred.
 2. **Mandate alignment:** map the current ADR-0010 v0.1 local coding mandate into the generalized model; record unsupported general-project operations without widening the schema silently. Reuse ADR-0008/0009 trust decisions and ADR-0010 autonomy behavior.
 3. **Project lifecycle:** add a durable reducer for project and authority states; keep task-specific state machines separate.
 4. **Local Resource Provider:** wrap the existing Resource Manager and local model/filesystem execution first; test no silent fallback and safe resource release.
@@ -451,9 +451,11 @@ These decisions do not block a local general-purpose agent or creator/team-led /
 
 ## 12. Bounded verification status
 
-The abstract Core reference model is in `verification/core_contracts/core_contract_model.py`; its tests are in `test_core_contract_model.py`. GitHub Actions [run #37](https://github.com/LiberoNuvola/Cormia/actions/runs/41583031982) passed **22 Core contract tests**. The same run passed all **31 existing EXP boundary tests**, for **53 tests total and zero failures**.
+The abstract Core reference model is in `verification/core_contracts/core_contract_model.py`; its tests are in `test_core_contract_model.py`. GitHub Actions [run #48](https://github.com/LiberoNuvola/Cormia/actions/runs/41583912440) passed **39 Core tests** (22 abstract predicate tests + 17 JSON Schema conformance tests) and all **31 EXP boundary tests**, for **70 tests total and zero failures**. The schemas are validated against JSON Schema Draft 2020-12.
 
 The Core tests cover:
+- JSON Schema shape/version validation for the project, lifecycle, resource and support records;
+- strict rejection of undeclared payment, wallet, Cardano, token, task-state and authority-state fields from mandatory Core records;
 - creator/team-led, agent-led and hybrid projects under the same Core contract;
 - steward, active project and active mandate requirements;
 - separate project and authority lifecycles;
@@ -467,3 +469,18 @@ The Core tests cover:
 - no default financial beneficiary that is an agent's personal wallet.
 
 These are finite reference-model checks only. They do not prove the actual Runtime, signed mandate store, consent broker, revocation anchor, durable project lifecycle, OS resource isolation, remote provider mesh, payment custody or end-to-end community support. No production schema or runtime was changed.
+
+
+## 13. Versioned record interfaces — draft v0.1.0
+
+The initial JSON record contracts are catalogued in [CORMIA_CORE_INTERFACE_CATALOG_v0.1.md](./CORMIA_CORE_INTERFACE_CATALOG_v0.1.md) and live under `schemas/core/`.
+
+The slice includes:
+- Project Descriptor with leadership/steward/accountability references and a digest-only pointer to the existing signed mandate claims;
+- Project Lifecycle Record and Project Lifecycle Event with a separate journal cursor and append-event digest fields;
+- Resource Offer and Resource Lease with explicit availability, owner acceptance, validation evidence, task binding and lease expiry;
+- separate Financial Support and In-Kind Support records.
+
+These schemas deliberately do not merge project, task and mandate authority lifecycles. The mandatory Core records reject undeclared economic/chain fields. Optional financial support is provider-referenced and cannot name an agent personal wallet as beneficiary; in-kind support contains no monetary equivalent.
+
+The new CI suite validates schema shape and fail-closed conditions. It does not establish durable journal semantics, signed mandate resolution, schema-generated Runtime types, OS quota enforcement, persistent leases or a support/payment service. The schemas remain proposals for review, not a normative runtime API.
