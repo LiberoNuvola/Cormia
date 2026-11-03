@@ -288,7 +288,7 @@ The existing Resource Manager wrapper's trusted fixed-operation map and finally 
 
 ### 6.1 Support target and contribution types
 
-Community Support is an optional project-facing registry, not the Core's payment engine or agent authority service.
+Community Support is an optional project-facing registry, not the Core's payment engine or agent authority service. Team collaboration and the pre-publication integration workflow are described in [Cormia Coordination Plane, Team Collaboration and Multi-Node Topology](./CORMIA_COORDINATION_PLANE_AND_MULTI_NODE_TOPOLOGY_v0.1.md); they remain available even when no financial or reward-pool adapter is configured.
 
 A contribution targets one of:
 - a project;
@@ -348,6 +348,22 @@ For in-kind contributions, the Resource Provider Contract is authoritative for w
 11. The system must not promise recurring outputs or guaranteed compute beyond accepted and available resources.
 12. No universal Cormia currency is implied. CRC, if enabled, is an optional access/quota mechanism and not a base identity, wage, financial balance or prerequisite.
 
+### 6.4 Optional Project Compute Reward Pool — proposed extension
+
+The current Resource Offer/Lease and Support Contribution records do not define a project-specific reward bucket distributed among compute contributors. A separate candidate model is documented in [Compute Reciprocity Economy, section 14](../economics/COMPUTE_RECIPROCITY.md).
+
+The proposed separation is:
+- Resource Offer/Lease records define what each host voluntarily offers and what capacity a task actually reserves/uses.
+- Accepted Contribution Receipts attest to completed, useful, attributable and verified work.
+- A Project Compute Reward Pool defines a finite reward budget, campaign/workstream scope, eligible work profiles and a predeclared allocation rule.
+- An optional payout/access adapter distributes the resulting entitlement after the required validation/finality conditions.
+
+The candidate allocation is pro-rata over accepted useful work, not advertised capacity, uptime or unverified raw GPU time. No percentage, conversion ratio, payout cadence or weighting coefficient is adopted. A pledge or unfunded promise is not a distributable pool.
+
+CRC access quota, financial/asset-denominated reward and non-financial project benefit remain distinct reward types. A resource contribution does not automatically create a monetary claim. If a project selects a financial reward inside an IMMORTAL-governed economic perimeter, the corresponding optional economic profile must govern it; Cormia Core itself does not custody or settle money.
+
+The resource ownership/partition and allocation/fairness questions remain open under JUR-05 and JUR-06. This proposal does not create a new Cormia currency, does not grant supporters authority and does not alter PRE-RICH or IMMORTAL normative parameters.
+
 ## 7. Composition: how the four contracts interact
 
 The Core composes the contracts in this order:
@@ -359,7 +375,8 @@ The Core composes the contracts in this order:
 5. Resource Provider offers are inspected and accepted only if both task authority and resource/host policy permit.
 6. Community Support may fund a project or add resources, but does not bypass steps 2–5.
 7. Execution produces durable journal entries, artifacts and evidence.
-8. Optional adapters can report support/payment/resource events; they cannot rewrite Core authority or task outcomes by themselves.
+8. Team Room and Project Workbench coordinate dialogue, co-development and integration; the Integration & Verification Bench produces an internal candidate before any optional external publication.
+9. Optional adapters can report support/payment/resource events; they cannot rewrite Core authority or task outcomes by themselves.
 
 ### 7.1 Independence test
 
@@ -383,6 +400,20 @@ An explicitly selected remote model/service is different: it requires explicit o
 
 No model, supporter, sponsor, resource provider or payment adapter can promote its own output into a capability grant or a valid mandate.
 
+### 7.3 Team collaboration and delivery boundary
+
+Cormia Core can execute a task with one agent or coordinate a team of agents. Team mode adds:
+- a Team Room for natural-language agent discussion, task coordination and peer review;
+- a Project Workbench for shared project context, task worktrees, patch exchange, local commits and controlled integration;
+- an Integration & Verification Bench for composing, building, testing and producing an evidence-backed candidate;
+- a Delivery Gate that applies the project's selected output profile.
+
+The Workbench supports parallel contribution and pair/team editing, but not unrestricted concurrent writes. The host controls workspace boundaries and conflict handling. Local Git history is permitted and does not require a GitHub remote.
+
+GitHub publication is an optional delivery adapter. Local work, internal commits, integration and testing do not require a remote repository. By default, the owner authorizes the verified candidate before a GitHub push/PR; a narrow standing publication mandate may be configured explicitly. Merge, release and production deployment remain distinct protected actions. Local-only tasks (for example, PC cleanup) bypass repository and publication stages entirely.
+
+The project mode and delivery profile determine which components are instantiated. This is not an obligation to run every task through all stages.
+
 ## 8. Conformance matrix
 
 | Test | Expected result |
@@ -395,6 +426,10 @@ No model, supporter, sponsor, resource provider or payment adapter can promote i
 | Agent creates an in-scope subtask | Runtime derives attenuated child authority automatically |
 | Task requests operation outside mandate/host policy | Denied, independent of sponsor/support status |
 | Compute is offered but not accepted/available | No lease; task does not assume capacity |
+| Two agents work as a team | They can discuss, contribute through the Workbench, integrate and test before publication |
+| A project has no GitHub destination | Local tasks/artifacts complete without a remote publication step |
+| A GitHub destination is selected but publication is not authorized | Verified candidate remains local; no remote push/PR occurs |
+| A compute reward bucket is pledged but unfunded | No distributable reward is reported |
 | Donated compute is revoked | Stop new leases and reconcile current work at safe boundary |
 | Pledge exists but provider has not confirmed receipt/settlement | Not reported as available settled funds |
 | Financial and in-kind contributions coexist | Separate records/ledgers; no implicit conversion |
