@@ -302,3 +302,10 @@ No universal Cormia agent operation should be routed through IMMORTAL merely bec
 - Which external payment, storage, compute and chain adapters are supported first.
 
 These decisions must not block the Core architecture or its local-first general-purpose operation.
+
+
+## 12. Core contracts and implementation boundary
+
+The four versioned conceptual contracts — Project Mandate, Autonomous Project Lifecycle, Resource Provider and Community Support — are defined in [CORMIA_CORE_CONTRACTS_v0.1.md](./CORMIA_CORE_CONTRACTS_v0.1.md). They refine this architecture's Core-first sequence without changing the AEP SPEC or schemas. ADR-0010 remains the source for one-time project delegation and task-child authority; its existing v0.1 mandate is coding-worktree-specific, not a universal mandate schema. Local Resource Manager compatibility is not yet a remote resource-provider mesh. Financial patronage and in-kind support remain separate records and neither grants operational authority.
+
+The bounded abstract contract model is under [verification/core_contracts](../../verification/core_contracts). Its tests do not establish Runtime implementation or end-to-end conformance.
