@@ -222,6 +222,14 @@ Each project declares a delivery profile:
 
 A GitHub remote is not a prerequisite for team collaboration, local commits, integration or testing. By default, publishing a verified candidate to GitHub requires an owner authorization at the external boundary. A narrowly scoped standing publication mandate can opt into automatic push/PR. Protected merge, release and production deployment remain separate actions. A one-agent local task can bypass Team Room, Workbench, build/test and publication stages it does not need.
 
+### 5.8 Work completion evidence and optional Materios certification
+
+A project may require verifiable completion evidence for selected tasks or compute contributions. Completion is an evidence-bearing claim, not just a task status or agent self-report. The worker-local Cormia Node remains the resource authority: it enforces owner-controlled limits, isolates the workload and produces a task-bound meter/receipt. Resource donation does not give the project or its agents general access to the contributor's PC.
+
+A Work Completion Receipt should bind project/task/attempt, assignment, worker, exact lease, workload, input/output commitments, meter profile, acceptance predicate and verifier evidence. Integrity/availability, resource metering, execution-environment attestation, task-outcome acceptance, execution proof and chain finality are separate claims.
+
+Materios may act as an optional receipt/evidence certification adapter; it must not control local resources or project authority. Its current receipt path supports commitment integrity and availability attestation, which does not alone prove task execution or semantic correctness. The [Work Completion Evidence and Materios Certification proposal](./CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md) records current implementation limits and the target profile boundary. Local Core remains independent of Materios and no certification schema/runtime is claimed yet.
+
 ## 6. What supporters are actually supporting
 
 A supporter can choose the object of support independently of the operator:
