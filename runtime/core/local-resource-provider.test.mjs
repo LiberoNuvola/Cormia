@@ -344,3 +344,55 @@ test("requires an explicit host lease duration and trusted execution port", () =
     leaseTtlMs: 1_000
   }), /executeWithLocalLease/);
 });
+
+test("composes with the existing fixed-operation ResourceManager compatibility wrapper", async () => {
+  const { withLocalResourceLease } = await import("../reference-worker/immortal-resource-manager-adapter.mjs");
+  let released = 0;
+  const resourceManager = {
+    async snapshot() {
+      return {
+        capturedAt: ISO(BASE),
+        host: { platform: "win32", architecture: "x64", totalMemoryBytes: 32 },
+        recommendation: {
+          mode: "balanced",
+          reason: "test headroom",
+          availableMemoryGB: 8,
+          cpuUtilizationPct: 20,
+          gpuFreeMemoryGB: 5,
+          policy: { maxConcurrentHeavyBuilds: 1 }
+        }
+      };
+    },
+    acquire(kind) {
+      assert.equal(kind, "cpu-heavy");
+      return {
+        allowed: true,
+        leaseId: "resource-manager-lease-1",
+        release() { released++; }
+      };
+    }
+  };
+  const provider = makeProvider({
+    executeWithLocalLease: args => withLocalResourceLease({
+      resourceManager,
+      operation: args.operation,
+      run: args.run
+    })
+  });
+  const result = await provider.withLease({
+    offerId: "offer:cpu-1",
+    consumerTaskRef: "task:integrated-adapter",
+    capabilityProfileRef: "profile:workspace-test-v0.1",
+    requestedCapacity: { quantity: 1, unit: "concurrent-operation" },
+    run: async ({ lease, resourceKind, assertActive }) => {
+      assert.equal(lease.leaseState, "active");
+      assert.equal(resourceKind, "cpu-heavy");
+      assert.equal(assertActive(), true);
+      return "integrated";
+    }
+  });
+  assert.equal(result.allowed, true);
+  assert.equal(result.result, "integrated");
+  assert.equal(result.lease.leaseState, "released");
+  assert.equal(released, 1);
+});
