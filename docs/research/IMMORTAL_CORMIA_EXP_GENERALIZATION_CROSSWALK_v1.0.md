@@ -29,6 +29,12 @@ This document is a mapping and gap register. It does not amend AEP, ADR-0010, th
 
 The economic composition analysis below is an optional integration profile, not the Cormia product's foundation. Cormia must remain a general-purpose autonomous agent and project-execution Core that works without Cardano, wallets, tokens, CRC, payment providers or IMMORTAL. The combined creator/team-led and agent-led community-support model is defined separately in [CORMIA_GENERAL_PURPOSE_AUTONOMOUS_AGENT_AND_MIXED_SUPPORT_ARCHITECTURE_v0.1.md](../architecture/CORMIA_GENERAL_PURPOSE_AUTONOMOUS_AGENT_AND_MIXED_SUPPORT_ARCHITECTURE_v0.1.md). The EXP comparison must therefore keep authority/action generalization distinct from optional economic-contract composition. An agent executes using available compute and tools; community money supports the project/resource pool and does not pay an agent a wage or grant it financial custody.
 
+
+
+## 1.2. Cormia Core contract decomposition
+
+The Core-first design is now decomposed into four independent contracts in [CORMIA_CORE_CONTRACTS_v0.1.md](../architecture/CORMIA_CORE_CONTRACTS_v0.1.md): mandate/operational authority, project lifecycle, resource providers and community support. This prevents the EXP comparison from conflating autonomous action authority with resource availability or financial support. EXP-12 primarily informs mandate/authority separation; EXP-06 informs evidence binding across task lifecycle and provider receipts; EXP-10 informs the separation of operational resource constraints from any optional economic exposure; EXP-11 informs worker/resource allocation. These links are architectural mappings, not proof that the Core or AEP Runtime implements the properties.
+
 ## 2. What “generalization” means here
 
 For this research, generalization means identifying properties that remain meaningful when the application domain changes, then expressing them as reusable contracts, invariants, transition constraints and evidence requirements.
