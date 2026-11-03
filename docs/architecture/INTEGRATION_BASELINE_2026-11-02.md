@@ -312,3 +312,26 @@ The Project Descriptor contains a digest-bound reference to the existing mandate
 GitHub Actions [run #58](https://github.com/LiberoNuvola/Cormia/actions/runs/41584236062) passed **40 Core tests** (22 abstract predicate tests + 18 JSON Schema conformance tests) and **31 EXP boundary tests**: 71 total, zero failures. The suite now also confirms steward/accountability reference fields are mandatory; it does not verify the identity behind those references.
 
 This is contract/schema evidence only. No schema-generated Runtime types, durable project journal, lifecycle reducer, mandate resolver, persistent Resource Lease store, Community Support service or integrated autonomous Core Runtime is present. Existing signed mandate/consent schemas, ADR-0010, AEP Task Manifest and production runtime behavior remain unchanged.
+
+
+## 6U. Local Cormia Project Lifecycle journal and reducer — isolated prototype
+
+A separate local Core component now exists under `runtime/core/`:
+- `project-lifecycle-reducer.mjs`: pure deterministic reducer for the declared project-state transition map;
+- `project-lifecycle-journal.mjs`: append-only UTF-8 NDJSON event journal with project binding, contiguous sequence, SHA-256 digest chain, local exclusive lock, compare-and-set revision, idempotent event IDs, replay and explicit torn-tail recovery;
+- `project-lifecycle-journal.test.mjs`: Node-native contract tests;
+- `README.md`: storage, recovery, security and integration boundaries.
+
+The implementation is intentionally independent of the Local Agent Task Store v1 and the existing IMMORTAL Agent. It does not read or modify the Agent's task data, does not turn task status into project status, does not authenticate the `actorRef`, does not resolve steward/mandate identity, and does not authorize activation by itself. Trusted host orchestration must validate the Project Descriptor, accountability arrangement, mandate/consent/revocation state and required execution profiles before it issues lifecycle commands.
+
+**Durability limits:** every appended event is followed by file `sync()`; a directory sync is attempted when the file is first created and supported by the platform. A final non-newline tail blocks reads and requires explicit repair; a complete malformed or digest-invalid record is never truncated. A stale lock is not automatically stolen. This is a single-host local-file prototype, not a multi-host journal, signed audit ledger, database, snapshot/compaction service or proof against power-loss/privileged host compromise.
+
+GitHub Actions [run #77](https://github.com/LiberoNuvola/Cormia/actions/runs/41585273487) completed **SUCCESS**:
+- 41 Python Core/schema tests;
+- 31 EXP boundary tests;
+- 15 Node Project Lifecycle journal/reducer tests;
+- **87 total, 0 failures**.
+
+The run verifies the prototype on the hosted Linux runner. It is not evidence of execution on the user's Windows host, and does not establish the integrated Core project loop, mandate resolver, task checkpoints, Resource Provider persistence, OS quota enforcement or Community Support registry. The Local Resource Provider remains the next separate adapter slice.
+
+This changes the earlier 6S/6T “no runtime changed” baseline only for the new isolated `runtime/core/` prototype. It does not change AEP Runtime, Local Agent Task Store v1, ADR-0010, mandate/consent schemas, Task Manifest, Agent execution, wallets, chain or economic policy.
