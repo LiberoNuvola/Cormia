@@ -78,6 +78,8 @@ Gate 4 also includes the first Cormia Node evidence slice:
 - proof adapters where justified;
 - liveness and collusion testing.
 
+Gate 5 also requires workload-specific verification profiles that distinguish receipt integrity/availability, task-outcome acceptance, execution-environment attestation, resource metering and provable execution. A Materios certificate must state the exact claim verified; a receipt hash/Merkle proof or committee availability attestation alone does not establish task completion or semantic correctness. Do not enable CRC mint from unsupported or incomplete evidence profiles.
+
 ## Gate 6 — Testnet public pilot
 
 - low-value tasks only;
