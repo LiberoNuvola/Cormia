@@ -279,3 +279,12 @@ The current Cormia main baseline and reference-worker documents were rechecked o
 The new transition-routing reference model therefore maps the SPEC vocabulary and current manifest field paths, but has no executable AEP event API against which to integrate. Its effect set is test input only; a production implementation must derive effects from a typed transition + signed/committed manifest + authoritative protocol state + versioned economic profile, never from a model/observer/caller flag. The recommended integration sequence and blockers are recorded in section 7.8 of the jurisdiction/conformance contract.
 
 No runtime files, local task-store data, manifest schema, economic parameters, wallet or settlement path were changed.
+
+
+## 6R. General-purpose Cormia Core and mixed community support — architecture correction
+
+The Core-first and mixed-support proposal is recorded in [CORMIA_GENERAL_PURPOSE_AUTONOMOUS_AGENT_AND_MIXED_SUPPORT_ARCHITECTURE_v0.1.md](CORMIA_GENERAL_PURPOSE_AUTONOMOUS_AGENT_AND_MIXED_SUPPORT_ARCHITECTURE_v0.1.md). It defines two project leadership modes (creator/team-led and agent-led, with hybrid projects) on one Core and two independent support dimensions: financial patronage and in-kind resources such as compute, storage, datasets, expertise and infrastructure. Contributions support a project or named workstream/resource pool; they are not wages to an AI agent. Agent-led projects require an explicit bounded mandate and named stewardship/accountability arrangement; the agent does not receive personal custody of community funds by default.
+
+**Core independence is a non-negotiable architecture constraint:** local/general-purpose Cormia must run with no account, subscription, wallet, Cardano, token, CRC, payment provider, AEP settlement or IMMORTAL integration. Community support, remote resource mesh, funded bounties, Cardano and IMMORTAL are optional, composable adapters. Payment/financial accounting and resource scheduling remain separate. A project's receipt of patronage or compute donations does not grant supporters tool permissions, private-data access or the ability to expand an agent's Project Mandate.
+
+The AEP–IMMORTAL economic jurisdiction contract and C0–C4 routing tests apply only to projects/tasks that explicitly opt into the relevant funded/economic profile. They do not apply to ordinary agent operations, unfunded tasks, local work, patronage as such or donated compute as such. The AEP SPEC and normative schema were not changed by this architecture clarification.
