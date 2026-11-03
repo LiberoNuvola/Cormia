@@ -189,7 +189,7 @@ function validateEventShape(event, expectedProjectRef, expectedSequence, previou
       event.reasonCode.length > 128 || !isDateTime(event.occurredAt)) {
     throw new ProjectLifecycleJournalCorruptionError("Journal event is missing required identity, reason or timestamp fields.");
   }
-  if (!Array.isArray(event.evidenceRefs) ||
+  if (!Array.isArray(event.evidenceRefs) || event.evidenceRefs.length > 256 ||
       event.evidenceRefs.some(item => typeof item !== "string" || !item.trim() || item.length > 512) ||
       new Set(event.evidenceRefs).size !== event.evidenceRefs.length) {
     throw new ProjectLifecycleJournalCorruptionError("Journal evidenceRefs must be unique non-empty strings.");
@@ -276,6 +276,13 @@ function snapshotFromEvents(projectRef, events) {
 
 function validateCommand(command) {
   if (!isPlainObject(command)) throw new TypeError("command must be an object.");
+  const allowedKeys = new Set([
+    "eventId", "expectedRevision", "eventType", "actorRef", "occurredAt",
+    "reasonCode", "evidenceRefs", "causationRef", "correlationRef"
+  ]);
+  if (Object.keys(command).some(key => !allowedKeys.has(key))) {
+    throw new TypeError("command contains an undeclared property.");
+  }
   if (!Number.isInteger(command.expectedRevision) || command.expectedRevision < 0) {
     throw new TypeError("expectedRevision must be a non-negative integer.");
   }
@@ -296,7 +303,7 @@ function validateCommand(command) {
     throw new TypeError("occurredAt must be an ISO date-time.");
   }
   if (command.evidenceRefs !== undefined &&
-      (!Array.isArray(command.evidenceRefs) ||
+      (!Array.isArray(command.evidenceRefs) || command.evidenceRefs.length > 256 ||
        command.evidenceRefs.some(item => typeof item !== "string" || !item.trim() || item.length > 512) ||
        new Set(command.evidenceRefs).size !== command.evidenceRefs.length)) {
     throw new TypeError("evidenceRefs must be an array of unique non-empty references.");
