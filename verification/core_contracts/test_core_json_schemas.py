@@ -229,6 +229,12 @@ class CoreJsonSchemaTests(unittest.TestCase):
     def test_project_lifecycle_event_has_a_valid_journal_shape(self):
         self.assert_valid("event", self.lifecycle_event())
 
+    def test_project_metadata_event_requires_metadata_artifact_reference(self):
+        instance = self.lifecycle_event()
+        instance["eventType"] = "project_metadata_updated"
+        instance["evidenceRefs"] = []
+        self.assert_invalid("event", instance)
+
     def test_project_lifecycle_event_requires_digest_chain_metadata(self):
         instance = self.lifecycle_event()
         del instance["recordDigest"]
