@@ -75,6 +75,8 @@ Financial and in-kind records are separate schemas and separate ledgers.
 
 Neither contribution type grants capabilities, private-data access, governance authority, mandate widening or task priority by itself. A supporter can make an offer; the provider/host still determines whether a resource is valid and available. No implicit exchange rate converts compute, expertise or volunteer time into money.
 
+The current seven-schema slice does not define a Project Compute Reward Pool, contribution receipt, reward allocation, payout or settlement record. The optional pro-rata pool concept in [Compute Reciprocity, section 14](../economics/COMPUTE_RECIPROCITY.md) is a separate design proposal. Do not imply that the existing Financial Support or In-Kind Support schema already implements it. A versioned pool/receipt schema requires prior decisions about eligible work, funding/custody, allocation, verification and dispute handling.
+
 ## 7. Local-first and optional-integration invariant
 
 The mandatory project descriptor, lifecycle projection/event and resource offer/lease schemas contain no payment, Cardano, wallet, token, CRC, AEP settlement or IMMORTAL fields. They reject undeclared additions.
@@ -97,7 +99,7 @@ The workflow `.github/workflows/exp-boundary-reference-model.yml` installs the p
 
 **Implemented in this proposal:** seven JSON Schema documents, schema conformance tests and CI wiring.
 
-**Not implemented:** schema-generated runtime types, serialization adapters, project registry, durable project journal, lifecycle reducer, mandate-reference resolver, local Resource Provider binding, lease persistence/recovery, Community Support registry, financial custody, remote compute mesh or integrated autonomous project loop.
+**Not implemented:** schema-generated runtime types, serialization adapters, project registry, durable project journal, lifecycle reducer, mandate-reference resolver, local Resource Provider binding, lease persistence/recovery, Team Room, Project Workbench, Integration & Verification Bench, project delivery gate, Community Support registry, Project Compute Reward Pool, financial custody, remote compute mesh or integrated autonomous project loop.
 
 The next implementation slice should consume these schemas in a trusted local Core adapter, bind the existing mandate evaluator without changing its approval semantics, and add a durable project journal plus a local Resource Provider wrapper. A complete end-to-end autonomous task must still prove restart/reconciliation and zero per-operation approval prompts under a one-time mandate. Remote resources and financial adapters remain later optional integrations.
 
