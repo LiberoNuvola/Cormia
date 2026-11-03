@@ -335,3 +335,23 @@ GitHub Actions [run #77](https://github.com/LiberoNuvola/Cormia/actions/runs/415
 The run verifies the prototype on the hosted Linux runner. It is not evidence of execution on the user's Windows host, and does not establish the integrated Core project loop, mandate resolver, task checkpoints, Resource Provider persistence, OS quota enforcement or Community Support registry. The Local Resource Provider remains the next separate adapter slice.
 
 This changes the earlier 6S/6T “no runtime changed” baseline only for the new isolated `runtime/core/` prototype. It does not change AEP Runtime, Local Agent Task Store v1, ADR-0010, mandate/consent schemas, Task Manifest, Agent execution, wallets, chain or economic policy.
+
+
+## 6V. Trusted Project Context Resolver — fail-closed orchestration contract
+
+An isolated resolver prototype and Node tests now exist under `runtime/core/trusted-project-context-resolver.mjs`. It loads the Project Descriptor from a host-selected project store, resolves the named steward/accountability arrangement, asks the host mandate authority to verify ADR-0010 claims/signature/key status, asks the consent authority to verify the one-time project receipt, asks a mandate-specific revocation authority to reconcile the independent anchor, and reads the Project Lifecycle journal.
+
+It reuses the existing `validateLocalAutonomousProjectMandateClaims` validator and `deriveLocalProjectTaskAuthority` / `authorizeLocalProjectOperation` engine. It creates no second mandate/grant/approval system. Task sessions are created only while the project lifecycle is `active`; every operation re-resolves trust state and host policy, so revocation, expiry, pause or provider loss blocks the next operation without a new human approval prompt.
+
+**Important — provider gap remains:** this repository still has no production implementations for:
+- host-pinned Project Mandate JWS verification and signing-key lifecycle;
+- authenticated OS operator identity and a signed/replay-protected project-consent broker;
+- steward/accountability/operator-authority registry;
+- mandate-specific signed revocation events, checkpoint and independent monotonic anchor;
+- durable host policy and Project Descriptor registry.
+
+The existing ADR-008 signed grant verifier is not a Project Mandate verifier. The ADR-009 revocation anchor module is a synthetic in-memory reconciliation model for its existing grant-revocation envelope; it is not a persistent mandate-revocation provider. The current resolver accepts these services only as host-trusted injected ports and fails closed when their results are missing, invalid or inconsistent. No real trust assertion is accepted from model/task input.
+
+[GitHub Actions run #93](https://github.com/LiberoNuvola/Cormia/actions/runs/41586046506) passed 41 Python Core/schema tests, 31 EXP tests and 36 Node tests (journal + resolver): **108 total, 0 failures**. The separate [grant/authority regression run #30](https://github.com/LiberoNuvola/Cormia/actions/runs/41586046555) passed all 65 existing crypto/schema/mandate/revocation model tests.
+
+This is an orchestration contract validated with synthetic in-memory provider doubles, not a production trusted Project Resolver. It does not enable the real Agent, change ADR-0010 trust semantics, or activate autonomous project execution.
