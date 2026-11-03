@@ -160,14 +160,16 @@ function harness(overrides = {}) {
     descriptor: descriptor(),
     claims: mandateClaims(),
     claimsDigest: MANDATE_DIGEST,
-    steward: { status: "verified", principalRef: "principal:steward-1", principalType: "human" },
+    steward: { status: "verified", principalStatus: "active", principalRef: "principal:steward-1", principalType: "human" },
     accountability: {
       status: "verified",
+      arrangementStatus: "active",
       arrangementRef: "accountability:project-board-1",
       accountablePrincipalRefs: ["principal:steward-1"]
     },
     operator: {
       status: "authorized",
+      operatorIdentityStatus: "authenticated",
       operatorPrincipalId: "os-principal:operator-1",
       accountabilityRef: "accountability:project-board-1"
     },
@@ -180,6 +182,9 @@ function harness(overrides = {}) {
     receiptDigest: CONSENT_DIGEST,
     consent: consentClaims(),
     revocationStatus: "HEALTHY",
+    revocationIssuerId: ISSUER_ID,
+    revocationMandateId: MANDATE_ID,
+    revocationMandateDigest: MANDATE_DIGEST,
     mandateRevocationState: "active",
     anchorProviderId: "host-monotonic-anchor-v0",
     anchorSequence: 2,
@@ -250,6 +255,9 @@ function harness(overrides = {}) {
         state.calls.push(["revocation", input.mandateId]);
         return {
           status: state.revocationStatus,
+          issuerId: state.revocationIssuerId,
+          mandateId: state.revocationMandateId,
+          mandateDigest: state.revocationMandateDigest,
           mandateState: state.mandateRevocationState,
           anchorProviderId: state.anchorProviderId,
           sequence: state.anchorSequence,
@@ -400,7 +408,7 @@ test("blocks wrong repository, workspace, worker or Runtime bindings", async t =
 
 test("steward identity must resolve to a human or organization through the trusted identity port", async () => {
   const { resolver } = harness({
-    steward: { status: "unverified", principalRef: "principal:steward-1", principalType: "human" }
+    steward: { status: "unverified", principalStatus: "active", principalRef: "principal:steward-1", principalType: "human" }
   });
   const result = await resolver.resolve();
   assert.equal(result.resolved, false);
@@ -409,7 +417,7 @@ test("steward identity must resolve to a human or organization through the trust
 
 test("community stewardship remains unsupported until its identity semantics are defined", async () => {
   const { resolver } = harness({
-    steward: { status: "verified", principalRef: "principal:steward-1", principalType: "community_stewardship_body" }
+    steward: { status: "verified", principalStatus: "active", principalRef: "principal:steward-1", principalType: "community_stewardship_body" }
   });
   const result = await resolver.resolve();
   assert.equal(result.resolved, false);
@@ -420,6 +428,7 @@ test("accountability arrangement must include the declared steward", async () =>
   const { resolver } = harness({
     accountability: {
       status: "verified",
+      arrangementStatus: "active",
       arrangementRef: "accountability:project-board-1",
       accountablePrincipalRefs: ["principal:another-person"]
     }
@@ -433,6 +442,7 @@ test("mandate operator must be authorized by the resolved accountability arrange
   const { resolver } = harness({
     operator: {
       status: "denied",
+      operatorIdentityStatus: "authenticated",
       operatorPrincipalId: "os-principal:operator-1",
       accountabilityRef: "accountability:project-board-1"
     }
@@ -467,6 +477,30 @@ test("consent receipt digest must equal the mandate's operatorConsentDigest", as
   const result = await resolver.resolve();
   assert.equal(result.resolved, false);
   assert.equal(result.reason, "PROJECT_CONSENT_UNTRUSTED");
+});
+
+test("revocation reconciliation must identify the exact issuer, mandate and digest", async () => {
+  const { resolver } = harness({
+    revocationMandateId: "99999999-9999-4999-8999-999999999999"
+  });
+  const result = await resolver.resolve();
+  assert.equal(result.resolved, false);
+  assert.equal(result.reason, "PROJECT_MANDATE_REVOCATION_UNHEALTHY");
+});
+
+test("descriptor mandate ID must equal the verified signed claims mandate ID", async () => {
+  const { resolver } = harness({
+    descriptor: descriptor({
+      mandateRef: {
+        mandateId: "99999999-9999-4999-8999-999999999999",
+        claimsSchemaId: "urn:immortal-aep:schema:local-autonomous-project-mandate:0.1.0",
+        claimsDigest: MANDATE_DIGEST
+      }
+    })
+  });
+  const result = await resolver.resolve();
+  assert.equal(result.resolved, false);
+  assert.equal(result.reason, "PROJECT_MANDATE_BINDING_MISMATCH");
 });
 
 test("mandate revocation/anchor failure blocks the whole trusted context", async () => {
