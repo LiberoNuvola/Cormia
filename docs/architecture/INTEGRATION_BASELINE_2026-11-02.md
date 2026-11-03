@@ -270,3 +270,12 @@ The current schemas/task-manifest.schema.json was inspected to bind the matrix t
 A fail-closed preflight reference model and tests now live in verification/exp_boundary/transition_routing.py and test_transition_routing.py. It routes C2 effects to the IMMORTAL gate, blocks C3 until canonical partition + joint certificate are present, requires reclassification for C0/C1 external claims or shared-resource effects, and keeps C4 independent. It never returns an economic admission. GitHub Actions [run #19](https://github.com/LiberoNuvola/Cormia/actions/runs/41580764675) passed all 31 bounded abstract tests (15 EXP boundary + 16 lifecycle-routing), with 0 failures. This is not implementation conformance or a C-COMP/solvency proof.
 
 No change was made to SPEC.md, schemas/task-manifest.schema.json, Runtime code, economic parameters, JUR-01…JUR-06 status, IMMORTAL normative sources, PRE-RICH or the separate PNC PR #1.
+
+
+## 6Q. AEP Runtime implementation boundary — transition model is not yet wired
+
+The current Cormia main baseline and reference-worker documents were rechecked on 2026-11-03. They describe the AEP SPEC, draft manifest schema and architecture, but no implemented AEP task engine/state reducer, scheduler, peer mesh or verifier service. The local Agent Task Store v1 inspector is a distinct read-only compatibility adapter for the existing IMMORTAL Local Agent; its pending/running/paused/failed/completed statuses are not the AEP Draft/Funded/Assigned/Settled lifecycle and it is not an AEP authority surface.
+
+The new transition-routing reference model therefore maps the SPEC vocabulary and current manifest field paths, but has no executable AEP event API against which to integrate. Its effect set is test input only; a production implementation must derive effects from a typed transition + signed/committed manifest + authoritative protocol state + versioned economic profile, never from a model/observer/caller flag. The recommended integration sequence and blockers are recorded in section 7.8 of the jurisdiction/conformance contract.
+
+No runtime files, local task-store data, manifest schema, economic parameters, wallet or settlement path were changed.
