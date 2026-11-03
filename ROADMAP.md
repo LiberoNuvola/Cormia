@@ -67,7 +67,7 @@
 
 Gate 4 also includes the first Cormia Node evidence slice:
 - local Resource Broker remains the host authority for each machine; remote project agents never receive general host access;
-- create a Work Completion Receipt bound to task/attempt/assignment/lease and committed inputs/outputs;
+- create a Work Completion Receipt bound to task/attempt/assignment/lease and committed inputs/outputs, following the [Work Completion Evidence and Materios Certification proposal](docs/architecture/CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md);
 - meter source, units, interval, precision and tamper limitations are explicit;
 - verify local revocation, lease expiry and process/workspace isolation before any remote certification adapter.
 
