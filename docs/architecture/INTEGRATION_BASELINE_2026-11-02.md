@@ -257,3 +257,16 @@ It distinguishes Cormia-local non-economic tasks, internal reciprocal-compute us
 The document also specifies proposed invariants and positive/negative conformance vectors for EXP-06 (Evidence-as-Input), EXP-12 (observer/authority separation), EXP-10 (economic risk budget distinct from operational resource budget) and EXP-11 (allocation). Its formal state variables and model-check scenarios are a specification proposal. A bounded Python reference model was added at verification/exp_boundary/, and its 15 tests passed in [GitHub Actions run #4](https://github.com/LiberoNuvola/Cormia/actions/runs/41528325294) at e59f4cf35eef43304f4eaec0aeff56184a77307f. This is evidence only for the abstract model, not Cormia implementation conformance, a full-state model check, a TLA+/Quint proof, a C-COMP deployment certificate or a live AEP/IMMORTAL adapter.
 
 No AEP SPEC, schema, economic parameter, Runtime authority, IMMORTAL normative rule or PRE-RICH semantic change is made.
+
+
+## 6P. AEP lifecycle economic-effect routing — research addendum
+
+The v0.2 routing addendum in [the AEP–IMMORTAL jurisdiction/conformance contract](../research/CORMIA_AEP_IMMORTAL_ECONOMIC_JURISDICTION_AND_EXP_CONFORMANCE_v0.1.md) maps every existing AEP lifecycle point from Draft through Funded/Open/Assigned/Running/Submitted/Verifying/ChallengeWindow/Disputed/Settled/Failed/Expired/Cancelled/Refunded/Slashed to its possible economic effects and authority route.
+
+The boundary is effect-driven, not event-driven: IMMORTAL is not called for every AEP state change. Funding/escrow lock, bond lock, claim or fee accrual, settlement release, refund, slash and shared economic-resource reservation/release are economic effects. Assignment, execution, submission, verifier evidence, challenge-window opening and failure classification are Cormia task events unless they also create one of those effects. Operational CPU/GPU/RAM/time limits remain Resource Manager controls and are not converted into economic exposure.
+
+The current schemas/task-manifest.schema.json was inspected to bind the matrix to real field names. It exposes budget asset/max amount/refund address/protocol fee, worker/verifier bond profiles, deadlines/windows, policy strings and resource profile. It does not yet encode an explicit C0–C4/profile identity, a typed challenge-bond profile, verifier-reward/settlement-allocation profile, or C3 resource partition/joint-certificate references; taskId is not required by the current schema. These are recorded as schema/contract gaps, not silently added here.
+
+A fail-closed preflight reference model and tests now live in verification/exp_boundary/transition_routing.py and test_transition_routing.py. It routes C2 effects to the IMMORTAL gate, blocks C3 until canonical partition + joint certificate are present, requires reclassification for C0/C1 external claims or shared-resource effects, and keeps C4 independent. It never returns an economic admission. The expanded suite is 30 bounded abstract tests once CI completes; it is not implementation conformance or a C-COMP/solvency proof.
+
+No change was made to SPEC.md, schemas/task-manifest.schema.json, Runtime code, economic parameters, JUR-01…JUR-06 status, IMMORTAL normative sources, PRE-RICH or the separate PNC PR #1.
