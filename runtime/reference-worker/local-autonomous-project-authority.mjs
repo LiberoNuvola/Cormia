@@ -208,7 +208,7 @@ export function deriveLocalProjectTaskAuthority({
       return { authorized: false, reason: "mandate-not-trusted" };
     }
 
-    const verdict = validateMandateClaims(trustedMandate.claims);
+    const verdict = validateLocalAutonomousProjectMandateClaims(trustedMandate.claims);
     if (!verdict.valid) return { authorized: false, reason: verdict.reason };
     const mandate = trustedMandate.claims;
 
@@ -321,7 +321,7 @@ export function authorizeLocalProjectOperation({
       return { allowed: false, reason: "trusted-mandate-state-unavailable" };
     }
     const mandate = trustedMandate.claims;
-    const mandateVerdict = validateMandateClaims(mandate);
+    const mandateVerdict = validateLocalAutonomousProjectMandateClaims(mandate);
     if (!mandateVerdict.valid) return { allowed: false, reason: mandateVerdict.reason };
     const authority = childAuthority.authority;
     if (authority.mandateDigest !== trustedMandate.mandateDigest) {
