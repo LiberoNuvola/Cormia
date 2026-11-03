@@ -61,11 +61,11 @@ Before building any newly proposed Core subsystem, map it to an existing standar
 
 ## Gate 4 — Local reference worker
 
-- protocol client and chain adapter;
-- persistent task engine, checkpoint/resume;
-- deterministic capability engine;
-- resource manager and sandbox;
-- evidence package generation.
+- protocol client and optional chain adapter;
+- selected durable workflow runtime, checkpoint/resume and idempotent side-effect handling (after PA-01; no home-grown generic workflow engine by default);
+- trusted mandate binding and selected policy/capability evaluation (after PA-02);
+- host-owned Resource Broker using native OS/runtime isolation and limits (after PA-03; no custom sandbox);
+- evidence built from standard provenance/attestation formats and existing trace tooling (after PA-04; no custom envelope by default).
 
 ## Gate 4A — Team Collaboration and Internal Delivery
 
@@ -91,7 +91,7 @@ Gate 4 also includes the first Cormia Node evidence slice:
 - proof adapters where justified;
 - liveness and collusion testing.
 
-Gate 5 also requires workload-specific verification profiles that distinguish receipt integrity/availability, task-outcome acceptance, execution-environment attestation, resource metering and provable execution. A Materios certificate must state the exact claim verified; a receipt hash/Merkle proof or committee availability attestation alone does not establish task completion or semantic correctness. Do not enable CRC mint from unsupported or incomplete evidence profiles.
+Gate 5 also requires workload-specific verification requirements to map each claim to a supported upstream format/verifier. Keep trace integrity, artifact provenance, availability, resource metering, execution-environment attestation, task-outcome acceptance, proof of execution and chain finality as separate dimensions; do not assume a universal R0–R4 ladder is an industry standard. A Materios certificate must state the exact claim verified; a receipt hash/Merkle proof or committee availability attestation alone does not establish task completion or semantic correctness. Do not enable CRC mint from unsupported or incomplete evidence profiles.
 
 ## Gate 6 — Testnet public pilot
 
