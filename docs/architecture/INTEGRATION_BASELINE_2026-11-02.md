@@ -288,3 +288,16 @@ The Core-first and mixed-support proposal is recorded in [CORMIA_GENERAL_PURPOSE
 **Core independence is a non-negotiable architecture constraint:** local/general-purpose Cormia must run with no account, subscription, wallet, Cardano, token, CRC, payment provider, AEP settlement or IMMORTAL integration. Community support, remote resource mesh, funded bounties, Cardano and IMMORTAL are optional, composable adapters. Payment/financial accounting and resource scheduling remain separate. A project's receipt of patronage or compute donations does not grant supporters tool permissions, private-data access or the ability to expand an agent's Project Mandate.
 
 The AEP–IMMORTAL economic jurisdiction contract and C0–C4 routing tests apply only to projects/tasks that explicitly opt into the relevant funded/economic profile. They do not apply to ordinary agent operations, unfunded tasks, local work, patronage as such or donated compute as such. The AEP SPEC and normative schema were not changed by this architecture clarification.
+
+
+## 6S. Four Cormia Core contracts — authority, lifecycle, resources and support
+
+The contract proposal is recorded in [CORMIA_CORE_CONTRACTS_v0.1.md](CORMIA_CORE_CONTRACTS_v0.1.md). It defines four independent surfaces: Project Mandate, Autonomous Project Lifecycle, Resource Provider, and Community Support.
+
+Reuse ADR-0010 and the existing mandate/consent claims schemas, ADR-0008/0009 trust design and local Resource Manager wrapper. Do not create a parallel mandate signer, per-operation approval flow, trust anchor or child-grant mechanism. The existing local-project mandate is coding-worktree-specific, so generalization to other project types must use versioned typed capability/resource profiles; do not silently extend the v0.1 schema.
+
+The contract keeps project lifecycle, mandate/authority lifecycle and individual task lifecycle separate. It also keeps financial patronage separate from in-kind compute/storage/data/expertise, and makes explicit that supporters and resource providers do not gain agent capabilities or mandate authority.
+
+A bounded reference model and 20 standard-library tests were added in `verification/core_contracts/`. CI now runs the Core model alongside the existing EXP economic-boundary model. This verifies only the abstract contract predicates; it is not a production Core implementation, mandate/consent persistence, credential broker, Resource Provider mesh, Community Support registry or end-to-end agent loop.
+
+No runtime, mandate schema, Task Manifest, payment provider, wallet, Cardano, token, CRC or IMMORTAL economic behavior was implemented or changed.
