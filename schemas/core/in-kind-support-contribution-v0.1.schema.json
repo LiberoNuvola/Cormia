@@ -75,12 +75,14 @@
         "project",
         "named_custodian",
         "resource_pool"
-      ]
+      ],
+      "description": "named_custodian must resolve through trusted identity policy to a human, organization or accountable custodian, not an agent acting as its own beneficiary."
     },
     "beneficiaryRef": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 512
+      "maxLength": 512,
+      "description": "Opaque beneficiary reference requiring trusted resolution; no identity claim is established by this string."
     },
     "scopeRef": {
       "type": "string",
