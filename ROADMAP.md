@@ -65,6 +65,12 @@
 - Prove a solo local-maintenance task can finish without Team Room, repository, GitHub or economic adapters.
 - Prove a two-agent team flow with discussion, collaborative edits, integration, build/test, repair and local candidate delivery before adding a second PC.
 
+Gate 4 also includes the first Cormia Node evidence slice:
+- local Resource Broker remains the host authority for each machine; remote project agents never receive general host access;
+- create a Work Completion Receipt bound to task/attempt/assignment/lease and committed inputs/outputs;
+- meter source, units, interval, precision and tamper limitations are explicit;
+- verify local revocation, lease expiry and process/workspace isolation before any remote certification adapter.
+
 ## Gate 5 — Independent verifier network
 
 - permissionless verifier admission under public profiles;
