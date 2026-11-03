@@ -218,6 +218,7 @@ test("an incomplete final line blocks reads and is removed only by explicit reco
 test("a complete malformed line is never discarded by torn-tail recovery", async t => {
   const h = await makeHarness();
   t.after(h.cleanup);
+  await mkdir(path.dirname(h.journalPath), { recursive: true });
   await writeFile(h.journalPath, "{not-json}\n", "utf8");
   await assert.rejects(
     () => h.journal.recover({ repairTornTail: true }),
