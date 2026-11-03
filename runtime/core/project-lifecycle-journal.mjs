@@ -289,8 +289,8 @@ function validateCommand(command) {
     throw new TypeError("reasonCode must be a non-empty stable reason code.");
   }
   if (command.eventId !== undefined &&
-      (typeof command.eventId !== "string" || command.eventId.length < 1 || command.eventId.length > 256)) {
-    throw new TypeError("eventId must be a non-empty string of at most 256 characters.");
+      (typeof command.eventId !== "string" || command.eventId.length < 1 || command.eventId.length > 512)) {
+    throw new TypeError("eventId must be a non-empty string of at most 512 characters.");
   }
   if (command.occurredAt !== undefined && !isDateTime(command.occurredAt)) {
     throw new TypeError("occurredAt must be an ISO date-time.");
@@ -316,8 +316,8 @@ export function createProjectLifecycleJournal({
   if (typeof journalPath !== "string" || !path.isAbsolute(journalPath)) {
     throw new TypeError("journalPath must be an absolute host-resolved path.");
   }
-  if (typeof projectRef !== "string" || !projectRef.trim()) {
-    throw new TypeError("projectRef must be a non-empty host-resolved project reference.");
+  if (typeof projectRef !== "string" || !projectRef.trim() || projectRef.length > 512) {
+    throw new TypeError("projectRef must be a non-empty host-resolved project reference of at most 512 characters.");
   }
   if (!Number.isInteger(lockTimeoutMs) || lockTimeoutMs < 1 || lockTimeoutMs > 60000) {
     throw new TypeError("lockTimeoutMs must be an integer between 1 and 60000.");
