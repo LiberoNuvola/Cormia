@@ -451,7 +451,7 @@ These decisions do not block a local general-purpose agent or creator/team-led /
 
 ## 12. Bounded verification status
 
-The abstract Core reference model is in `verification/core_contracts/core_contract_model.py`; its tests are in `test_core_contract_model.py`. GitHub Actions [run #48](https://github.com/LiberoNuvola/Cormia/actions/runs/41583912440) passed **39 Core tests** (22 abstract predicate tests + 17 JSON Schema conformance tests) and all **31 EXP boundary tests**, for **70 tests total and zero failures**. The schemas are validated against JSON Schema Draft 2020-12.
+The abstract Core reference model is in `verification/core_contracts/core_contract_model.py`; its tests are in `test_core_contract_model.py`. GitHub Actions [run #58](https://github.com/LiberoNuvola/Cormia/actions/runs/41584236062) passed **40 Core tests** (22 abstract predicate tests + 18 JSON Schema conformance tests) and all **31 EXP boundary tests**, for **71 tests total and zero failures**. The schemas are validated against JSON Schema Draft 2020-12, including required steward/accountability references. Trusted identity resolution remains a separate host responsibility.
 
 The Core tests cover:
 - JSON Schema shape/version validation for the project, lifecycle, resource and support records;
