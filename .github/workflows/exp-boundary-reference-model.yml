@@ -10,7 +10,8 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "verification/exp_boundary/**"
+      - "verification/exp-boundary/**"
+      - "verification/core_contracts/**"
       - ".github/workflows/exp-boundary-reference-model.yml"
   workflow_dispatch:
 
