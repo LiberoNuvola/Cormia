@@ -32,6 +32,11 @@ SHARED_RESOURCE_EFFECTS = frozenset({
 # They fail closed when their corresponding economic effect is omitted.
 REQUIRED_EFFECTS_BY_EVENT: Mapping[str, FrozenSet[str]] = {
     "funding": frozenset({"escrow_lock"}),
+    "worker_bond_lock": frozenset({"bond_lock"}),
+    "verifier_bond_lock": frozenset({"bond_lock"}),
+    "challenge_bond_lock": frozenset({"bond_lock"}),
+    "claim_accrual": frozenset({"claim_accrual"}),
+    "fee_accrual": frozenset({"fee_accrual"}),
     "settlement": frozenset({"settlement_release"}),
     "refund": frozenset({"refund"}),
     "slash": frozenset({"slash"}),
