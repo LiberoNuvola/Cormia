@@ -55,11 +55,11 @@ async function createActiveProject(journal) {
 
 test("reducer applies only the declared project lifecycle transitions", () => {
   const events = [
-    { recordType: "cormia.core.project-lifecycle-event", eventType: "project_created", fromState: null, toState: "draft" },
-    { recordType: "cormia.core.project-lifecycle-event", eventType: "project_configured", fromState: "draft", toState: "configured" },
-    { recordType: "cormia.core.project-lifecycle-event", eventType: "project_activated", fromState: "configured", toState: "active" },
-    { recordType: "cormia.core.project-lifecycle-event", eventType: "project_paused", fromState: "active", toState: "paused" },
-    { recordType: "cormia.core.project-lifecycle-event", eventType: "project_resumed", fromState: "paused", toState: "active" }
+    { recordType: "cormia.core.project-lifecycle-event", projectRef: PROJECT_REF, eventType: "project_created", fromState: null, toState: "draft" },
+    { recordType: "cormia.core.project-lifecycle-event", projectRef: PROJECT_REF, eventType: "project_configured", fromState: "draft", toState: "configured" },
+    { recordType: "cormia.core.project-lifecycle-event", projectRef: PROJECT_REF, eventType: "project_activated", fromState: "configured", toState: "active" },
+    { recordType: "cormia.core.project-lifecycle-event", projectRef: PROJECT_REF, eventType: "project_paused", fromState: "active", toState: "paused" },
+    { recordType: "cormia.core.project-lifecycle-event", projectRef: PROJECT_REF, eventType: "project_resumed", fromState: "paused", toState: "active" }
   ];
   let state = null;
   for (const event of events) state = applyProjectLifecycleEvent(state, event);
