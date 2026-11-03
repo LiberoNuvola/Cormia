@@ -1,0 +1,134 @@
+# Cormia Core — Project Lifecycle Journal v0.1
+
+- **Status:** isolated local-runtime component / experimental implementation slice
+- **Version:** event record `0.1.0`
+- **Scope:** single-project, single-host local filesystem journal
+- **Related schema:** `schemas/core/project-lifecycle-event-v0.1.schema.json`
+- **Related projection:** `schemas/core/project-lifecycle-record-v0.1.schema.json`
+- **Architecture contract:** `docs/architecture/CORMIA_CORE_CONTRACTS_v0.1.md`
+
+## 1. Files
+
+- `project-lifecycle-reducer.mjs` — pure deterministic state reducer.
+- `project-lifecycle-journal.mjs` — append-only NDJSON journal, locking, digest validation, replay and explicit torn-tail recovery.
+- `project-lifecycle-journal.test.mjs` — Node-native contract tests.
+
+The component is deliberately outside `runtime/reference-worker/`. It does not replace, read or write the existing Local Agent Task Store v1 and does not change the IMMORTAL Agent's /resume behavior.
+
+## 2. Lifecycle state machine
+
+Implemented transitions:
+
+| Event | From | To |
+| --- | --- | --- |
+| `project_created` | none | `draft` |
+| `project_configured` | `draft` | `configured` |
+| `project_activated` | `configured` | `active` |
+| `project_paused` | `active` | `paused` |
+| `project_resumed` | `paused` | `active` |
+| `project_blocked` | `active` | `blocked` |
+| `project_unblocked` | `blocked` | `active` |
+| `project_completed` | `active` | `completed` |
+| `project_archived` | `completed` | `archived` |
+| `project_metadata_updated` | any created non-archived state | unchanged |
+
+Unsupported transitions and event types are rejected. The reducer never accepts mandate states (`suspended`, `expired`, `revoked`, `trust_failed`) or task states (`pending`, `running`, etc.) as project states.
+
+This is the implemented transition subset for v0.1. In particular, blocking is currently modeled only from `active`, and unblocking returns to `active`; there is no configured→blocked or pause-from-blocked shortcut.
+
+## 3. Storage and append contract
+
+The host supplies:
+- an absolute, host-resolved journal path;
+- a non-empty `projectRef`;
+- a trusted `actorRef` and evidence references in each append command.
+
+The journal uses one UTF-8 NDJSON record per event. Each event contains the schema/version, project binding, event ID, contiguous sequence, event type, exact from/to state, actor reference, timestamp, reason code, evidence references, previous event digest and current record digest.
+
+The record digest is `sha256:` plus the lowercase SHA-256 of the event JSON with `recordDigest` removed. Object keys are serialized in lexicographic order; values in this record profile are strings, integers, nulls and arrays of strings. This is the local v0.1 serialization profile, not a signed or cross-language canonicalization standard.
+
+Append behavior:
+1. Acquire a local exclusive `.lock` file using create-if-absent semantics.
+2. Replay and validate the existing journal while holding the lock.
+3. Check `expectedRevision` (compare-and-set) and derive the next state using the reducer.
+4. Deduplicate a retry by `eventId`; reusing the same ID with different intent is rejected.
+5. Append the complete line and call file `sync()`; directory sync is attempted on first creation where the filesystem supports it.
+6. Release the lock.
+
+Readers use the same lock, so a reader never consumes an append in progress. The lock serializes cooperating processes on one local filesystem. It is not a network/distributed lock and should not be placed on an unqualified network share.
+
+A crashed process may leave a stale `.lock` file. It is not automatically stolen or deleted. The trusted host must inspect it and clear it only after verifying no writer remains.
+
+## 4. Recovery
+
+A valid journal must end each record with a newline. An incomplete final non-newline-terminated suffix is treated as an uncommitted/torn tail and blocks reads and appends.
+
+Only an explicit call may discard that suffix:
+
+```js
+const result = await journal.recover({ repairTornTail: true });
+```
+
+The repair truncates only bytes after the final newline (or all bytes if the first event never reached a newline), syncs the file, then replays the remaining complete records. A complete malformed JSON line, invalid digest, broken chain, wrong project, duplicate event ID or invalid transition is never auto-truncated. Preserve the file for investigation.
+
+## 5. API
+
+```js
+import { createProjectLifecycleJournal } from "./project-lifecycle-journal.mjs";
+
+const journal = createProjectLifecycleJournal({
+  journalPath: "/host-resolved/cormia/projects/project-1/lifecycle.ndjson",
+  projectRef: "project:project-1"
+});
+
+const current = await journal.read();
+
+await journal.append({
+  eventId: "host-generated-idempotency-reference",
+  expectedRevision: current.revision,
+  eventType: "project_created",
+  actorRef: "principal:resolved-steward",
+  reasonCode: "project_initialized",
+  evidenceRefs: ["artifact:project-descriptor-sha256-reference"]
+});
+```
+
+Do not expose the raw filesystem path to an untrusted model or caller. A retry after an ambiguous response should reuse the same `eventId`; a new command must use the revision returned by `read()` or by the append receipt.
+
+## 6. Security and authority boundary
+
+This module is not an identity provider, mandate verifier, consent broker, revocation anchor, credential broker, task scheduler or resource manager.
+
+- `actorRef` is a host-supplied reference. The journal does not authenticate the actor or prove a person's/legal entity's role.
+- `evidenceRefs` are opaque pointers. The journal does not fetch, validate or assess the referenced evidence.
+- A successful `project_activated` append does not by itself prove that steward, accountability, mandate, workspace or execution profiles have been verified. Trusted orchestration must enforce those preconditions before issuing the command.
+- Hash chaining detects accidental edits and incomplete/altered records when the full chain is not recomputed. It is not a digital signature, non-repudiation proof or protection against a privileged attacker who can rewrite the entire file.
+- The journal contains references and status metadata, not secrets. Do not place API keys, signing keys, prompts, private project data or raw evidence payloads in event fields.
+- It contains no payment, Cardano, wallet, token, CRC, AEP settlement or IMMORTAL dependency.
+
+## 7. Explicit non-goals / remaining work
+
+This slice does not implement:
+- a project descriptor registry or trusted steward/accountability resolution;
+- signed mandate/consent verification or binding to ADR-0008/0009/0010;
+- automatic mandate revalidation on every protected operation;
+- a task journal, task engine, checkpoint executor or crash-safe side-effect reconciliation;
+- schema-generated runtime types or a database projection store;
+- snapshotting, compaction, retention, backup rotation or bounded journal growth;
+- persistent Resource Lease storage, the Local Resource Provider or OS-level quotas;
+- Community Support, payment custody, remote worker mesh or cross-host replication;
+- Agent/Granite integration, autonomous task execution or project-loop activation.
+
+The next layer is a schema-backed projection/registry and trusted mandate/identity resolver. The Local Resource Provider remains a separate adapter step; it must not be conflated with project lifecycle state.
+
+## 8. Tests
+
+Run from repository root:
+
+```sh
+node --check runtime/core/project-lifecycle-reducer.mjs
+node --check runtime/core/project-lifecycle-journal.mjs
+node --test runtime/core/*.test.mjs
+```
+
+The contract tests cover pure transition replay, journal reconstruction after a fresh instance, digest chain, idempotent retry, revision conflicts under concurrent writes, invalid transitions, metadata artifact references, tamper detection, explicit torn-tail repair, preservation of complete corruption, stale-lock fail-closed behavior and symbolic-link rejection.
