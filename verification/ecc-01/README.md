@@ -37,6 +37,17 @@ The script:
 
 If a run directory already exists, the script stops. Preserve it as evidence or move it manually after review; the script intentionally has no cleanup operation.
 
+
+## 2A. Validate fixture behavior (not an Agent benchmark)
+
+From the Cormia checkout, run:
+
+    node verification/ecc-01/validate-fixtures.mjs
+
+This checks the research JSON, confirms the review fixture contains the intended shell-injection pattern without executing it, then copies the page-size fixture to an OS temporary directory. It requires the seeded baseline to exit 1 with 2/4 tests passing and the minimal corrected source to exit 0 with 4/4 passing; it also hashes the tests to confirm they were not changed. The temporary directory is removed after validation.
+
+**Interpretation:** this validates only the fixture and RED/GREEN expectation. It does not call the local Agent, Granite, the PowerShell staging script, ECC, hooks, MCP or AgentShield.
+
 ## 3. Execute each pair
 
 For each task (01-research, then 02-bugfix, then 03-review):
