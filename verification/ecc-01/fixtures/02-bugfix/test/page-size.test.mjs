@@ -15,7 +15,10 @@ test("ordinary valid page sizes are preserved", () => {
   assert.equal(normalizePageSize(50), 50);
 });
 
-test("values above the maximum are capped at 50", () => {
+test("51 is capped at 50", () => {
   assert.equal(normalizePageSize(51), 50);
+});
+
+test("500 is capped at 50", () => {
   assert.equal(normalizePageSize(500), 50);
 });
