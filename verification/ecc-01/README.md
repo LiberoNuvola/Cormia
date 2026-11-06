@@ -46,7 +46,7 @@ From the Cormia checkout, run:
 
 This checks the research JSON, confirms the review fixture contains the intended shell-injection pattern without executing it, then copies the page-size fixture to an OS temporary directory. It requires the seeded baseline to exit 1 with 2/4 tests passing and the minimal corrected source to exit 0 with 4/4 passing; it also hashes the tests to confirm they were not changed. The temporary directory is removed after validation.
 
-**Interpretation:** this validates only the fixture and RED/GREEN expectation. It does not call the local Agent, Granite, the PowerShell staging script, ECC, hooks, MCP or AgentShield.
+**Recorded result:** [fixture-validation-linux-node-v22.16.0.json](./fixture-validation-linux-node-v22.16.0.json). **Interpretation:** this validates only the fixture and RED/GREEN expectation. It does not call the local Agent, Granite, the PowerShell staging script, ECC, hooks, MCP or AgentShield.
 
 ## 3. Execute each pair
 
