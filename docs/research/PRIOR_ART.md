@@ -53,6 +53,11 @@ The user-facing idea of sharing personal hardware to access AI without subscript
 
 AEP must not claim the credit-for-compute model itself as novel. Its possible contribution is a verifiable composition of reciprocal access, task-scoped capabilities, Resource Manager enforcement, deterministic engineering gates, JEV evidence normalization, read-only audit connectors, on-chain epoch commitments, challenges and governance.
 
+
+## 4A. Local model post-training with constrained GPU memory
+
+- **Soup CLI / Layer Streaming:** open-source local LLM training/post-training toolkit. Its optional BETA streaming path keeps the frozen quantized base in CPU RAM (with NVMe overflow) and loads one decoder layer at a time into VRAM while LoRA adapters and optimizer state remain on-device. It is a candidate for low-VRAM local adapter production, not a decentralized inference mesh or a substitute for peer execution/reciprocity. The reported Llama-3.1-8B-on-4GB result is configuration-specific and Soup's own page distinguishes pre- and post-correctness-repair measurements; do not generalize the benchmark. Granite 4.0 H Tiny recipe availability does not establish Granite 4.2 8B compatibility. See [DECENTRALIZED_INFERENCE_PRIOR_ART.md](DECENTRALIZED_INFERENCE_PRIOR_ART.md), section 1A, for the bounded Cormia evaluation and provenance requirements.
+
 ## 5. Existing IMMORTAL implementation assets to preserve
 
 The existing `Immortal-Protocol` work branch already contains a Flux Point DoD pilot, JEV verification registry assets and a Mitsuro JEV read-only MCP bridge. These are not fresh ideas to replace with a new stack:
