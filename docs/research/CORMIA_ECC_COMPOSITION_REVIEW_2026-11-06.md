@@ -47,7 +47,7 @@ ECC is an optional source of workflow patterns. It does not sit above IMMORTAL a
 
 ## 4. Compatibility and security findings
 
-1. **Windows is a material gate.** ECC's current README says its core Node.js CLI and managed installers support Windows, but documents open native-Windows defects in the Continuous Learning v2 observer daemon and memory-vault writes. Windows + WSL follows the Linux paths more closely; shell-backed optional features may require Git Bash/WSL.
+1. **Windows is a material gate and upstream status is inconsistent.** ECC's README platform table still lists #2489 (Continuous Learning v2 observer) and #2626 (Memory Vault) as open native-Windows defects. The #2626 issue page is closed via #2637 and a 24 September 2026 contributor comment says the fix is on main; do not repeat the older claim that the Memory Vault defect is definitely still open. By contrast, #2489 was closed via #2606 but subsequent comments from 23 September say that change delivered a warning/documentation and the underlying observer-detach defect remained. In addition, the live issue tracker lists newer Windows hook regressions (#3756, #3765 and #3802) created after v2.2.3. Therefore the ECC-01 profile uses no hooks, observers, Memory Vault or new MCP. Treat any such feature as unqualified until the exact pinned package is smoke-tested on the target host. Windows + WSL follows Linux paths more closely, but still requires separate host/harness validation.
 2. **Harness parity is partial.** The upstream support matrix distinguishes stable, beta, experimental and instruction-only adapters. The Codex native plugin has its own manifest and hook projection; Codex requires an explicit trust decision for hooks. Do not infer Claude hook behavior or trust from a successful plugin installation.
 3. **Hooks and MCP are executable trust surfaces.** Inventory and inspect every hook command, environment variable, MCP server, package invocation and permission scope before enabling any runtime behavior.
 4. **Memory isolation matters.** Keep ECC data stores separate by project and host. Do not merge learned instincts into the existing IMMORTAL session/task store without a versioned, provenance-bearing adapter.
@@ -125,3 +125,26 @@ ECC is an optional source of workflow patterns. It does not sit above IMMORTAL a
 **Phase C — local experiment: NOT RUN / BLOCKED.** The live Windows process, local model telemetry and private Task Store are accessible only on the operator's machine. No local task was launched and no private task/evidence data was copied into this repository.
 
 The reproducible, non-invasive manual profile and matched A/B protocol are in [CORMIA_ECC_MANUAL_ADAPTATION_v0.1.md](../integration/CORMIA_ECC_MANUAL_ADAPTATION_v0.1.md). It uses only task framing, TDD and verification/review discipline; it preserves the existing `/task`, `/evidence` and `/resume` behavior. Any local run must use a disposable fixture/worktree, identical model/tools/settings in both arms and a pre-written acceptance rubric. No package install, runtime source change, global config mutation or model/authority change is part of this phase.
+
+
+## 9. ECC-01 fixture pack and updated upstream Windows status — 2026-11-06
+
+The matched A/B evaluation fixtures and local preparation procedure are now committed under [verification/ecc-01](../../verification/ecc-01/README.md). The pack contains:
+- read-only research with six fact/evidence questions;
+- a Node.js off-by-one bug with a captured RED expectation and a GREEN correction;
+- a static-only shell-injection review fixture that must never be executed;
+- identical A/B fixture copies, baseline and manual ECC profiles, a 12-point rubric and a local result template;
+- a PowerShell staging script that only creates new disposable directories beneath an explicitly supplied existing CodingRoot, refuses overwrite/reparse-point roots, and does not launch the Agent or model;
+- a Node fixture validator that exercises only the harmless page-size test in an OS temporary directory.
+
+**Fixture logic validation (isolated Linux/Node v22.16.0, 2026-11-06):** PASS. Seeded baseline: 4 tests, 2 passed / 2 failed, exit 1. Corrected temporary source: 4 passed / 0 failed, exit 0. The review fixture was not executed. This is fixture-contract evidence only; it is not a Windows execution, Agent run, Granite benchmark or ECC effectiveness result.
+
+The PowerShell staging script has not been executed because the Windows host is not accessible from this session. ECC-01 local A/B runs remain **NOT RUN / BLOCKED** pending operator-side Windows execution.
+
+**Upstream status correction:** ECC's current README platform table continues to label #2489 and #2626 as open native-Windows defects. However, the #2626 issue page shows closure via #2637 and a 24 September contributor comment says the fix is present on main. The #2489 issue was closed via #2606, but subsequent author/contributor comments say that only the failure warning/documentation landed while the actual Windows observer-detach issue remained. The current issue tracker also lists newer Windows hook problems #3756, #3765 and #3802 after the v2.2.3 release. Therefore the older statement that both #2489 and #2626 are definitely still open is superseded. No ECC hooks, observer or Memory Vault have been installed for this evaluation.
+
+Sources:
+- ECC README platform support: https://github.com/affaan-m/ECC#platform-support
+- #2489 / observer follow-up: https://github.com/affaan-m/ECC/issues/2489
+- #2626 / Memory Vault fix: https://github.com/affaan-m/ECC/issues/2626
+- Windows hook issue tracker: https://github.com/affaan-m/ECC/issues
