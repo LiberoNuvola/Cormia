@@ -6,7 +6,7 @@
  */
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { copyFile, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -52,11 +52,9 @@ assert.equal((originalSource.match(/Math\.min\(value, 51\)/g) ?? []).length, 1);
 
 const tempRoot = await mkdtemp(path.join(os.tmpdir(), "cormia-ecc01-"));
 try {
-  await mkdtemp;
   const workspace = path.join(tempRoot, "bugfix");
   const sourceDir = path.join(workspace, "src");
   const testDir = path.join(workspace, "test");
-  const { mkdir } = await import("node:fs/promises");
   await mkdir(sourceDir, { recursive: true });
   await mkdir(testDir, { recursive: true });
   await copyFile(
