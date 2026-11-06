@@ -107,3 +107,21 @@ ECC is an optional source of workflow patterns. It does not sit above IMMORTAL a
 - AgentShield scanner: https://github.com/affaan-m/agentshield
 
 **Reviewed:** 2026-11-06. Re-check release, support matrix, exact tag, dependencies, package integrity, hooks, memory behavior, platform compatibility and licenses before running or vendoring code.
+
+
+## 8. ECC-01 static review result — 2026-11-06
+
+**Phase A — public source/release inventory: reviewed.** The official release page marks v2.2.3 as Latest and displays the tag and release commit as GitHub-verified signatures (short commit `c05b2d6`). ECC identifies its open-source repository as MIT-licensed. This is release-source provenance evidence, not a complete dependency/package audit.
+
+**Phase B — static compatibility/security review: partial.**
+
+- ECC's own [Manual Adaptation Guide](https://github.com/affaan-m/ECC/blob/v2.2.3/docs/MANUAL-ADAPTATION-GUIDE.md) explicitly covers harnesses without native skill loading, slash commands or hooks. It recommends a small task-specific bundle and simulated command/hook intent in instructions.
+- Cormia's custom Node/Granite agent is not a first-class native ECC harness. The chosen route is manual adaptation only.
+- ECC README documents the native-Windows Continuous Learning v2 observer defect in [issue #2489](https://github.com/affaan-m/ECC/issues/2489) and Memory Vault write/body-file defect in [issue #2626](https://github.com/affaan-m/ECC/issues/2626). Both features are excluded from this native-Windows test until fixed and revalidated.
+- ECC's Memory Vault treats entries as unreviewed context and explicitly says they are not executable policy; Cormia already has a durable Agent Task Store and attempt evidence. No second task-truth store is justified.
+- ECC hooks and MCP are executable configuration surfaces. No hook or MCP was enabled. The Codex plugin's default Chrome DevTools MCP is irrelevant to the custom local agent.
+- AgentShield was not run. The custom agent's private files/configuration are not available in this review environment, and AgentShield's documented coverage is a scanner surface, not a complete arbitrary Node.js audit. No clean security grade is claimed.
+
+**Phase C — local experiment: NOT RUN / BLOCKED.** The live Windows process, local model telemetry and private Task Store are accessible only on the operator's machine. No local task was launched and no private task/evidence data was copied into this repository.
+
+The reproducible, non-invasive manual profile and matched A/B protocol are in [CORMIA_ECC_MANUAL_ADAPTATION_v0.1.md](../integration/CORMIA_ECC_MANUAL_ADAPTATION_v0.1.md). It uses only task framing, TDD and verification/review discipline; it preserves the existing `/task`, `/evidence` and `/resume` behavior. Any local run must use a disposable fixture/worktree, identical model/tools/settings in both arms and a pre-written acceptance rubric. No package install, runtime source change, global config mutation or model/authority change is part of this phase.
