@@ -57,7 +57,8 @@ Use this only for the bounded ECC-01 comparison task; it is not a global system 
 
 ## 4. Security and platform exclusions
 
-1. **No native-Windows ECC memory or continuous learning.** The ECC README currently lists open native-Windows defects for the Continuous Learning v2 observer daemon and Memory Vault writes (upstream issues #2489 and #2626). These features remain excluded until a fixed release is verified on the actual host.
+1. **No native-Windows observer or automatic memory promotion.** ECC's current README still lists #2489 and #2626, but the issue pages conflict with that summary: #2626 was closed via #2637 and a September comment says the fix is on main; #2489 was closed via #2606 but later comments say the actual observer-detach defect remained. Newer Windows hook issues (#3756, #3765, #3802) are also reported after v2.2.3. The evaluation therefore excludes Continuous Learning v2 observer, hooks and Memory Vault integration; it does not claim that all of these defects remain open. Any future trial must verify the exact package on the target host first.
+
 2. **No hooks.** ECC hooks are executable host configuration. This profile simulates their intent as instructions only; it does not install or register them.
 3. **No new MCP.** ECC's Codex plugin bundles a default Chrome DevTools MCP server; that is not needed for the custom Granite agent and must not be registered.
 4. **AgentShield not yet run.** ECC describes scanning CLAUDE.md, settings, MCP configs, hooks, agent definitions and skills. The scanner is an aid, not a full audit of arbitrary Node.js agent code. Do not install/run an unpinned scanner or claim the custom agent has been scanned. A separate exact-path review of the local agent configuration is still required.
