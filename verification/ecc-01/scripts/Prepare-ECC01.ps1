@@ -78,7 +78,9 @@ try {
             New-Item -ItemType Directory -Path $workspace -Force | Out-Null
 
             $fixtureSource = Join-Path $fixturesRoot $task.Fixture
-            Copy-Item -LiteralPath $fixtureSource -Destination $workspace -Recurse
+            Get-ChildItem -LiteralPath $fixtureSource -Force | ForEach-Object {
+                Copy-Item -LiteralPath $_.FullName -Destination $workspace -Recurse
+            }
 
             $taskText = Get-Content -LiteralPath (Join-Path $tasksRoot $task.TaskFile) -Raw
             $workspacePath = (Resolve-Path -LiteralPath $workspace).Path
