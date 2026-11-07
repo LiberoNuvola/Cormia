@@ -241,8 +241,10 @@ test("rejects malformed HTTP JSON as an invalid provider response", async t => {
 
 test("enforces timeout and aborts the local HTTP request", async t => {
   let connectionClosed = false;
-  const stub = await startStub(({ req, res }) => {
-    req.on("close", () => { connectionClosed = true; });
+  const stub = await startStub(({ res }) => {
+    res.on("close", () => {
+      if (!res.writableEnded) connectionClosed = true;
+    });
     setTimeout(() => {
       if (!res.destroyed) sendJson(res, 200, chatResponse());
     }, 150);
@@ -251,6 +253,19 @@ test("enforces timeout and aborts the local HTTP request", async t => {
   await expectAdapterCode(makeProvider(stub.baseUrl, { timeoutMs: 20 }).generate(request()), "provider_timeout");
   await new Promise(resolve => setTimeout(resolve, 180));
   assert.equal(connectionClosed, true);
+});
+
+test("request generation profile is host-pinned and mismatch prevents HTTP calls", async t => {
+  let calls = 0;
+  const stub = await startStub(({ res }) => {
+    calls += 1;
+    sendJson(res, 200, chatResponse());
+  });
+  t.after(stub.close);
+  await expectAdapterCode(makeProvider(stub.baseUrl).generate(request({
+    generationProfileRef: "profile:remote-or-untrusted"
+  })), "request_unsupported");
+  assert.equal(calls, 0);
 });
 
 test("request deadline that has already expired prevents all HTTP calls", async t => {
