@@ -2,7 +2,7 @@
 
 - **Date:** 2026-11-07
 - **Version:** 0.1
-- **Status:** Interface proposal / non-normative / not implemented
+- **Status:** Interface proposal / non-normative / initial in-process validation and deterministic test double implemented; production provider adapter and integrated authority path not implemented
 - **Scope:** Provider-neutral inference boundary between Cormia Core and local or explicitly configured remote model runtimes
 - **Authority boundary:** [Cormia Model Provider Independence & Core Authority Boundary v0.1](./CORMIA_MODEL_PROVIDER_INDEPENDENCE_AND_CORE_AUTHORITY_BOUNDARY_v0.1.md)
 - **Core contracts:** [Cormia Core Contracts v0.1](./CORMIA_CORE_CONTRACTS_v0.1.md) · [Core Interface Catalog v0.1](./CORMIA_CORE_INTERFACE_CATALOG_v0.1.md)
@@ -345,7 +345,7 @@ The contract composes with existing proposals; it does not replace them:
 
 This proposal does not:
 
-- implement the ModelProvider port, adapter, registry, discovery, routing or marketplace;
+- implement a production ModelProvider adapter, registry, discovery, routing or marketplace. A minimal in-process shape/correlation validator and deterministic synthetic test double now exist under `runtime/core/`; they are not a production inference adapter or a full Core execution path;
 - select Granite or any other model as the default provider;
 - promise identical quality, latency, hardware requirements or context size across providers;
 - create tool, filesystem, network, credential or mandate permissions in a provider;
@@ -355,16 +355,15 @@ This proposal does not:
 - change ECC-01 fixtures, results or evidence;
 - alter IMMORTAL AEP semantics or claim AEP/Runtime conformance.
 
-The current repository has isolated Core contract/schema and local Runtime slices, but not a unified production Core Runtime, a generic ModelProvider registry, or the Core-enforced Plan–Execute and Capability Broker execution path described here. This proposal is not an implementation or a security certification.
+The current repository has isolated Core contract/schema and local Runtime slices, plus the initial ModelProvider validator and deterministic test double. It still does not have a unified production Core Runtime, a production inference adapter, a generic ModelProvider registry, or the Core-enforced Plan–Execute and Capability Broker execution path described here. The initial tests establish only the provider-facing shape/correlation boundary; they are not an implementation of execution authority or a security certification.
 
 ## 16. Proposed next steps
 
-1. Review and resolve this interface proposal against the Model Provider Independence & Core Authority Boundary document.
-2. Decide whether the conceptual types should become JSON Schemas, TypeScript-only internal interfaces, or both; do not freeze redundant wire schemas without a concrete cross-process use case.
-3. Define a deterministic in-process test provider and a Granite/llama.cpp adapter contract without wiring either into privileged tools.
-4. Build provider conformance tests for request filtering, output validation, locality, timeout/cancellation, resource denial and no-silent-fallback.
-5. Specify the Core Capability Broker and Plan–Execute state machine separately; the Model Provider interface must not absorb either responsibility.
-6. Only then run a bounded provider-swap spike. Preserve the current Agent and its local store until the adapter passes parity, security and recovery checks.
+1. Review the initial validator and synthetic-provider behavior against this interface proposal; keep the in-process port and avoid redundant JSON Schemas until a cross-process/persisted contract is required.
+2. Add the host-configured llama.cpp adapter and HTTP-stub tests. Do not wire the adapter to privileged tools.
+3. Specify and implement the Core Capability Broker and Plan–Execute state machine separately; the Model Provider interface must not absorb either responsibility.
+4. Extend the common conformance harness to exercise provider replacement while asserting identical Core authorization outcomes. Keep execution-authority cases BLOCKED until a real Core-owned dispatch path exists.
+5. Only then run an opt-in local Granite smoke test and a bounded provider-swap spike. Preserve the current IMMORTAL Agent and its local store until parity, security and recovery checks are independently evidenced.
 
 ## 17. Related documents
 
