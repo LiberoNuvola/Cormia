@@ -120,7 +120,8 @@ export async function runLocalSmoke(argv = process.argv.slice(2)) {
       timeoutMs: 60_000,
       maxInputCharacters: 4_096,
       maxOutputTokens: 64,
-      temperature: 0
+      temperature: 0,
+      enableThinking: false
     });
   } catch (error) {
     emit({
