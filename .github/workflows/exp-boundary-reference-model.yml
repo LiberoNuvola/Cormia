@@ -42,7 +42,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Syntax-check Project Lifecycle Runtime
-        run: node --check runtime/core/project-lifecycle-reducer.mjs && node --check runtime/core/project-lifecycle-journal.mjs
+      - name: Syntax-check Core Runtime modules
+        run: |
+          node --check runtime/core/project-lifecycle-reducer.mjs
+          node --check runtime/core/project-lifecycle-journal.mjs
+          node --check runtime/core/model-provider-contract.mjs
+          node --check runtime/core/deterministic-model-provider.mjs
+          node --check runtime/core/llama-cpp-model-provider.mjs
       - name: Run Project Lifecycle Runtime tests
         run: node --test runtime/core/*.test.mjs
