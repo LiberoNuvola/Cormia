@@ -293,3 +293,27 @@ node --test runtime/core/llama-cpp-model-provider.test.mjs
 The adapter is tested against a local HTTP stub in mandatory CI; the current combined Core run reports 88 PASS / 0 FAIL, including 17 adapter tests. The real local Granite smoke test remains opt-in and has not been run. This adapter is not an integrated Core task runner and has no Capability Broker or Plan–Execute dispatch path.
 
 Upstream transport reference: [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md), which documents the OpenAI-compatible `/v1/chat/completions` route, the `/health` probe and the JSON response-format option.
+
+
+## Opt-in local llama.cpp smoke test
+
+`runtime/core/llama-cpp-local-smoke.mjs` performs one real local inference through the same ModelProvider adapter. It is intentionally separate from mandatory CI and never modifies the IMMORTAL Agent or its Granite configuration.
+
+From the repository root in PowerShell:
+
+```powershell
+node .\runtime\core\llama-cpp-local-smoke.mjs --help
+node .\runtime\core\llama-cpp-local-smoke.mjs --confirm-local-inference --model-id "<the-exact-model-id-reported-by-your-llama-server>"
+```
+
+The default endpoint is `http://127.0.0.1:18080/v1`; override it with `--base-url` only when the server listens on another loopback port. The model ID is required and must match the identity returned by the server (configure a matching llama.cpp alias where applicable). The profile defaults to `profile:local-smoke-v0.1` and can be pinned with `--generation-profile-ref`.
+
+Safety properties:
+- `--confirm-local-inference` is mandatory before any health or generation request.
+- The adapter enforces loopback HTTP only and rejects redirects; no remote fallback exists.
+- The test uses a fixed synthetic marker prompt, sends one generation request, and does not expose tools or dispatch operations.
+- No API-key argument is accepted. The script prints only sanitized metadata, result status and a response digest, never the generated text.
+- Exit code `0` means the expected marker was returned; `2` means configuration/provider failure or not-ready; `3` means inference returned but did not match the marker; `64` means invocation was refused or invalid.
+- A successful smoke test verifies connectivity and response normalization only. It is not a Core security, authorization or production-integration proof.
+
+CI tests the opt-in guard and CLI behavior without contacting a model. The actual local Granite smoke test remains **NOT_RUN** until the operator executes it on the machine running llama.cpp.
