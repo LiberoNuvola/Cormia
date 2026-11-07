@@ -290,7 +290,7 @@ node --check runtime/core/llama-cpp-model-provider.mjs
 node --test runtime/core/llama-cpp-model-provider.test.mjs
 ```
 
-The adapter is tested against a local HTTP stub in mandatory CI; the current combined Core run reports 88 PASS / 0 FAIL, including 17 adapter tests. The real local Granite smoke test remains opt-in and has not been run. This adapter is not an integrated Core task runner and has no Capability Broker or Plan–Execute dispatch path.
+The adapter is tested against a local HTTP stub in mandatory CI; the current combined Core run reports 94 PASS / 0 FAIL, including 19 adapter tests. An operator-run real local Granite smoke test passed on 2026-11-07 (evidence recorded below). This adapter is not an integrated Core task runner and has no Capability Broker or Plan–Execute dispatch path.
 
 Upstream transport reference: [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md), which documents the OpenAI-compatible `/v1/chat/completions` route, the `/health` probe and the JSON response-format option.
 
@@ -316,7 +316,17 @@ Safety properties:
 - Exit code `0` means the expected marker was returned; `2` means configuration/provider failure or not-ready; `3` means inference returned but did not match the marker; `64` means invocation was refused or invalid.
 - A successful smoke test verifies connectivity and response normalization only. It is not a Core security, authorization or production-integration proof.
 
-CI tests the opt-in guard and CLI behavior without contacting a model. The actual local Granite smoke test remains **NOT_RUN** until the operator executes it on the machine running llama.cpp.
+CI tests the opt-in guard and CLI behavior without contacting a model. The real local smoke test was subsequently executed by the operator and **PASSED** on 2026-11-07.
+
+Recorded local run (operator-provided sanitized output):
+- Result: `PASS`; `stage: generation`; `finishReason: completed`; `markerMatched: true`.
+- Model: `granite-4.2-8b-Q4_K_M`; endpoint host: `127.0.0.1`; locality: `local`.
+- Provider: `cormia.llama-cpp`; provider instance: `provider:local-smoke:fc8186e3-6f56-46b1-92d3-de1ebbdb75fa`.
+- Run reference: `fc8186e3-6f56-46b1-92d3-de1ebbdb75fa`; provider request reference: `chatcmpl-EOnpNWzCDxZiIAx3ohVGQMCZdDI6ih6w`.
+- Output length: 30 characters; response digest: `sha256:a212a60b065fb4a1e36e9d711886e23bf6c4551c381a2305ebfc3fc99166a878`.
+- Smoke report: `remoteFallback: false`; `toolDispatch: false`; no warnings.
+
+This proves one real local generation through the adapter and normalized response binding. The report's no-fallback/no-dispatch fields describe the script/adapter boundary; this was not an independent network packet capture or a test of the integrated Core authorization path.
 
 **Granite 4.2 chat-template note:** Granite 4.2 enables thinking by default in its embedded chat template. The smoke probe deliberately caps generation at 64 tokens and expects a short literal marker; with thinking enabled, the reasoning trace can consume that budget and llama.cpp can correctly return `finish_reason: "length"` before the marker.
 
