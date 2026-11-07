@@ -216,3 +216,25 @@ The local configuration contains a host-only `operation` mapping for each offer.
 - No claim of production Agent integration or multi-PC execution.
 
 The tests use injected execution-port doubles. They verify host-bound operation mapping, offer/lease binding, time-window and revocation checks, fail-closed admission and release/error boundaries. They do not test the user's Windows ResourceManager or create a persistent lease.
+
+
+## Model Provider — initial in-process contract slice (2026-11-07)
+
+Files:
+- `model-provider-contract.mjs` — version constants, bounded enums, strict shape validation and correlation checks for provider descriptors, health, generation requests/responses and cancellation results.
+- `deterministic-model-provider.mjs` — in-process test double with controlled response factory and best-effort cancellation behavior.
+- `model-provider-contract.test.mjs` — Node-native contract tests, including request field allowlisting, response/provider binding, metadata limits, non-completed finish reasons and adversarial tool-call-shaped content.
+
+Run the provider-specific tests from the repository root:
+
+```sh
+node --check runtime/core/model-provider-contract.mjs
+node --check runtime/core/deterministic-model-provider.mjs
+node --test runtime/core/model-provider-contract.test.mjs
+```
+
+The existing Core CI command `node --test runtime/core/*.test.mjs` includes this suite.
+
+This slice validates the provider-facing data boundary; it does not implement a production inference adapter, provider registry, Core Capability Broker, Plan–Execute gate, resource admission integration or task orchestration. The synthetic provider has no tool registry, filesystem access, network access or host execution callback. Provider output remains untrusted content. A tool-call-shaped response is not dispatched by this module.
+
+No Granite/llama.cpp integration, local Agent modification or remote fallback is part of this implementation.
