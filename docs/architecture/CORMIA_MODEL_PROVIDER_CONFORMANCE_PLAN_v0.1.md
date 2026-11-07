@@ -2,7 +2,7 @@
 
 - **Date:** 2026-11-07
 - **Version:** 0.1
-- **Status:** Test plan / non-normative / initial validator, deterministic provider, loopback llama.cpp adapter and HTTP-stub tests implemented; real Granite smoke test and Core authority path not implemented
+- **Status:** Test plan / non-normative / initial validator, deterministic provider, loopback llama.cpp adapter, HTTP-stub tests and opt-in smoke-test CLI implemented; operator-run Granite inference remains NOT_RUN and the integrated Core authority path is not implemented
 - **Scope:** Conformance strategy for provider-neutral inference and Core-owned authority
 - **Related contracts:**
   - [Model Provider Independence & Core Authority Boundary](./CORMIA_MODEL_PROVIDER_INDEPENDENCE_AND_CORE_AUTHORITY_BOUNDARY_v0.1.md)
