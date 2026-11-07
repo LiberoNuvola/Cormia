@@ -2,7 +2,7 @@
 
 - **Date:** 2026-11-07
 - **Version:** 0.1
-- **Status:** Test plan / non-normative / not implemented
+- **Status:** Test plan / non-normative / initial Stage 0 validator, deterministic provider and contract tests implemented; production adapter and Core authority path not implemented
 - **Scope:** Conformance strategy for provider-neutral inference and Core-owned authority
 - **Related contracts:**
   - [Model Provider Independence & Core Authority Boundary](./CORMIA_MODEL_PROVIDER_INDEPENDENCE_AND_CORE_AUTHORITY_BOUNDARY_v0.1.md)
@@ -28,7 +28,7 @@ This document is a test plan. It does not claim that the provider port, adapter,
 
 ## 2. Repository baseline and implementation decision
 
-The branch baseline reviewed for this plan is `work/exp-generalization-crosswalk`, at the then-current branch head `d3597311135db0c46484911144ce213a1f147b91`.
+The architectural baseline was reviewed on `work/exp-generalization-crosswalk` at `d3597311135db0c46484911144ce213a1f147b91`. The first executable Stage 0 slice was subsequently added to that same branch.
 
 Observed repository conventions:
 
@@ -36,7 +36,7 @@ Observed repository conventions:
 - Core contract tests use Node's built-in `node:test` and `node:assert/strict`.
 - The Core README documents the root-level command `node --test runtime/core/*.test.mjs`.
 - JSON Schema files are already used for persisted, versioned and interoperable records, including Core lifecycle and resource records.
-- The Model Provider interface is currently a conceptual in-process port documented in the architecture contract. No integrated ModelProvider implementation, llama.cpp adapter, Capability Broker or Plan–Execute runtime gate was found in the reviewed Core slice.
+- The Model Provider interface began as a conceptual in-process port. The initial Stage 0 slice now provides descriptor/health/request/response/cancellation validators, a required-method port check, a deterministic synthetic provider and Node-native contract tests. No production llama.cpp adapter, integrated Capability Broker or Plan–Execute runtime gate is present in this slice.
 
 ### 2.1 Contract representation
 
@@ -353,9 +353,10 @@ This plan does not:
 | Area | Status |
 | --- | --- |
 | Provider independence boundary | Documented |
-| ModelProvider conceptual port | Documented; not implemented |
+| ModelProvider conceptual port | Initial in-process validators implemented; not a production/network adapter |
 | Conformance plan and test matrix | Documented by this file |
-| Deterministic synthetic provider | Not implemented |
+| Deterministic synthetic provider | Implemented as a test double |
+| ModelProvider contract tests | 17 new tests included in the Core Node test run; latest validated run is tracked by GitHub Actions |
 | llama.cpp adapter | Not implemented |
 | HTTP stub integration tests | Not implemented |
 | Integrated Capability Broker / Plan–Execute gate | Not demonstrated as an integrated runtime path |
@@ -364,11 +365,9 @@ This plan does not:
 
 ## 10. Recommended implementation order
 
-1. Implement the minimal in-process port validator and deterministic synthetic provider.
-2. Implement request/response binding and inert-output tests.
+1. Review and harden the in-process validators and deterministic synthetic provider against the v0.1 contract. The first slice and its Node tests are now present.
+2. Implement the llama.cpp adapter behind the same port and test it against an HTTP stub; keep the real Granite smoke test opt-in.
 3. Implement or identify the actual Core-owned Plan–Execute and Capability Broker path; do not hide missing production enforcement behind a test mock.
-4. Add the llama.cpp adapter and HTTP stub tests.
-5. Run the opt-in local Granite smoke test.
-6. Re-run the same Core authorization matrix through both providers and publish the evidence.
+4. Re-run the same Core authorization matrix through both providers only after that integrated path exists, and publish evidence that compares actual dispatch/state outcomes.
 
 The first meaningful security milestone is not “Granite responded.” It is: **a hostile provider response cannot make Cormia perform an operation that the trusted Core has not authorized.**
