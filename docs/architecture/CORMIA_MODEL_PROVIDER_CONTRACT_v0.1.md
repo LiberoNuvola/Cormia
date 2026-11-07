@@ -355,7 +355,7 @@ This proposal does not:
 - change ECC-01 fixtures, results or evidence;
 - alter IMMORTAL AEP semantics or claim AEP/Runtime conformance.
 
-The current repository has isolated Core contract/schema and local Runtime slices, plus an initial ModelProvider validator, deterministic test double and experimental local loopback llama.cpp adapter. The adapter has HTTP-stub tests but has not been used against a real model server. The repository still does not have a unified production Core Runtime, a generic ModelProvider registry, or the Core-enforced Plan–Execute and Capability Broker execution path described here. These tests establish provider-facing contract, transport and locality behavior; they are not an implementation of execution authority or a security certification.
+The current repository has isolated Core contract/schema and local Runtime slices, plus an initial ModelProvider validator, deterministic test double and experimental local loopback llama.cpp adapter. The adapter has HTTP-stub tests; the combined Core Node runtime run completed with 88 PASS / 0 FAIL, including 17 adapter tests. It has not been used against a real model server. The repository still does not have a unified production Core Runtime, a generic ModelProvider registry, or the Core-enforced Plan–Execute and Capability Broker execution path described here. These tests establish provider-facing contract, transport and locality behavior; they are not an implementation of execution authority or a security certification.
 
 ## 16. Proposed next steps
 
