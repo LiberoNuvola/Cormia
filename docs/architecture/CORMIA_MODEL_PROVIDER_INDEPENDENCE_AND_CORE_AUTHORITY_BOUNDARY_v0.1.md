@@ -77,7 +77,9 @@ Model output is untrusted input, even when syntactically valid, confidently expr
 
 For ordinary operational capabilities, the effective action scope is bounded by the intersection of all applicable trusted constraints:
 
-`EffectiveCapabilities = Mandate ∩ TaskRequest ∩ HostPolicy ∩ ResourceLease`
+`EffectiveCapabilities = Mandate ∩ TaskRequest ∩ HostPolicy`
+
+An operation that consumes admitted resources additionally requires an active, task-bound Resource Lease where the selected resource profile requires one. A lease proves capacity admission under its own trust boundary; it does not grant operation permission and is not part of the capability intersection.
 
 For AEP-bound work, the action must additionally satisfy the applicable AEP task commitment and protocol state. This is an additional admissibility condition, not a reason to merge the AEP state machine with the project, mandate or local task state machine.
 
@@ -274,6 +276,7 @@ A successful model swap test demonstrates provider independence at the tested bo
 
 - [Cormia General-Purpose Autonomous Agent & Mixed Community-Support Architecture v0.1](./CORMIA_GENERAL_PURPOSE_AUTONOMOUS_AGENT_AND_MIXED_SUPPORT_ARCHITECTURE_v0.1.md)
 - [Cormia Core Contracts v0.1](./CORMIA_CORE_CONTRACTS_v0.1.md)
+- [Cormia Model Provider Contract v0.1](./CORMIA_MODEL_PROVIDER_CONTRACT_v0.1.md)
 - [Cormia Core Interface Catalog v0.1](./CORMIA_CORE_INTERFACE_CATALOG_v0.1.md)
 - [Cormia Coordination Plane and Multi-Node Topology v0.1](./CORMIA_COORDINATION_PLANE_AND_MULTI_NODE_TOPOLOGY_v0.1.md)
 - [IMMORTAL AEP normative specification](../../SPEC.md)
