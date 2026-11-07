@@ -302,7 +302,15 @@ node .\runtime\core\llama-cpp-local-smoke.mjs --help
 node .\runtime\core\llama-cpp-local-smoke.mjs --confirm-local-inference --model-id "<the-exact-model-id-reported-by-your-llama-server>"
 ```
 
-**Gate 3:** the operator-run adapter reaches the expected local runtime, returns a normalized response bound to the current request, and makes no remote contact. Record runtime/model identifiers and result status, but do not treat a successful generation as an authorization or verification proof. Until the operator executes the command, the real Granite smoke test remains **NOT_RUN**.
+**Gate 3: PASS — operator-run local inference completed on 2026-11-07.** The operator executed `llama-cpp-local-smoke.mjs` against the local server and supplied the sanitized result:
+
+- `status: PASS`; `stage: generation`; `finishReason: completed`; `markerMatched: true`.
+- Endpoint host `127.0.0.1`; locality `local`; model ID `granite-4.2-8b-Q4_K_M`; adapter `cormia.llama-cpp`.
+- Run reference `fc8186e3-6f56-46b1-92d3-de1ebbdb75fa`; provider request reference `chatcmpl-EOnpNWzCDxZiIAx3ohVGQMCZdDI6ih6w`.
+- Output length 30 characters; digest `sha256:a212a60b065fb4a1e36e9d711886e23bf6c4551c381a2305ebfc3fc99166a878`; no adapter warnings.
+- Smoke report records `remoteFallback: false` and `toolDispatch: false`.
+
+This closes the real local connectivity/generation smoke gate for this model, adapter version and endpoint. It does **not** certify Core security, mandate enforcement, operation authorization, evidence verification or production task orchestration. The no-fallback/no-dispatch fields are emitted by the smoke implementation and do not represent an independent network packet capture.
 
 ### Stage 4 — Integrated Core security conformance
 
@@ -367,11 +375,11 @@ This plan does not:
 | Deterministic synthetic provider | Implemented as a test double |
 | ModelProvider contract tests | 17 tests passed |
 | llama.cpp adapter | Experimental loopback-only adapter implemented |
-| llama.cpp HTTP stub tests | 17 tests passed |
-| Combined Core Node runtime suite | 88 PASS / 0 FAIL in GitHub Actions |
-| Real Granite smoke test | Not run |
+| llama.cpp HTTP stub tests | 19 tests passed |
+| Combined Core Node runtime suite | 94 PASS / 0 FAIL in GitHub Actions (run #42359783559) |
+| Real Granite smoke test | PASS — operator-run local inference, 2026-11-07 |
 | Integrated Capability Broker / Plan–Execute gate | Not demonstrated as an integrated runtime path |
-| Real Granite smoke test | Not run |
+| Real Granite smoke test | PASS — operator-run local inference, 2026-11-07 |
 | Full provider replacement conformance | Blocked pending implementation |
 
 Upstream transport reference: [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md), documenting the OpenAI-compatible chat-completions endpoint, health route and JSON response-format option.
@@ -380,7 +388,7 @@ Upstream transport reference: [llama.cpp server README](https://github.com/ggml-
 
 1. Review and harden the in-process validators and deterministic synthetic provider against the v0.1 contract. The first slice and its Node tests are present.
 2. Stage 2 HTTP-stub CI has passed; review the loopback adapter contract and keep the no-redirect/no-fallback boundary.
-3. Run the opt-in local Granite smoke test with an explicitly pinned endpoint/model alias; it is not a mandatory CI test.
+3. Local Granite smoke test passed with the pinned endpoint/model alias; retain as an opt-in operator check, not a mandatory CI test.
 4. Implement or identify the actual Core-owned Plan–Execute and Capability Broker path; do not hide missing production enforcement behind a test mock.
 5. Re-run the same Core authorization matrix through both providers only after that integrated path exists, and publish evidence that compares actual dispatch/state outcomes.
 
