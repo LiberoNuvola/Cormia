@@ -297,7 +297,17 @@ export function createLlamaCppModelProvider({
           reasonCode: "health_http_" + result.response.status
         }, { expectedProviderInstanceRef: normalizedDescriptor.providerInstanceRef });
       }
-      const payload = parseJson(result.body, null);
+      let payload;
+      try {
+        payload = parseJson(result.body, null);
+      } catch {
+        return validateModelProviderHealth({
+          providerInstanceRef: normalizedDescriptor.providerInstanceRef,
+          observedAt,
+          status: "unknown",
+          reasonCode: "health_response_invalid"
+        }, { expectedProviderInstanceRef: normalizedDescriptor.providerInstanceRef });
+      }
       return validateModelProviderHealth({
         providerInstanceRef: normalizedDescriptor.providerInstanceRef,
         observedAt,
@@ -383,6 +393,7 @@ export function createLlamaCppModelProvider({
         ? "provider_error"
         : mapFinishReason(choice.finish_reason, request.requestRef);
 
+      const usage = normalizeUsage(payload.usage);
       const providerResponse = {
         contractVersion: MODEL_PROVIDER_CONTRACT_VERSION,
         requestRef: request.requestRef,
@@ -403,7 +414,7 @@ export function createLlamaCppModelProvider({
           contentDigest: "sha256:" + createHash("sha256").update(outputContent, "utf8").digest("hex")
         },
         finishReason,
-        ...(normalizeUsage(payload.usage) === undefined ? {} : { usage: normalizeUsage(payload.usage) }),
+        ...(usage === undefined ? {} : { usage }),
         ...(warnings.length === 0 ? {} : { warnings })
       };
       return validateModelGenerationResponse(providerResponse, {
