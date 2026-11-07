@@ -49,5 +49,6 @@ jobs:
           node --check runtime/core/model-provider-contract.mjs
           node --check runtime/core/deterministic-model-provider.mjs
           node --check runtime/core/llama-cpp-model-provider.mjs
+          node --check runtime/core/llama-cpp-local-smoke.mjs
       - name: Run Project Lifecycle Runtime tests
         run: node --test runtime/core/*.test.mjs
