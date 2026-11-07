@@ -287,7 +287,7 @@ Deliverables:
 - request/response normalization;
 - HTTP stub tests for success, failure, timeout, malformed response, model mismatch and endpoint pinning.
 
-**Gate 2:** the adapter and HTTP-stub suite are implemented. The suite exercises local health, chat-completions mapping, JSON mode, no tool declarations, inert native tool-call data, pinned model/profile, response mismatch, HTTP errors, malformed JSON, timeout/abort, redirect rejection, API-key handling and unsupported cancellation. The real endpoint is not contacted.
+**Gate 2:** PASS in GitHub Actions. The suite exercises local health, chat-completions mapping, JSON mode, no tool declarations, inert native tool-call data, pinned model/profile, response mismatch, HTTP errors, malformed JSON, timeout/abort, redirect rejection, API-key handling and unsupported cancellation. No model process or external endpoint is contacted.
 
 ### Stage 3 — Local Granite smoke test
 
@@ -307,7 +307,7 @@ This stage requires a real Core-owned path for:
 
 ## 6. CI and local execution
 
-The intended deterministic test command, once the tests are implemented, is:
+The deterministic test command is:
 
 ```sh
 node --test runtime/core/model-provider*.test.mjs
@@ -356,18 +356,21 @@ This plan does not:
 | ModelProvider conceptual port | Initial in-process validators implemented; not a production/network adapter |
 | Conformance plan and test matrix | Documented by this file |
 | Deterministic synthetic provider | Implemented as a test double |
-| ModelProvider contract tests | 17 tests previously passed in Core CI |
+| ModelProvider contract tests | 17 tests passed |
 | llama.cpp adapter | Experimental loopback-only adapter implemented |
-| llama.cpp HTTP stub tests | Implemented; CI rerun pending after first timeout assertion correction |
+| llama.cpp HTTP stub tests | 17 tests passed |
+| Combined Core Node runtime suite | 88 PASS / 0 FAIL in GitHub Actions |
 | Real Granite smoke test | Not run |
 | Integrated Capability Broker / Plan–Execute gate | Not demonstrated as an integrated runtime path |
 | Real Granite smoke test | Not run |
 | Full provider replacement conformance | Blocked pending implementation |
 
+Upstream transport reference: [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md), documenting the OpenAI-compatible chat-completions endpoint, health route and JSON response-format option.
+
 ## 10. Recommended implementation order
 
 1. Review and harden the in-process validators and deterministic synthetic provider against the v0.1 contract. The first slice and its Node tests are present.
-2. Finalize Stage 2 HTTP-stub CI and review the loopback adapter contract. The adapter and stub tests are now present; no external endpoint is contacted.
+2. Stage 2 HTTP-stub CI has passed; review the loopback adapter contract and keep the no-redirect/no-fallback boundary.
 3. Run the opt-in local Granite smoke test with an explicitly pinned endpoint/model alias; it is not a mandatory CI test.
 4. Implement or identify the actual Core-owned Plan–Execute and Capability Broker path; do not hide missing production enforcement behind a test mock.
 5. Re-run the same Core authorization matrix through both providers only after that integrated path exists, and publish evidence that compares actual dispatch/state outcomes.
