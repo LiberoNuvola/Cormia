@@ -290,4 +290,6 @@ node --check runtime/core/llama-cpp-model-provider.mjs
 node --test runtime/core/llama-cpp-model-provider.test.mjs
 ```
 
-The real local Granite smoke test remains opt-in. This adapter is not an integrated Core task runner and has no Capability Broker or Plan–Execute dispatch path.
+The adapter is tested against a local HTTP stub in mandatory CI; the current combined Core run reports 88 PASS / 0 FAIL, including 17 adapter tests. The real local Granite smoke test remains opt-in and has not been run. This adapter is not an integrated Core task runner and has no Capability Broker or Plan–Execute dispatch path.
+
+Upstream transport reference: [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md), which documents the OpenAI-compatible `/v1/chat/completions` route, the `/health` probe and the JSON response-format option.
