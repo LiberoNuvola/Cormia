@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cormia:core:project-lifecycle-record:0.1.0",
+  "title": "Cormia Core Project Lifecycle Projection",
+  "description": "Project lifecycle projection only. Mandate authority state and task state are intentionally separate records and cannot be added to this object.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "recordType",
+    "projectRef",
+    "state",
+    "revision",
+    "updatedAt",
+    "journalRef",
+    "lastEventRef"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "recordType": {
+      "type": "string",
+      "const": "cormia.core.project-lifecycle-record"
+    },
+    "projectRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "configured",
+        "active",
+        "paused",
+        "blocked",
+        "completed",
+        "archived"
+      ]
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "journalRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "journalId",
+        "streamId",
+        "sequence",
+        "recordDigest",
+        "storageRef"
+      ],
+      "properties": {
+        "journalId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "streamId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "recordDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "storageRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        }
+      },
+      "description": "Opaque pointer into the durable project journal; schema does not implement or certify storage durability."
+    },
+    "lastEventRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    }
+  }
+}

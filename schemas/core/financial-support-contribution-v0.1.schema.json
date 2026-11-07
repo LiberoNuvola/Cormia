@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cormia:core:financial-support-contribution:0.1.0",
+  "title": "Cormia Optional Financial Support Contribution",
+  "description": "Optional provider-referenced financial support record. It is not a wallet balance, agent compensation account, payment credential or Core execution prerequisite.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "recordType",
+    "contributionId",
+    "contributionKind",
+    "targetKind",
+    "targetRef",
+    "contributorRef",
+    "beneficiaryKind",
+    "beneficiaryRef",
+    "amountMinor",
+    "currency",
+    "providerRef",
+    "providerContributionRef",
+    "providerStatus",
+    "providerConfirmed",
+    "recordedAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "recordType": {
+      "type": "string",
+      "const": "cormia.core.financial-support-contribution"
+    },
+    "contributionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "contributionKind": {
+      "type": "string",
+      "const": "financial"
+    },
+    "targetKind": {
+      "type": "string",
+      "enum": [
+        "project",
+        "workstream",
+        "milestone",
+        "resource_pool"
+      ]
+    },
+    "targetRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "contributorRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "beneficiaryKind": {
+      "type": "string",
+      "enum": [
+        "project",
+        "named_custodian",
+        "resource_pool"
+      ],
+      "description": "named_custodian must resolve through a trusted identity registry to a human, organization or otherwise accountable legal custodian; an agent principal is not an eligible personal beneficiary."
+    },
+    "beneficiaryRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "description": "Opaque beneficiary reference; trusted identity resolution is required, especially for named_custodian. The schema cannot prove who controls the reference."
+    },
+    "amountMinor": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "providerRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "providerContributionRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "providerStatus": {
+      "type": "string",
+      "enum": [
+        "pledged",
+        "pending",
+        "settled",
+        "refunded",
+        "reversed",
+        "failed"
+      ]
+    },
+    "providerConfirmed": {
+      "type": "boolean"
+    },
+    "recordedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "maxItems": 128,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 512
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "providerStatus": {
+            "const": "settled"
+          }
+        },
+        "required": [
+          "providerStatus"
+        ]
+      },
+      "then": {
+        "properties": {
+          "providerConfirmed": {
+            "const": true
+          }
+        }
+      }
+    }
+  ]
+}

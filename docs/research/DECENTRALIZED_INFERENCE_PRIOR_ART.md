@@ -16,6 +16,48 @@
 | **Morpheus Lumerin Node** | Local `llama.cpp` demo model plus decentralized provider marketplace. | Documentation states that local demo chat can run without staking MOR; marketplace sessions use MOR staking and ETH for gas on Base. | Useful precedent for separating local no-wallet inference from remote paid marketplace access. AEP goes further with compute reciprocity as an alternative to payment for mesh usage. |
 | **OpenMayhem / Infernet / similar inference markets** | Provider marketplaces, P2P routing, verification or attestation claims. | Mostly price-based or token/payment models; maturity and guarantees vary by repository and deployment. | Track as competing architectures; do not adopt claims without code, threat-model and operational validation. |
 
+
+## 1A. Adjacent prior art: local post-training with constrained GPU memory — Soup CLI
+
+**Classification:** local model fine-tuning / post-training, not decentralized inference and not a peer-compute network.
+
+[Soup CLI](https://github.com/MakazhanAlpamys/Soup) is an open-source (Apache-2.0) toolkit for local LLM training and post-training. Its optional **Layer Streaming** mode keeps the frozen base checkpoint in host RAM, with an NVMe-backed tier when needed, and copies one decoder layer at a time into a small set of VRAM buffers. Trainable LoRA adapters, gradients and optimizer state remain resident on the training device. The aim is to make selected fine-tuning runs possible on a GPU that cannot hold the full base model.
+
+The documented 8B-on-4GB example is a **Llama-3.1-8B-Instruct NF4 + LoRA** run on an RTX 3050 Laptop. Soup's own documentation distinguishes an earlier 3.32 GB measurement (v0.72.2, before a later NF4 correctness repair) from a 2.40 GB post-repair report on another machine/clock; these figures are not a controlled like-for-like comparison. Layer Streaming is explicitly marked **BETA**. They are project-reported measurements, not a general guarantee for arbitrary 8B models or hardware.
+
+**What this does and does not mean**
+
+- It reduces the *peak VRAM residency* of the frozen base by streaming layers; it does not remove the need to store the model, perform the training computation, or provide sufficient host RAM / NVMe capacity and bandwidth.
+- It is a fine-tuning/post-training technique for a frozen base plus trainable parameters; it must not be described as making full pretraining of an arbitrarily large model practical on a tiny machine.
+- It is not Petals-style distributed inference, model sharding across independent peers, or a contribution-credit network. Its resource placement and trust boundary are local to the training host.
+- Soup's recipe catalog contains a Granite 4.0 H Tiny base recipe (7B); that does **not** establish support for the project's existing Granite 4.2 8B GGUF model or for its exact Transformers checkpoint and LoRA target modules. The current GGUF inference file must not be assumed to be a directly trainable source checkpoint.
+
+**Cormia reuse direction — candidate, not adopted**
+
+Evaluate Soup as an optional backend for a local **Model Adaptation / Training Lab**: produce narrowly scoped adapters for agent roles or project domains on participant-owned hardware, then evaluate and distribute approved adapter artifacts. Keep this separate from Cormia Mesh inference and from AEP/IMMORTAL authority.
+
+Every candidate adapter should be traceable to at least: exact base-model identifier and digest; dataset manifest, permissions and content digest; Soup/package version and training configuration; hardware/precision profile; training-run identifier; evaluation suite/version and results; adapter digest; and the approval/promotion decision. Adapter contents must never grant tool permissions, widen a Project Mandate, change Runtime policy, or become an authority source.
+
+**Bounded evaluation spike (SOUP-01)**
+
+1. Run Soup's preflight/doctor and a supported reference recipe in an isolated environment; record GPU VRAM, system RAM, free NVMe space, Python/CUDA/PyTorch versions and the exact package/tag.
+2. Compare resident and streamed training on the same small reference dataset where supported; record peak VRAM, host RAM, disk I/O, throughput, loss behavior and forward/backward parity evidence.
+3. Test the exact target base checkpoint and LoRA target modules separately. For Granite, treat Granite 4.0 H Tiny as a reference recipe only; Granite 4.2 8B remains **unverified** until its exact Hugging Face/Transformers checkpoint passes model-load, adapter-attach, short-train, save/resume and evaluation checks.
+4. Export a candidate adapter and run held-out regression/safety/effectiveness evaluations before any registry promotion. Do not merge it into the canonical base or deploy it automatically.
+
+No Soup dependency, code, training job, runtime integration, model promotion or authority change is introduced by this prior-art entry.
+
+**Sources**
+
+- Soup repository and license: https://github.com/MakazhanAlpamys/Soup
+- Layer Streaming guide and constraints: https://trysoup.dev/docs/layer-streaming
+- FAQ / model and memory notes: https://trysoup.dev/docs/faq
+- Recipe catalog (including Granite 4.0 H Tiny): https://trysoup.dev/docs/recipe-catalog
+- Product and licensing information: https://trysoup.dev/about
+- Layer-streaming paper: https://doi.org/10.5281/zenodo.21918325
+
+**Reviewed:** 2026-11-06. Re-check the exact release/tag, supported architectures, license notices, feature maturity and model-specific behavior before any trial.
+
 ## 2. Key conclusions
 
 1. “Share your compute and get free AI” is already an active design space. Senda and Decoupled AI make the overlap especially direct.

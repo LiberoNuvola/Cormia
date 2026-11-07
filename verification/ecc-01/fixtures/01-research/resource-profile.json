@@ -1,0 +1,12 @@
+{
+  "profileId": "ecc01-synthetic-local-v1",
+  "limits": {
+    "maxReadBytes": 65536,
+    "maxWorkspaceEntries": 200,
+    "timeoutSeconds": 120
+  },
+  "network": {
+    "mode": "offline",
+    "allowOutbound": false
+  }
+}

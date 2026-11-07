@@ -1,0 +1,35 @@
+{
+  "schema": "cormia.ecc01.fixture-validation.v1",
+  "result": "PASS",
+  "date": "2026-11-06",
+  "environment": {
+    "os": "isolated Linux container",
+    "node": "v22.16.0"
+  },
+  "researchFixture": "valid",
+  "reviewFixture": "static-shell-injection-pattern-present-not-executed",
+  "bugfixBaseline": {
+    "exitCode": 1,
+    "tests": 4,
+    "pass": 2,
+    "fail": 2
+  },
+  "bugfixCorrected": {
+    "exitCode": 0,
+    "tests": 4,
+    "pass": 4,
+    "fail": 0
+  },
+  "testFileChanged": false,
+  "executionScope": "disposable-os-temp-directory",
+  "localAgentStarted": false,
+  "graniteStarted": false,
+  "powershellStagingScriptExecuted": false,
+  "reviewFixtureExecuted": false,
+  "limitations": [
+    "This validates fixture logic only.",
+    "This is not a Windows-host test.",
+    "This is not an A/B evaluation of ECC against the IMMORTAL Agent.",
+    "No production source, local Agent data, task store, hooks, MCP servers or model configuration were changed."
+  ]
+}

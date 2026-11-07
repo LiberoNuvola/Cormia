@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cormia:core:resource-offer:0.1.0",
+  "title": "Cormia Core Resource Offer",
+  "description": "Cormia Core record contract v0.1.0. This schema defines data shape only; trusted Runtime policy and durable storage semantics remain separate.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "recordType",
+    "offerId",
+    "providerRef",
+    "resourceType",
+    "capabilityProfileRef",
+    "capacity",
+    "availability",
+    "privacyProfileRef",
+    "offerState",
+    "ownerAccepted",
+    "validated",
+    "validationEvidenceRefs",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "recordType": {
+      "type": "string",
+      "const": "cormia.core.resource-offer"
+    },
+    "offerId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "providerRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "resourceType": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(\\.[a-z0-9-]+)+$",
+      "maxLength": 128
+    },
+    "capabilityProfileRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "capacity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quantity",
+        "unit"
+      ],
+      "properties": {
+        "quantity": {
+          "type": "number",
+          "minimum": 0
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      }
+    },
+    "availability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "notBefore",
+        "expiresAt"
+      ],
+      "properties": {
+        "notBefore": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "privacyProfileRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "constraintsRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "offerState": {
+      "type": "string",
+      "enum": [
+        "offered",
+        "inspected",
+        "accepted",
+        "available",
+        "exhausted",
+        "revoked",
+        "expired"
+      ]
+    },
+    "ownerAccepted": {
+      "type": "boolean"
+    },
+    "ownerAcceptanceRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "validated": {
+      "type": "boolean"
+    },
+    "validationEvidenceRefs": {
+      "type": "array",
+      "maxItems": 128,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 512
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "offerState": {
+            "const": "available"
+          }
+        },
+        "required": [
+          "offerState"
+        ]
+      },
+      "then": {
+        "required": [
+          "ownerAcceptanceRef"
+        ],
+        "properties": {
+          "ownerAccepted": {
+            "const": true
+          },
+          "validated": {
+            "const": true
+          },
+          "validationEvidenceRefs": {
+            "minItems": 1
+          },
+          "capacity": {
+            "properties": {
+              "quantity": {
+                "exclusiveMinimum": 0
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
