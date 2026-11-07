@@ -291,9 +291,16 @@ Deliverables:
 
 ### Stage 3 — Local Granite smoke test
 
-Run only when the operator explicitly enables the local integration test and supplies the configured llama.cpp endpoint/model identity.
+The opt-in operator command is implemented as `runtime/core/llama-cpp-local-smoke.mjs`. It requires the explicit `--confirm-local-inference` flag and a `--model-id` that matches the server-reported model identity. The default loopback endpoint is `http://127.0.0.1:18080/v1`; the script sends one fixed synthetic prompt, records only sanitized metadata and a response digest, and has no remote fallback or tool-dispatch path. Its CLI guard is covered by CI, but CI does not execute the model.
 
-**Gate 3:** the adapter reaches the expected local runtime, returns a normalized response bound to the current request, and makes no remote contact. Record runtime/model identifiers and result status, but do not treat a successful generation as an authorization or verification proof.
+PowerShell example from the repository root:
+
+```powershell
+node .\runtime\core\llama-cpp-local-smoke.mjs --help
+node .\runtime\core\llama-cpp-local-smoke.mjs --confirm-local-inference --model-id "<the-exact-model-id-reported-by-your-llama-server>"
+```
+
+**Gate 3:** the operator-run adapter reaches the expected local runtime, returns a normalized response bound to the current request, and makes no remote contact. Record runtime/model identifiers and result status, but do not treat a successful generation as an authorization or verification proof. Until the operator executes the command, the real Granite smoke test remains **NOT_RUN**.
 
 ### Stage 4 — Integrated Core security conformance
 
