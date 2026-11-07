@@ -144,6 +144,7 @@ test("maps scoped Cormia text to fixed OpenAI-compatible chat completions withou
     ]);
     assert.equal("tools" in body, false);
     assert.equal("tool_choice" in body, false);
+    assert.equal("chat_template_kwargs" in body, false);
     assert.equal("apiKey" in body, false);
     assert.equal("generationProfileRef" in body, false);
     sendJson(res, 200, chatResponse());
@@ -344,4 +345,27 @@ test("resource usage and finish reasons are normalized conservatively", async t 
   })));
   t.after(stub.close);
   await expectAdapterCode(makeProvider(stub.baseUrl).generate(request()), "generation_truncated");
+});
+
+test("uses host-pinned non-thinking mode per request without changing server-global settings", async t => {
+  const stub = await startStub(({ res, body }) => {
+    assert.deepEqual(body.chat_template_kwargs, { enable_thinking: false });
+    sendJson(res, 200, chatResponse({
+      choices: [{
+        index: 0,
+        message: { role: "assistant", content: "CORMIA_LOCAL_PROVIDER_SMOKE_OK" },
+        finish_reason: "stop"
+      }]
+    }));
+  });
+  t.after(stub.close);
+  const result = await makeProvider(stub.baseUrl, { enableThinking: false }).generate(request());
+  assert.equal(result.output.content, "CORMIA_LOCAL_PROVIDER_SMOKE_OK");
+  assert.equal(result.finishReason, "completed");
+});
+
+test("rejects a non-boolean host thinking-mode setting", async t => {
+  const stub = await startStub(({ res }) => sendJson(res, 200, chatResponse()));
+  t.after(stub.close);
+  assert.throws(() => makeProvider(stub.baseUrl, { enableThinking: "false" }), /enableThinking must be a boolean/);
 });
