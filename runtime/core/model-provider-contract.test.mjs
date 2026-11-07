@@ -172,9 +172,10 @@ test("preserves non-completed finish reasons without misclassifying them as succ
 });
 
 test("rejects oversized metadata and unexpected nested fields", () => {
-  expectCode(() => validateModelGenerationResponse(response(), {
-    request: request(),
-    descriptor,
+  const wrongRequest = request({ requestRef: "request:different" });
+  expectCode(() => validateModelGenerationResponse(response(request()), {
+    request: wrongRequest,
+    descriptor
   }), "MODEL_PROVIDER_REQUEST_MISMATCH");
   expectCode(() => validateModelGenerationResponse(response(request(), {
     providerMetadata: { harmless: "x".repeat(2049) }
