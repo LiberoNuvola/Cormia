@@ -2,7 +2,7 @@
 
 - **Date:** 2026-11-07
 - **Version:** 0.1
-- **Status:** Test plan / non-normative / initial Stage 0 validator, deterministic provider and contract tests implemented; production adapter and Core authority path not implemented
+- **Status:** Test plan / non-normative / initial validator, deterministic provider, loopback llama.cpp adapter and HTTP-stub tests implemented; real Granite smoke test and Core authority path not implemented
 - **Scope:** Conformance strategy for provider-neutral inference and Core-owned authority
 - **Related contracts:**
   - [Model Provider Independence & Core Authority Boundary](./CORMIA_MODEL_PROVIDER_INDEPENDENCE_AND_CORE_AUTHORITY_BOUNDARY_v0.1.md)
@@ -36,7 +36,7 @@ Observed repository conventions:
 - Core contract tests use Node's built-in `node:test` and `node:assert/strict`.
 - The Core README documents the root-level command `node --test runtime/core/*.test.mjs`.
 - JSON Schema files are already used for persisted, versioned and interoperable records, including Core lifecycle and resource records.
-- The Model Provider interface began as a conceptual in-process port. The initial Stage 0 slice now provides descriptor/health/request/response/cancellation validators, a required-method port check, a deterministic synthetic provider and Node-native contract tests. No production llama.cpp adapter, integrated Capability Broker or Plan–Execute runtime gate is present in this slice.
+- The Model Provider interface began as a conceptual in-process port. Stage 0 provides descriptor/health/request/response/cancellation validators, a required-method port check, a deterministic synthetic provider and Node-native contract tests. Stage 2 adds an experimental loopback-only llama.cpp HTTP adapter and local HTTP-stub tests. No integrated Capability Broker or Plan–Execute runtime gate is present in this slice.
 
 ### 2.1 Contract representation
 
@@ -129,7 +129,7 @@ The adapter is tested in two modes:
 1. **HTTP stub mode (CI):** a local test HTTP server returns controlled transport responses. This verifies request mapping, response normalization, endpoint pinning, timeout handling and error mapping without requiring a model or GPU.
 2. **Local smoke mode (opt-in):** an explicitly configured llama.cpp server and selected model are used to verify that real local inference can be reached through the same port.
 
-The adapter configuration must be host-supplied and pinned for the test run. The test must not hard-code a port, model name or machine path into shared Core policy. An adapter configured as local must fail closed when its configured endpoint is unavailable; it must not silently contact a remote service.
+The adapter configuration must be host-supplied and pinned for the test run. The current implementation accepts loopback HTTP only, rejects redirects and does not implement remote mode. A local adapter must fail closed when its configured endpoint is unavailable; it must not silently contact a remote service.
 
 The actual Granite generation is not the deterministic security oracle. Prompt injection and unauthorized operation tests remain mandatory against the synthetic provider, because a probabilistic model cannot reliably reproduce a hostile response on every run.
 
@@ -287,7 +287,7 @@ Deliverables:
 - request/response normalization;
 - HTTP stub tests for success, failure, timeout, malformed response, model mismatch and endpoint pinning.
 
-**Gate 2:** adapter tests pass without launching Granite or contacting an external endpoint.
+**Gate 2:** the adapter and HTTP-stub suite are implemented. The suite exercises local health, chat-completions mapping, JSON mode, no tool declarations, inert native tool-call data, pinned model/profile, response mismatch, HTTP errors, malformed JSON, timeout/abort, redirect rejection, API-key handling and unsupported cancellation. The real endpoint is not contacted.
 
 ### Stage 3 — Local Granite smoke test
 
@@ -356,18 +356,20 @@ This plan does not:
 | ModelProvider conceptual port | Initial in-process validators implemented; not a production/network adapter |
 | Conformance plan and test matrix | Documented by this file |
 | Deterministic synthetic provider | Implemented as a test double |
-| ModelProvider contract tests | 17 new tests included in the Core Node test run; latest validated run is tracked by GitHub Actions |
-| llama.cpp adapter | Not implemented |
-| HTTP stub integration tests | Not implemented |
+| ModelProvider contract tests | 17 tests previously passed in Core CI |
+| llama.cpp adapter | Experimental loopback-only adapter implemented |
+| llama.cpp HTTP stub tests | Implemented; CI rerun pending after first timeout assertion correction |
+| Real Granite smoke test | Not run |
 | Integrated Capability Broker / Plan–Execute gate | Not demonstrated as an integrated runtime path |
 | Real Granite smoke test | Not run |
 | Full provider replacement conformance | Blocked pending implementation |
 
 ## 10. Recommended implementation order
 
-1. Review and harden the in-process validators and deterministic synthetic provider against the v0.1 contract. The first slice and its Node tests are now present.
-2. Implement the llama.cpp adapter behind the same port and test it against an HTTP stub; keep the real Granite smoke test opt-in.
-3. Implement or identify the actual Core-owned Plan–Execute and Capability Broker path; do not hide missing production enforcement behind a test mock.
-4. Re-run the same Core authorization matrix through both providers only after that integrated path exists, and publish evidence that compares actual dispatch/state outcomes.
+1. Review and harden the in-process validators and deterministic synthetic provider against the v0.1 contract. The first slice and its Node tests are present.
+2. Finalize Stage 2 HTTP-stub CI and review the loopback adapter contract. The adapter and stub tests are now present; no external endpoint is contacted.
+3. Run the opt-in local Granite smoke test with an explicitly pinned endpoint/model alias; it is not a mandatory CI test.
+4. Implement or identify the actual Core-owned Plan–Execute and Capability Broker path; do not hide missing production enforcement behind a test mock.
+5. Re-run the same Core authorization matrix through both providers only after that integrated path exists, and publish evidence that compares actual dispatch/state outcomes.
 
 The first meaningful security milestone is not “Granite responded.” It is: **a hostile provider response cannot make Cormia perform an operation that the trusted Core has not authorized.**
