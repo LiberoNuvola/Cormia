@@ -238,3 +238,56 @@ The existing Core CI command `node --test runtime/core/*.test.mjs` includes this
 This slice validates the provider-facing data boundary; it does not implement a production inference adapter, provider registry, Core Capability Broker, Plan–Execute gate, resource admission integration or task orchestration. The synthetic provider has no tool registry, filesystem access, network access or host execution callback. Provider output remains untrusted content. A tool-call-shaped response is not dispatched by this module.
 
 No Granite/llama.cpp integration, local Agent modification or remote fallback is part of this implementation.
+
+
+## llama.cpp ModelProvider adapter — local HTTP integration (2026-11-07)
+
+File:
+- `llama-cpp-model-provider.mjs` — local-only adapter from the Cormia in-process ModelProvider contract to llama.cpp's OpenAI-compatible chat-completions route.
+
+The initial adapter is deliberately restricted to loopback HTTP endpoints (`localhost`, `127.0.0.1`, `::1`). It rejects remote hosts, HTTPS, URL credentials, query/fragment components and redirects. The host pins:
+- endpoint URL;
+- model alias/ID, which must match the provider descriptor and any model ID reported by the server;
+- generation profile reference;
+- timeout, input/output bounds and generation parameters;
+- optional API key, held only in the adapter closure and sent as an Authorization header.
+
+The request path is fixed to `/v1/chat/completions`; health uses the fixed `/health` path. The adapter sends no `tools` or `tool_choice` definitions. A provider-returned native `tool_calls` array is serialized into inert response content and marked with a warning; it is never dispatched.
+
+Only Core-materialized text/instruction inputs are accepted. Artifact references are rejected until a separate Core/host materialization boundary supplies authorized content. JSON mode requests `response_format: { type: "json_object" }`; a request's `schemaRef`/digest are not treated as a schema payload and semantic JSON Schema validation remains a Core responsibility.
+
+Cancellation returns `unsupported` because the adapter does not claim a portable server-side request cancellation API. Request deadlines/timeouts abort the local HTTP request where supported. HTTP error bodies and transport exception details are not copied into normalized error messages. There is no retry to another provider and no remote fallback.
+
+Example host configuration (the alias must also be configured in the llama.cpp server):
+
+```js
+import { createLlamaCppModelProvider } from "./llama-cpp-model-provider.mjs";
+
+const provider = createLlamaCppModelProvider({
+  baseUrl: "http://127.0.0.1:8080",
+  modelId: "granite-local-alias",
+  generationProfileRef: "profile:local-safe",
+  descriptor: {
+    contractVersion: "cormia.model-provider/0.1",
+    providerAdapterId: "cormia.llama-cpp",
+    adapterVersion: "0.1.0",
+    providerInstanceRef: "provider:host:llama-cpp",
+    locality: "local",
+    endpointClass: "host_service",
+    observedModelId: "granite-local-alias",
+    inferenceRuntime: { name: "llama.cpp" },
+    featureHints: ["structured_json"]
+  },
+  timeoutMs: 60000,
+  maxOutputTokens: 2048
+});
+```
+
+Run the HTTP-stub adapter tests without a model, GPU, external network or secret:
+
+```sh
+node --check runtime/core/llama-cpp-model-provider.mjs
+node --test runtime/core/llama-cpp-model-provider.test.mjs
+```
+
+The real local Granite smoke test remains opt-in. This adapter is not an integrated Core task runner and has no Capability Broker or Plan–Execute dispatch path.
