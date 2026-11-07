@@ -317,3 +317,19 @@ Safety properties:
 - A successful smoke test verifies connectivity and response normalization only. It is not a Core security, authorization or production-integration proof.
 
 CI tests the opt-in guard and CLI behavior without contacting a model. The actual local Granite smoke test remains **NOT_RUN** until the operator executes it on the machine running llama.cpp.
+
+**Granite 4.2 chat-template note:** Granite 4.2 enables thinking by default in its embedded chat template. The smoke probe deliberately caps generation at 64 tokens and expects a short literal marker; with thinking enabled, the reasoning trace can consume that budget and llama.cpp can correctly return `finish_reason: "length"` before the marker. For this connectivity-only probe, launch the server with Jinja enabled and thinking disabled:
+
+```powershell
+& $llamaServer `
+    --model $modelPath `
+    --alias "granite-4.2-8b-Q4_K_M" `
+    --host 127.0.0.1 `
+    --port 18080 `
+    --ctx-size 4096 `
+    --n-gpu-layers 99 `
+    --jinja `
+    --chat-template-kwargs '{"enable_thinking": false}'
+```
+
+Check that the installed binary exposes both `--jinja` and `--chat-template-kwargs` in `llama-server --help` before restarting. Stop the existing server with Ctrl+C first. This disables reasoning only for the smoke-test server process; it does not change the model file or the IMMORTAL Agent's settings. If reasoning is intentionally left enabled, increase the smoke generation budget and expect the exact-marker probe to be less deterministic.
