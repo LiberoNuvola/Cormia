@@ -214,6 +214,7 @@ export function createLlamaCppModelProvider({
   generationProfileRef,
   descriptor,
   apiKey,
+  enableThinking,
   timeoutMs = 60_000,
   maxResponseBytes = 2_000_000,
   maxInputCharacters = 250_000,
@@ -237,6 +238,9 @@ export function createLlamaCppModelProvider({
     throw new TypeError("topP must be a finite host-configured value in (0, 1].");
   }
   if (apiKey !== undefined) requireText(apiKey, "apiKey", 4_096);
+  if (enableThinking !== undefined && typeof enableThinking !== "boolean") {
+    throw new TypeError("enableThinking must be a boolean when configured.");
+  }
   if (typeof fetchImpl !== "function") throw new TypeError("fetchImpl must be a function.");
   if (typeof clock !== "function") throw new TypeError("clock must be a function.");
 
@@ -333,6 +337,7 @@ export function createLlamaCppModelProvider({
         stream: false,
         max_tokens: maxOutputTokens,
         temperature,
+        ...(enableThinking === undefined ? {} : { chat_template_kwargs: { enable_thinking: enableThinking } }),
         ...(topP === undefined ? {} : { top_p: topP }),
         ...(request.outputContract.format === "json"
           ? { response_format: { type: "json_object" } }
