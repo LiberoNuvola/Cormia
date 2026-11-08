@@ -21,7 +21,7 @@ import {
 import { PLAN_PROPOSAL_CONTRACT_VERSION } from "./plan-execute-capability-broker.mjs";
 
 const DIGEST_PATTERN = /^sha256:[a-f0-9]{64}$/;
-const OPERATION_PATTERN = /^[a-z][a-z0-9.-]{0,127}(?:\.[a-z][a-z0-9.-]{0,127})?$/;
+const OPERATION_PATTERN = /^[a-z][a-z0-9-]{0,63}(?:\.[a-z][a-z0-9-]{0,63}){1,4}$/;
 const PROPOSAL_STEP_FIELDS = ["operation", "input"];
 const AUTHORIZATION_FIELDS = ["relativePath", "executionProfileId", "branchName", "remoteHost"];
 const MAX_STEPS = 32;
@@ -106,12 +106,12 @@ function validatePlanningContext(value, { taskRef, projectRef, manifestDigest })
   return deepFreeze(structuredClone(value));
 }
 
-function validatePlanProposal(value, requestedOperations) {
+function validatePlanProposal(value, requestedOperations, { maxSteps, maxProposalBytes }) {
   if (!hasOnlyDataKeys(value, ["contractVersion", "steps"]) ||
       value.contractVersion !== PLAN_PROPOSAL_CONTRACT_VERSION ||
       !Array.isArray(value.steps) ||
       value.steps.length < 1 ||
-      value.steps.length > MAX_STEPS) {
+      value.steps.length > maxSteps) {
     throw new ModelTaskPlannerError("MODEL_PLAN_PROPOSAL_INVALID");
   }
 
@@ -121,7 +121,7 @@ function validatePlanProposal(value, requestedOperations) {
   } catch {
     throw new ModelTaskPlannerError("MODEL_PLAN_PROPOSAL_INVALID");
   }
-  if (Buffer.byteLength(encoded, "utf8") > MAX_PROPOSAL_BYTES) {
+  if (Buffer.byteLength(encoded, "utf8") > maxProposalBytes) {
     throw new ModelTaskPlannerError("MODEL_PLAN_PROPOSAL_TOO_LARGE");
   }
 
@@ -325,7 +325,7 @@ export function createModelTaskPlanner({
       throw new ModelTaskPlannerError("MODEL_PLAN_JSON_INVALID");
     }
 
-    const proposal = validatePlanProposal(parsed, planningContext.requestedOperations);
+    const proposal = validatePlanProposal(parsed, planningContext.requestedOperations, { maxSteps, maxProposalBytes });
     return Object.freeze({
       projectRef,
       taskRef: task.taskRef,
@@ -394,7 +394,9 @@ export function createModelBackedTaskExecutor({
           !DIGEST_PATTERN.test(plan.planDigest)) {
         return {
           state: "blocked",
-          reasonCode: normalizeErrorCode({ code: plan?.reason }, "PLAN_PREPARATION_REJECTED"),
+          reasonCode: typeof plan?.reason === "string" && /^[A-Za-z0-9_-]{1,128}$/.test(plan.reason)
+            ? plan.reason
+            : "PLAN_PREPARATION_REJECTED",
           evidenceRefs: []
         };
       }
