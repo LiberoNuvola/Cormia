@@ -128,6 +128,14 @@ CI [run #42455045258](https://github.com/LiberoNuvola/Cormia/actions/runs/424550
 
 A separate candidate `workspace.test` adapter now accepts only a host-registered Node test profile, exact host-pinned test files and digest-pinned preloaded image. It requires a Broker Resource Lease, local Docker context, `--pull=never`, network disabled, non-root and bounded execution. [CI run #42457456976](https://github.com/LiberoNuvola/Cormia/actions/runs/42457456976) passed 8 test-runner adapter tests alongside 152 Core, 7 read-only adapter and 16 worktree/write adapter tests. CI uses a fake Docker CLI; it does not yet prove real Docker/Windows or complete write→test→verify integration. See [Local Task-Worktree Test Execution Adapter](../../runtime/reference-worker/LOCAL_TASK_WORKTREE_TEST_EXECUTION_ADAPTER.md).
 
+## 2.12 Broker-to-ResourceManager test dispatch composition (2026-11-08)
+
+`runtime/core/task-worktree-test-resource-broker.integration.test.mjs` now composes the actual Project Runtime Broker, fixed-profile `workspace.test` adapter, `createImmortalResourceProvider()` and the existing `withLocalResourceLease()` wrapper. A required Broker Resource Offer maps only to the host-fixed `workspace-test` operation and existing `cpu-heavy` class; the model cannot select the class. The adapter receives an active task-bound lease, the test runner returns a bounded result, and the ResourceManager release callback is verified.
+
+CI [run #42457906806](https://github.com/LiberoNuvola/Cormia/actions/runs/42457906806): **153 Core PASS**, **7 read-only PASS**, **16 worktree/write PASS**, **8 test-runner PASS**, **4 ResourceManager composition PASS**; zero failures.
+
+The ResourceManager and test runner are synthetic fixtures. This closes the software composition regression, not the user's Windows integration or OS resource enforcement. The actual Agent ResourceManager instance, Docker Desktop and signed project authority providers remain external host gates.
+
 ## 3. Project execution topology
 
 | Component | Responsibility |
