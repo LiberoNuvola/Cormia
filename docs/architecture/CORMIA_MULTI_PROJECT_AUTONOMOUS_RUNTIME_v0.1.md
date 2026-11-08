@@ -71,6 +71,14 @@ The following remain distinct and separately gated: protected-branch merge, rele
 
 Granite is the current inference provider, not the Supervisor, scheduler, authority engine or execution environment. A provider outage pauses tasks that require inference; it does not erase their durable state. Deterministic verification or recovery may continue only when separately authorized and independent of inference. There is no silent remote fallback.
 
+## 2.5 First code slice — Project Runtime composition and host routing (2026-11-08)
+
+Implemented in `runtime/core/project-runtime-registry.mjs` with Node tests in `runtime/core/project-runtime-registry.test.mjs` and detailed contract in [CORMIA Project Runtime Composition v0.1](./CORMIA_PROJECT_RUNTIME_COMPOSITION_v0.1.md).
+
+The slice composes one separate Plan–Execute broker per host-configured project Runtime and routes a `taskRef` through a host-only verified task-route provider. Requests contain no `projectRef`; a model/caller cannot select a project. The registry binds plan, task, project, manifest digest and route digest, and checks the route before and after PLAN and before EXECUTE. The selected Runtime independently revalidates its own Task Authority and trusted project context.
+
+**Verification status:** implementation and contract tests added; CI result pending for the current commit at the time of this update. This is an in-process composition slice only. It does not yet provide a durable task router, persistent project registry, task engine, Supervisor scheduler, recovery, worktree adapters or real Windows/IMMORTAL end-to-end execution.
+
 ## 3. Project execution topology
 
 | Component | Responsibility |
