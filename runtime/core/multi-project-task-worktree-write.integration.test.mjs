@@ -278,6 +278,15 @@ test("one Supervisor autonomously creates/replaces files in two project-specific
       planner,
       resultVerifier: {
         async verifyTaskResult({ projectRef, task, attempt, plan, execution }) {
+          verificationDiagnostics.push({
+            phase: "verifier-entered",
+            projectRef,
+            taskRef: task?.taskRef,
+            attempt,
+            planStepCount: plan?.stepCount,
+            executionState: execution?.state,
+            completedStepCount: execution?.completedStepCount
+          });
           try {
             const config = taskConfigMap.get(task.taskRef);
             assert.ok(config);
@@ -312,24 +321,12 @@ test("one Supervisor autonomously creates/replaces files in two project-specific
               evidenceRefs: ["evidence:workspace-write:" + projectRef + ":" + task.taskRef]
             };
           } catch (error) {
-            const config = taskConfigMap.get(task.taskRef);
-            const workspace = await managers.get(projectRef).resolveTaskWorkspace({ taskRef: task.taskRef }).catch(() => null);
             verificationDiagnostics.push({
+              phase: "verifier-error",
               projectRef,
-              taskRef: task.taskRef,
+              taskRef: task?.taskRef,
               errorName: error?.name,
-              errorMessage: error?.message,
-              plan,
-              execution,
-              createdContent: workspace
-                ? await readFile(path.join(workspace.rootPath, CREATE_FILE), "utf8").catch(e => "READ_ERROR:" + e.code)
-                : "WORKTREE_UNAVAILABLE",
-              replacedContent: workspace
-                ? await readFile(path.join(workspace.rootPath, MAIN_FILE), "utf8").catch(e => "READ_ERROR:" + e.code)
-                : "WORKTREE_UNAVAILABLE",
-              sourceContent: config
-                ? await readFile(path.join(config.repositoryPath, MAIN_FILE), "utf8").catch(e => "READ_ERROR:" + e.code)
-                : "SOURCE_UNAVAILABLE"
+              errorMessage: error?.message
             });
             throw error;
           }
