@@ -169,12 +169,25 @@ function boundedAppend(current, chunk, maximum) {
  */
 export function createDockerTaskWorktreeTestRunner({
   dockerExecutable = "docker",
-  stopGraceMs = 2_000
+  stopGraceMs = 2_000,
+  processPort
 } = {}) {
   if (!isText(dockerExecutable, 2_048) ||
       !Number.isSafeInteger(stopGraceMs) || stopGraceMs < 100 || stopGraceMs > 10_000) {
     throw new TypeError("Docker runner host configuration is invalid.");
   }
+  // This is a host-only dependency seam for deterministic tests. The model
+  // cannot supply or select a process port through a task plan or profile.
+  const hostProcessPort = processPort === undefined
+    ? Object.freeze({ execFile, spawn })
+    : processPort;
+  if (!exactDataObject(hostProcessPort, ["execFile", "spawn"]) ||
+      typeof hostProcessPort.execFile !== "function" ||
+      typeof hostProcessPort.spawn !== "function") {
+    throw new TypeError("Docker runner host process port is invalid.");
+  }
+  const executeFile = hostProcessPort.execFile;
+  const spawnProcess = hostProcessPort.spawn;
 
   async function run({ profile, workspace, assertResourceActive } = {}) {
     const validated = validateProfile(profile);
@@ -192,7 +205,7 @@ export function createDockerTaskWorktreeTestRunner({
     const root = await verifyTestFiles(workspace, validated.testFiles);
     let dockerHost;
     try {
-      const contextResult = await execFile(dockerExecutable, [
+      const contextResult = await executeFile(dockerExecutable, [
         "context", "inspect", "default", "--format", "{{json .Endpoints.docker.Host}}"
       ], {
         encoding: "utf8",
@@ -212,7 +225,7 @@ export function createDockerTaskWorktreeTestRunner({
       throw new TaskWorktreeTestError("DOCKER_CONTEXT_NOT_LOCAL");
     }
     try {
-      await execFile(dockerExecutable, [
+      await executeFile(dockerExecutable, [
         "--context", "default", "image", "inspect", validated.imageDigest
       ], {
         encoding: "utf8",
@@ -276,7 +289,7 @@ export function createDockerTaskWorktreeTestRunner({
       };
 
       try {
-        child = spawn(dockerExecutable, args, {
+        child = spawnProcess(dockerExecutable, args, {
           cwd: root,
           shell: false,
           windowsHide: true,
