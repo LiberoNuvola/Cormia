@@ -54,7 +54,7 @@ The adapter returns the fixed runner ID, image digest, exact test-file list, exi
 
 ## 6. Tests and evidence
 
-`task-worktree-test-operation-adapter.test.mjs` covers host-profile selection, mandatory lease, exact worktree binding, Docker argv, non-root/resource flags, local context selection, preloaded-image/no-pull behavior, symlink rejection and lease-loss termination. The Docker CLI is a deterministic fake in CI; the workflow does not run a real Docker daemon or claim Windows host compatibility.
+`task-worktree-test-operation-adapter.test.mjs` covers host-profile selection, mandatory lease, exact worktree binding, Docker argv, non-root/resource flags, local context selection, preloaded-image/no-pull behavior, symlink rejection and lease-loss termination. [CI run #42457456976](https://github.com/LiberoNuvola/Cormia/actions/runs/42457456976) passed **152 Core tests, 7 read-only adapter tests, 16 worktree/write adapter tests and 8 test-runner adapter tests** (all zero failures). The Docker CLI is a deterministic fake in CI; the workflow does not run a real Docker daemon or claim Windows host compatibility.
 
 CI workflow adds syntax checks and a dedicated Node test step. Existing `multi-project-task-worktree-write.integration.test.mjs` separately proves two synthetic projects can create/replace files in two real temporary Git worktrees under one Supervisor; it does not yet include a real Docker test run.
 
