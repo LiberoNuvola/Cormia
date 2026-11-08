@@ -12,6 +12,9 @@
 - `project-lifecycle-reducer.mjs` — pure deterministic state reducer.
 - `project-lifecycle-journal.mjs` — append-only NDJSON journal, locking, digest validation, replay and explicit torn-tail recovery.
 - `project-lifecycle-journal.test.mjs` — Node-native contract tests.
+- `trusted-project-context-resolver.mjs` / `.test.mjs` — host-port trust-context resolution and task-session boundary.
+- `plan-execute-capability-broker.mjs` / `.test.mjs` — inert PLAN validation and host-authorized EXECUTE boundary.
+- `project-runtime-registry.mjs` / `.test.mjs` — isolated per-project broker composition and host-verified task routing.
 
 The component is deliberately outside `runtime/reference-worker/`. It does not replace, read or write the existing Local Agent Task Store v1 and does not change the IMMORTAL Agent's /resume behavior.
 
@@ -386,3 +389,46 @@ This slice does not modify the IMMORTAL Local Agent, its prompts, task store, MC
 ## Primary product priority: autonomous multi-project work
 
 The current near-term implementation priority is one local Supervisor operating independent Project Runtime instances, with IMMORTAL Protocol as the first project and other projects isolated by their own mandate, task queue, workspace, evidence and resource budget. This is a sequencing priority only: it does not narrow or replace the full Cormia architecture, final product objectives or later community/resource/economic/team/evidence integrations. See [CORMIA Multi-Project Autonomous Runtime v0.1](../../docs/architecture/CORMIA_MULTI_PROJECT_AUTONOMOUS_RUNTIME_v0.1.md). The Supervisor, durable task engine, task-scoped worktree manager and integrated plan→execute→verify loop are not yet implemented; existing ModelProvider, trusted resolver, broker and local adapters are component slices.
+
+
+## 11. Project Runtime composition and registry — first multi-project slice
+
+Implementation:
+- \`project-runtime-registry.mjs\`
+- \`project-runtime-registry.test.mjs\`
+
+\`createProjectRuntime()\` composes one Plan–Execute Capability Broker with exactly one trusted project resolver, Task Authority Provider, Resource Admission Provider, optional Resource Provider and fixed operation-adapter registry. The returned facade is bound to one host-selected \`projectRef\`; plans and execution requests are also bound to their \`taskRef\`.
+
+\`createProjectRuntimeRegistry()\` captures an immutable set of those Runtime facades and a host-owned \`taskRoutingProvider.resolveVerifiedTaskRoute()\` port. The caller supplies a \`taskRef\` and inert proposal, never a \`projectRef\`. The host route binds the task to a project and manifest digest. The registry checks that route before PLAN, again after PLAN and immediately before EXECUTE; it also keeps a registry-side binding between the task, project, manifest digest, route digest and plan digest. A plan cannot be replayed under a different task or Runtime.
+
+Each Project Runtime has separate broker state and captures its own resolver, task authority, resource admission and adapters. Shared Model Provider or host Resource Manager services do not become shared authority.
+
+### Contract and tests
+
+The route port must return exactly:
+\`\`\`js
+{
+  schemaVersion: "0.1.0",
+  status: "verified",
+  taskRef: "...",
+  projectRef: "...",
+  manifestDigest: "sha256:...",
+  routeDigest: "sha256:..."
+}
+\`\`\`
+
+The route provider is a trusted host port, not a model-supplied object. The implementation validates shape and binding but does not authenticate the provider's underlying signature or persistence. The selected Project Runtime's own Task Authority Provider and Trusted Project Resolver remain independent checks and must reject a task that is not bound to that project.
+
+Tests cover two-project routing, inability to nominate a project from the request, duplicate registration, unknown project, provider failure, route change after PLAN, plan/task cross-binding and rejection by the wrong project's own Task Authority.
+
+### Explicit remaining gaps
+
+This is an **in-process composition and routing slice**, not the complete Supervisor:
+- no production signed/persistent task routing provider;
+- no persistent project descriptor/runtime registry or live registration lifecycle;
+- no durable Cormia-owned task queue, task journal, task graph or restart recovery;
+- no fairness scheduler, global/per-project concurrency admission or background service lifecycle;
+- no task-scoped filesystem/Git worktree adapters or Windows ResourceManager composition;
+- no real IMMORTAL execution path or second-project host proof.
+
+Existing runtime facades and route bindings live in memory and are lost at process restart. This is not advertised as durable autonomy. The next implementation layer is the durable task engine and host Project Supervisor, reusing these project-bound Runtime facades without taking over the user's separate IMMORTAL Local Agent Task Store v1.
