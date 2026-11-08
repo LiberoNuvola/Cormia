@@ -282,6 +282,9 @@ function fixture({
     policy: hostPolicy(),
     requirement,
     loadedTaskRefs: [],
+    revalidations: [],
+    verifiedTask: task,
+    taskAuthorityRevoked: false,
     dispatches: [],
     inputValidations: []
   };
@@ -290,7 +293,12 @@ function fixture({
   const taskAuthorityProvider = {
     async loadVerifiedTask(taskRef) {
       state.loadedTaskRefs.push(taskRef);
-      return task;
+      return state.verifiedTask;
+    },
+    async revalidateVerifiedTask(input) {
+      state.revalidations.push(input);
+      if (state.taskAuthorityRevoked) throw new Error("task manifest revoked");
+      return state.verifiedTask;
     }
   };
   const resourceAdmissionProvider = {
@@ -632,4 +640,45 @@ test("task manifest expiry is enforced before PLAN", async () => {
 
 test("broker requires trusted task, resource-admission and resolver ports at construction", () => {
   assert.throws(() => createPlanExecuteCapabilityBroker({}), /trustedProjectResolver/);
+});
+
+
+test("Task Manifest authority is revalidated after PLAN and before every dispatch", async () => {
+  const { broker, state } = fixture();
+  const prepared = await broker.preparePlan({
+    taskRef: "task:broker-test-1",
+    proposal: proposal([readStep()])
+  });
+  assert.equal(prepared.accepted, true);
+  assert.equal(state.revalidations.length, 0);
+
+  state.taskAuthorityRevoked = true;
+  const executed = await broker.executePlan({
+    planRef: prepared.planRef,
+    expectedPlanDigest: prepared.planDigest
+  });
+  assert.equal(executed.executed, false);
+  assert.equal(executed.reason, "TASK_AUTHORITY_REVALIDATION_FAILED");
+  assert.equal(state.dispatches.length, 0);
+  assert.equal(state.revalidations.length, 1);
+});
+
+test("Task Manifest projection cannot change after PLAN even when task ID is unchanged", async () => {
+  const { broker, state } = fixture();
+  const prepared = await broker.preparePlan({
+    taskRef: "task:broker-test-1",
+    proposal: proposal([readStep()])
+  });
+  assert.equal(prepared.accepted, true);
+  state.verifiedTask = taskProjection({
+    requestedOperations: ["workspace.create"]
+  });
+
+  const executed = await broker.executePlan({
+    planRef: prepared.planRef,
+    expectedPlanDigest: prepared.planDigest
+  });
+  assert.equal(executed.executed, false);
+  assert.equal(executed.reason, "TASK_AUTHORITY_CHANGED");
+  assert.equal(state.dispatches.length, 0);
 });
