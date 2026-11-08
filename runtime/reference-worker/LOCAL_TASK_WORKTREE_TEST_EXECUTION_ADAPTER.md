@@ -86,6 +86,18 @@ This validates the Windows test harness and synthetic two-project worktree execu
 ## 8. Next integration
 
 Connect the existing local ResourceManager through the Broker Resource Provider; define a host-reviewed Node test profile only after inspecting the target repository's actual test tooling and selecting exact tests; then run a local Windows smoke test with a disposable synthetic repository before registering the IMMORTAL project. Do not touch IMMORTAL V3, Reveal, PRE-RICH economic semantics or the old Agent `/code` + `APPROVO` compatibility path.
+## Real Windows Docker Desktop smoke result — 2026-11-08
+
+**Operator-run result:** PASS, 5/5 tests, exit code 0, approximately 2.49 seconds.
+
+- Docker context: `default`, endpoint `npipe:////./pipe/docker_engine`.
+- Preloaded image reference: `node@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914`.
+- The smoke script used a disposable workspace under `E:\\AI\\Cormia`, and the runner invoked the real local Docker CLI.
+- Verified: Node 22, UID 1000, writable Windows bind mount, writable bounded `/tmp`, and read-only container root.
+- The invocation used the adapter's default native Node process port and the host image digest; no image pull was requested.
+
+This closes the first real Windows Docker Desktop runner smoke test. It does **not** prove production Broker-to-ResourceManager wiring: the smoke invocation supplied a callback-scoped always-active test lease. It also does not certify Docker as a hardened VM, the IMMORTAL test toolchain, or production project authority. The full integration and an approved fixed IMMORTAL test profile remain open.
+
 ## Broker and ResourceManager composition
 
 `runtime/core/task-worktree-test-resource-broker.integration.test.mjs` composes the real Project Runtime/Plan–Execute Broker, fixed-profile `workspace.test` adapter, `createImmortalResourceProvider()` and `withLocalResourceLease()`. It proves the Broker's required Resource Offer causes the fixed `workspace-test` → `cpu-heavy` ResourceManager operation, the adapter receives an active task-bound lease, the test result returns through the Broker, and the release closure runs once.
