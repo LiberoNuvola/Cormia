@@ -17,7 +17,6 @@ import {
 } from "node:fs/promises";
 import { createHash, randomUUID } from "node:crypto";
 import { pathToFileURL } from "node:url";
-import os from "node:os";
 import path from "node:path";
 
 import { createProjectRuntime } from "../runtime/core/project-runtime-registry.mjs";
