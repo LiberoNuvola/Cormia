@@ -130,6 +130,8 @@ test("Project Runtime Broker dispatches workspace.test under the existing local 
         assert.equal(verifiedTask.manifestDigest, MANIFEST);
         return Object.freeze({
           authorized: true,
+          taskId: TASK,
+          manifestDigest: MANIFEST,
           async authorizeOperation(request) {
             const allowed = request.operation === "workspace.test" &&
               request.executionProfileId === PROFILE.executionProfileId;
