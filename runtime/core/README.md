@@ -15,6 +15,7 @@
 - `trusted-project-context-resolver.mjs` / `.test.mjs` — host-port trust-context resolution and task-session boundary.
 - `plan-execute-capability-broker.mjs` / `.test.mjs` — inert PLAN validation and host-authorized EXECUTE boundary.
 - `project-runtime-registry.mjs` / `.test.mjs` — isolated per-project broker composition and host-verified task routing.
+- `project-task-store.mjs` / `.test.mjs` — per-project durable task journal, queue, attempts, checkpoints and explicit restart reconciliation.
 
 The component is deliberately outside `runtime/reference-worker/`. It does not replace, read or write the existing Local Agent Task Store v1 and does not change the IMMORTAL Agent's /resume behavior.
 
@@ -432,3 +433,41 @@ This is an **in-process composition and routing slice**, not the complete Superv
 - no real IMMORTAL execution path or second-project host proof.
 
 Existing runtime facades and route bindings live in memory and are lost at process restart. This is not advertised as durable autonomy. The next implementation layer is the durable task engine and host Project Supervisor, reusing these project-bound Runtime facades without taking over the user's separate IMMORTAL Local Agent Task Store v1.
+
+
+## 12. Durable Project Task Store — Cormia-owned task queue
+
+Implementation:
+- \`project-task-store.mjs\`
+- \`project-task-store.test.mjs\`
+
+\`createProjectTaskStore({ journalPath, projectRef })\` creates one local append-only NDJSON task journal for exactly one host-selected project. It is separate from the Project Lifecycle journal and from the user's IMMORTAL Local Agent Task Store v1. It does not read or write the latter.
+
+Task records bind a taskRef, manifest digest, goal, source reference, attempt limit and dependencies. A task can be claimed only once its dependencies have completed. Each claim increments the attempt counter under a cross-process local lock and a journal-revision compare-and-set. Checkpoints are append-only and record the checkpoint reference, evidence references and the side-effect boundary classification (\`no_external_effects\`, \`idempotent_or_reconciled\`, \`unknown\`).
+
+### Task state and recovery
+
+\`queued → running → completed | failed | blocked\`
+
+A process restart changes remaining \`running\` tasks to \`recovery_required\`. It does **not** requeue them. A host-side reconciliation event with evidence must explicitly choose:
+- \`safe_to_retry\` — return to \`queued\` only when attempts remain and external side effects have been reconciled;
+- \`confirmed_complete\` — mark completed with evidence of the resulting state;
+- \`blocked\` — preserve the unresolved task without retry.
+
+A blocked task can only be unblocked with evidence. A recovery event does not rely on a model's claim that replay is safe. This conservative policy may pause a task that could in fact be harmless to retry; that is preferable to duplicating an uncertain external side effect.
+
+### Durability contract
+
+- one journal per project, with projectRef binding on every event;
+- append-only records with contiguous sequence, previous-event digest and SHA-256 record digest;
+- exclusive local lock, fsync, compare-and-set revision and idempotent eventId;
+- complete corruption fails closed; only an incomplete non-newline tail can be removed through explicit \`recover({ repairTornTail: true })\`;
+- a stale lock is never stolen automatically;
+- task dependency references must point to tasks already created in the same project, giving the v0.1 queue a backward-only DAG;
+- current journal event cap: 250,000; compaction/snapshotting is not implemented.
+
+### Boundaries and remaining work
+
+This store is a persistence primitive, not a complete autonomous engine. It does not authenticate Task Manifest signatures, choose a project, schedule fairly across projects, launch workers, enforce resource leases or perform side-effect reconciliation itself. The host must verify a Task Manifest before enqueueing, resolve its project route, and supply evidence-backed recovery decisions. The tests use local temporary files and synthetic host actors; they do not prove production key custody or Windows service recovery.
+
+The next layer is the host Project Supervisor: fair scheduling across the registered Runtime/store pairs, global/per-project concurrency limits, recovery invocation at startup, and the autonomous plan→execute→verify loop. The existing IMMORTAL Agent store remains untouched.
