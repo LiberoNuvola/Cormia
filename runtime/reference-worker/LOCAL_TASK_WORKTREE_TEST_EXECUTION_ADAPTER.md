@@ -91,3 +91,30 @@ Connect the existing local ResourceManager through the Broker Resource Provider;
 `runtime/core/task-worktree-test-resource-broker.integration.test.mjs` composes the real Project Runtime/Plan–Execute Broker, fixed-profile `workspace.test` adapter, `createImmortalResourceProvider()` and `withLocalResourceLease()`. It proves the Broker's required Resource Offer causes the fixed `workspace-test` → `cpu-heavy` ResourceManager operation, the adapter receives an active task-bound lease, the test result returns through the Broker, and the release closure runs once.
 
 CI [run #42457906806](https://github.com/LiberoNuvola/Cormia/actions/runs/42457906806): 153 Core PASS, 7 read-only adapter PASS, 16 worktree/write adapter PASS, 8 test-runner adapter PASS and 4 ResourceManager composition PASS. The ResourceManager and test runner are fake fixtures; no real Docker or Windows host was used.
+
+## Real Docker smoke harness
+
+`scripts/smoke-docker-task-worktree-runner.mjs` exercises the actual adapter against the host Docker CLI. It creates a disposable synthetic workspace under the Cormia repository and checks Node 22, UID 1000, writable task-worktree bind mount, writable bounded `/tmp`, and a read-only container root. The runner itself checks the local `default` context, exact preloaded digest and launches with `--pull=never`, `--network none`, and its fixed resource/security arguments.
+
+PowerShell invocation using a digest already present locally:
+
+```powershell
+$imageInfo = @(docker --context default image inspect node:22-alpine | ConvertFrom-Json)[0]
+if ($LASTEXITCODE -ne 0) { throw "Cannot inspect the local Node image" }
+
+$expectedDigest = "sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914"
+$image = @($imageInfo.RepoDigests) |
+    Where-Object { $_.EndsWith("@$expectedDigest") } |
+    Select-Object -First 1
+if (-not $image) { throw "The expected digest is not present in this local image's RepoDigests" }
+
+$env:CORMIA_DOCKER_TEST_IMAGE = $image
+try {
+    node .\\scripts\\smoke-docker-task-worktree-runner.mjs
+    if ($LASTEXITCODE -ne 0) { throw "Real Docker smoke test failed" }
+} finally {
+    Remove-Item Env:CORMIA_DOCKER_TEST_IMAGE -ErrorAction SilentlyContinue
+}
+```
+
+This script deliberately supplies a callback-scoped always-active test lease. It validates the runner and Docker host boundary only; it does not validate the Project Runtime Broker, production ResourceManager, signed project mandate, or an IMMORTAL Vitest profile. No image is pulled. The Node image remains a smoke-test candidate until the operator reviews the results and approves the host profile.
