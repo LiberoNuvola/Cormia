@@ -289,6 +289,42 @@ test("Supervisor startup recovers interrupted attempts and never auto-replays th
   }
 });
 
+test("proven pre-dispatch resource denial persists blocked, not recovery_required", async () => {
+  const env = await makeEnvironment();
+  try {
+    await enqueue(env.stores.get(PROJECT_A), TASK_A1, MANIFEST_A, 0);
+    const supervisor = makeSupervisor(env, {
+      taskExecutor: {
+        async executeTask(context) {
+          await context.checkpoint({
+            checkpointRef: "checkpoint:resource-denied:plan",
+            effectBoundary: "no_external_effects",
+            evidenceRefs: [],
+            reasonCode: "resource_admission_denied_before_dispatch"
+          });
+          return {
+            state: "blocked",
+            reasonCode: "RESOURCE_ADMISSION_DENIED",
+            evidenceRefs: []
+          };
+        }
+      }
+    });
+    await supervisor.start();
+    const cycle = await supervisor.runCycle();
+    const stored = (await env.stores.get(PROJECT_A).read()).tasks[0];
+
+    assert.equal(cycle.results[0].state, "blocked");
+    assert.equal(stored.state, "blocked");
+    assert.equal(stored.lastEffectBoundary, "no_external_effects");
+    assert.equal(stored.reasonCode, "RESOURCE_ADMISSION_DENIED");
+    assert.equal((await env.stores.get(PROJECT_A).listRunnable()).length, 0);
+    await supervisor.stop();
+  } finally {
+    await env.cleanup();
+  }
+});
+
 test("executor exception immediately persists recovery_required instead of requeueing", async () => {
   const env = await makeEnvironment();
   try {
