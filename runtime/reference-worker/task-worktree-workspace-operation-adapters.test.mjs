@@ -37,6 +37,7 @@ async function fixture({ maxFileBytes = 256 * 1024 } = {}) {
   const worktreeBasePath = path.join(directory, "worktrees");
   await mkdir(repositoryPath);
   await git(["init", "--initial-branch=main"], repositoryPath);
+  await git(["config", "core.autocrlf", "false"], repositoryPath);
   await git(["config", "user.name", "Cormia Test"], repositoryPath);
   await git(["config", "user.email", "cormia-test@example.invalid"], repositoryPath);
   await mkdir(path.join(repositoryPath, "src"));
