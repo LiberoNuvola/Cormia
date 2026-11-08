@@ -181,14 +181,36 @@ test("Docker runner uses a fixed no-network sandbox and host-pinned test files",
   }
 });
 
-test("Docker runner rejects missing files and symlink escapes before process launch", async () => {
+test("Docker runner rejects missing files before process launch", async () => {
+  const workspace = await temporaryWorkspace();
+  await rm(workspace.file);
+  try {
+    const runner = createDockerTaskWorktreeTestRunner({ dockerExecutable: "must-not-launch" });
+    await assert.rejects(runner.run({
+      profile: PROFILE,
+      workspace: { rootPath: workspace.rootPath },
+      assertResourceActive() { return true; }
+    }), error => error.code === "TEST_PROFILE_FILE_MISSING");
+  } finally {
+    await rm(workspace.rootPath, { recursive: true, force: true });
+  }
+});
+
+test("Docker runner rejects file symlink escapes before process launch", async t => {
   const workspace = await temporaryWorkspace();
   const outside = path.join(path.dirname(workspace.rootPath), "outside.test.mjs");
   await writeFile(outside, "export {};", "utf8");
   await rm(workspace.file);
-  await symlink(outside, workspace.file);
-
   try {
+    try {
+      await symlink(outside, workspace.file);
+    } catch (error) {
+      if (["EPERM", "EACCES", "ENOTSUP"].includes(error?.code)) {
+        t.skip("Host does not permit file symbolic-link creation");
+        return;
+      }
+      throw error;
+    }
     const runner = createDockerTaskWorktreeTestRunner({ dockerExecutable: "must-not-launch" });
     await assert.rejects(runner.run({
       profile: PROFILE,
