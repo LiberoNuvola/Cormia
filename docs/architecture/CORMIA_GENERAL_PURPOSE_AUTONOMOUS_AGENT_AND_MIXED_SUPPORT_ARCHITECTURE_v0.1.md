@@ -1,7 +1,7 @@
 # Cormia General-Purpose Autonomous Agent & Mixed Community-Support Architecture v0.1
 
 - **Date:** 2026-11-03
-- **Status:** Architecture proposal / non-normative / not implemented
+- **Status:** Architecture proposal / non-normative / partial Core slices implemented; integrated multi-project Runtime not implemented
 - **Scope:** Cormia Core, project modes, community support, optional resource and economic integrations
 - **Baseline:** Cormia `main` AEP/Runtime inventory reviewed 2026-11-03
 - **Purpose:** define one Cormia architecture that supports both creator-led and agent-led projects, while keeping autonomous execution independent of money, Cardano, wallets, tokens and IMMORTAL.
@@ -322,16 +322,38 @@ No universal Cormia agent operation should be routed through IMMORTAL merely bec
 
 ## 10. Implementation sequencing
 
-1. **Prior-art composition gate:** complete the bounded PA-01…PA-06 comparisons in [Cormia Prior-Art Composition Review](../research/CORMIA_PRIOR_ART_COMPOSITION_REVIEW_2026-11-03.md); record ADOPT/ADAPT/SPIKE/REFERENCE decisions and exact source/license/trust boundaries before building new subsystems.
-2. **Core-first contract:** define only the Cormia-specific standalone interfaces for project, mandate, task binding, resource offer, acceptance and journal. Keep money/chain fields out of mandatory Core types.
-3. **Two leadership modes:** define creator/team-led, agent-led and hybrid configurations against the same mandate and stewardship interfaces.
-4. **Runtime and resource adapters:** select a durable execution engine and wrap native host controls; preserve the existing Agent, local store, Flux Point DoD and JEV.
-5. **Team collaboration and internal integration:** compose A2A/MCP, Git worktrees and the selected CI/DoD/JEV stack. Add Matrix/Zulip or a CRDT editor only if a measured two-agent workflow requires them.
-6. **Project support registry:** model support target, contribution type, restrictions, status, custodian, benefits and reporting. Do not assume payment settlement.
-7. **Optional financial adapter:** connect one provider/fiscal host only after support semantics, custody, refunds and spending policy are explicit.
-8. **Optional in-kind mesh:** add remote resource discovery, offers, leases, preemption, privacy and reliability evidence only after the local Node is enforceable and revocable.
-9. **Optional AEP/IMMORTAL/Cardano/Materios profiles:** connect only task classes and economic/evidence perimeters that require them.
-10. **Conformance:** test that Core runs without optional adapters, adapter failure does not halt local work, sponsors cannot increase agent authority, funds never enter agent wallets by default, and financial/resource ledgers remain separate.
+The immediate product priority is local autonomous project execution, not community support, financial integrations or remote compute. The detailed current execution plan is [CORMIA Multi-Project Autonomous Runtime v0.1](./CORMIA_MULTI_PROJECT_AUTONOMOUS_RUNTIME_v0.1.md).
+
+1. **Project Runtime composition:** register multiple projects through host-resolved descriptors and bind a separate resolver, mandate, host policy, task authority, broker, workspace and adapter set to each project. The model must not select or switch project identity.
+2. **Durable task engine and Supervisor:** implement project-scoped queues, task graph, attempts, checkpoints, evidence and crash recovery, with one global scheduler and per-project concurrency/resource ceilings.
+3. **Task-scoped workspace/worktree adapters:** enable bounded writes, patches, tests and Git operations only inside isolated task worktrees; preserve the existing Agent approval boundaries and self-improvement review/promotion limits.
+4. **Autonomous execution loop:** connect ModelProvider, strict inert plan proposal, PLAN validation, Core Capability Broker, Resource Lease, host adapter, verifier/evidence and durable task transition.
+5. **IMMORTAL first integration:** operate on the selected working branch and preserve its central coordination checkpoint, assigned workstreams and normative protocol boundaries.
+6. **Second-project proof:** run a separate project under the same Supervisor and prove context, authority, workspace and resource isolation while both projects make progress.
+7. **Local service lifecycle:** add explicit host start/stop/status, startup recovery, safe shutdown and operator-visible queue/lease/evidence state.
+8. **Prior-art composition and team collaboration:** complete the bounded PA-01…PA-06 comparisons and compose A2A/MCP, Git worktrees and existing CI/DoD/JEV. Add Matrix/Zulip or a CRDT editor only if a measured workflow requires them.
+9. **Optional project support registry:** model support targets, contributions, restrictions, custodian, benefits and reporting. Do not assume payment settlement.
+10. **Optional financial, in-kind mesh and AEP/economic integrations:** add only after local Runtime authority, task isolation, resource enforcement and recovery are demonstrated.
+11. **Conformance:** prove local Core works without optional adapters, provider failure causes no remote fallback, unrelated projects continue safely when one is blocked, sponsors cannot increase authority, and financial/resource records remain separate.
+
+## 10A. Current operational priority — multi-project autonomy (2026-11-08)
+
+The principal Cormia outcome is one local Supervisor that can autonomously advance IMMORTAL and other independent projects at the same time, under separate project mandates and resource budgets. A dedicated implementation plan is maintained in [CORMIA_MULTI_PROJECT_AUTONOMOUS_RUNTIME_v0.1.md](./CORMIA_MULTI_PROJECT_AUTONOMOUS_RUNTIME_v0.1.md).
+
+The first Project Runtime profile is IMMORTAL Protocol on the observed working branch `work/immortal-green-closure`. Other projects are registered independently; they do not inherit IMMORTAL's mandate, task queue, repository or workspace. The model cannot select a project by returning different text.
+
+“Simultaneous” means independently scheduled progress subject to global/per-project concurrency and actual CPU/GPU/inference capacity. A shared local Granite server is an inference service, not a shared project session or authority source. Resource shortage queues work rather than oversubscribing or silently switching providers.
+
+Current verified boundary:
+- Real local Granite inference through the Cormia ModelProvider passed the operator smoke test.
+- The Core Plan–Execute/Capability Broker is an isolated enforcement slice with synthetic trust/task/operation-provider test doubles; latest recorded broker suite: 110 PASS / 0 FAIL.
+- The current IMMORTAL Task Store v1 integration is a read-only inspector; it does not launch or resume tasks.
+- Coding Workspace integration is read-only; Evolution Manager integration is not wired into the Agent/Core loop and cannot self-promote candidates.
+- A multi-project Supervisor, durable Cormia task engine, task worktree manager and integrated autonomous plan→execute→verify loop are still missing.
+
+This priority does not authorize automatic changes to IMMORTAL protocol rules. The project's central checkpoint, task assignments, current branch and protected-operation boundaries remain authoritative. Ordinary in-scope edits may become unattended under a valid standing mandate; protected merges, releases, deployments, wallet/ledger actions, trust-anchor changes and mandate widening remain separate gates.
+
+Community support, CRC, Cardano settlement, remote peer mesh and payment custody are intentionally later priorities and must not delay useful local autonomous work.
 
 ## 11. Open decisions — keep separate from Core
 
