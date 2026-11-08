@@ -14,9 +14,9 @@ This is a first implementation step toward the complete Supervisor. It does not 
 
 ## 2. Project Runtime composition
 
-\`createProjectRuntime()\` captures, for one host-selected \`projectRef\`:
+`createProjectRuntime()` captures, for one host-selected `projectRef`:
 
-- one \`TrustedProjectResolver\`;
+- one `TrustedProjectResolver`;
 - one Task Authority Provider, with load and revalidation ports;
 - one Resource Admission Provider;
 - an optional Resource Provider;
@@ -29,13 +29,13 @@ Each project gets a separate broker instance. There is no shared plan map betwee
 
 ## 3. Host task routing
 
-\`createProjectRuntimeRegistry()\` receives a fixed list of Runtime registrations and a trusted host port named \`taskRoutingProvider.resolveVerifiedTaskRoute({ taskRef })\`.
+`createProjectRuntimeRegistry()` receives a fixed list of Runtime registrations and a trusted host port named `taskRoutingProvider.resolveVerifiedTaskRoute({ taskRef })`.
 
 The public registry operations accept task references and proposals/plan references. They do **not** accept a project reference:
 
-- \`prepareTaskPlan({ taskRef, proposal })\`;
-- \`executeTaskPlan({ taskRef, planRef, expectedPlanDigest })\`;
-- \`getTaskPlanStatus({ taskRef, planRef })\`.
+- `prepareTaskPlan({ taskRef, proposal })`;
+- `executeTaskPlan({ taskRef, planRef, expectedPlanDigest })`;
+- `getTaskPlanStatus({ taskRef, planRef })`.
 
 The model may propose task operations, but it cannot nominate a project or repository. The host routing provider resolves a task to a project; the registry selects only the Runtime already registered for that project.
 
@@ -43,7 +43,7 @@ The model may propose task operations, but it cannot nominate a project or repos
 
 The host provider must return exactly:
 
-\`\`\`js
+```js
 {
   schemaVersion: "0.1.0",
   status: "verified",
@@ -52,7 +52,7 @@ The host provider must return exactly:
   manifestDigest: "sha256:<64 lowercase hex characters>",
   routeDigest: "sha256:<64 lowercase hex characters>"
 }
-\`\`\`
+```
 
 The route is checked before and after plan preparation and again immediately before execution. Registry state binds the plan reference to taskRef, projectRef, manifestDigest, routeDigest and planDigest. A route change, manifest change, cross-task plan reference or unregistered project blocks execution before a host adapter is invoked.
 
@@ -60,8 +60,8 @@ The selected Runtime then performs its own independent checks using its own Task
 
 ## 4. Isolation invariants
 
-1. A caller/model cannot select or switch project identity by adding \`projectRef\` to a request; the request shape is rejected.
-2. Each Runtime is bound to one immutable \`projectRef\` at construction.
+1. A caller/model cannot select or switch project identity by adding `projectRef` to a request; the request shape is rejected.
+2. Each Runtime is bound to one immutable `projectRef` at construction.
 3. The Runtime's resolver, task authority provider, resource admission provider and adapter registry are captured by its own broker instance.
 4. The routing provider is injected by the host and never read from a task proposal.
 5. A verified route to a project not registered in the current host configuration fails closed.
@@ -86,11 +86,11 @@ The Node tests cover:
 
 Run:
 
-\`\`\`sh
+```sh
 node --check runtime/core/project-runtime-registry.mjs
 node --test runtime/core/project-runtime-registry.test.mjs
 node --test runtime/core/*.test.mjs
-\`\`\`
+```
 
 ## 6. What this implementation does not prove
 
@@ -106,7 +106,7 @@ Still missing:
 - actual Windows local service/ResourceManager composition;
 - end-to-end IMMORTAL execution and independent second-project proof.
 
-The user's existing IMMORTAL Local Agent Task Store v1 remains separately owned and read-only to Cormia. This slice neither writes it nor changes \`/resume\`, V3, Reveal, protocol economics, wallet behavior or Cardano semantics.
+The user's existing IMMORTAL Local Agent Task Store v1 remains separately owned and read-only to Cormia. This slice neither writes it nor changes `/resume`, V3, Reveal, protocol economics, wallet behavior or Cardano semantics.
 
 ## 7. Next implementation dependency
 
