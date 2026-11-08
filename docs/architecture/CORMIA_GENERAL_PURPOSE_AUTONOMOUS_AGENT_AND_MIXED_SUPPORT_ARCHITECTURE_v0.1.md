@@ -6,6 +6,10 @@
 - **Baseline:** Cormia `main` AEP/Runtime inventory reviewed 2026-11-03
 - **Purpose:** define one Cormia architecture that supports both creator-led and agent-led projects, while keeping autonomous execution independent of money, Cardano, wallets, tokens and IMMORTAL.
 
+
+
+**Scope clarification (2026-11-08):** this multi-project execution priority is a sequencing overlay only. It does not change this architecture's full scope or final objectives. All project leadership modes, resource/support planes, community patronage, financial and in-kind integrations, Team Collaboration Plane, Integration & Verification Bench, evidence/Materios options, and AEP/CRC/IMMORTAL/Cardano relationships remain as defined in this parent architecture. Only the order of implementation is being prioritized.
+
 ## 1. Foundational rule
 
 **Cormia is a general-purpose autonomous agent and project-execution system. Money is not a prerequisite for an agent to work.**
@@ -322,7 +326,7 @@ No universal Cormia agent operation should be routed through IMMORTAL merely bec
 
 ## 10. Implementation sequencing
 
-The immediate product priority is local autonomous project execution, not community support, financial integrations or remote compute. The detailed current execution plan is [CORMIA Multi-Project Autonomous Runtime v0.1](./CORMIA_MULTI_PROJECT_AUTONOMOUS_RUNTIME_v0.1.md).
+The following is the **current implementation order**, not a replacement or reduction of this document's full architecture or final product goals. All architecture layers and objectives described in this document remain in scope for the final Cormia system. The immediate operational priority is local autonomous project execution; community support, finance, remote compute, team collaboration, AEP/economic, Cardano, CRC and Materios layers remain in the architecture and are sequenced according to their dependencies. The detailed priority plan is [CORMIA Multi-Project Autonomous Runtime v0.1](./CORMIA_MULTI_PROJECT_AUTONOMOUS_RUNTIME_v0.1.md).
 
 1. **Project Runtime composition:** register multiple projects through host-resolved descriptors and bind a separate resolver, mandate, host policy, task authority, broker, workspace and adapter set to each project. The model must not select or switch project identity.
 2. **Durable task engine and Supervisor:** implement project-scoped queues, task graph, attempts, checkpoints, evidence and crash recovery, with one global scheduler and per-project concurrency/resource ceilings.
@@ -353,7 +357,7 @@ Current verified boundary:
 
 This priority does not authorize automatic changes to IMMORTAL protocol rules. The project's central checkpoint, task assignments, current branch and protected-operation boundaries remain authoritative. Ordinary in-scope edits may become unattended under a valid standing mandate; protected merges, releases, deployments, wallet/ledger actions, trust-anchor changes and mandate widening remain separate gates.
 
-Community support, CRC, Cardano settlement, remote peer mesh and payment custody are intentionally later priorities and must not delay useful local autonomous work.
+Community support, CRC, Cardano settlement, remote peer mesh, payment custody, team collaboration and the optional integrations described in this architecture remain part of the final product direction. They are later in the current implementation sequence, not removed or cancelled. Their existing architectural definitions and open decisions remain valid.
 
 ## 11. Open decisions — keep separate from Core
 
