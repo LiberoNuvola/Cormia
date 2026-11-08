@@ -52,5 +52,6 @@ jobs:
           node --check runtime/core/llama-cpp-local-smoke.mjs
           node --check runtime/core/plan-execute-capability-broker.mjs
           node --check runtime/core/project-runtime-registry.mjs
+          node --check runtime/core/project-task-store.mjs
       - name: Run Project Lifecycle Runtime tests
         run: node --test runtime/core/*.test.mjs
