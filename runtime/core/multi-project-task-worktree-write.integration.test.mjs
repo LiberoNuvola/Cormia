@@ -71,7 +71,7 @@ async function createSourceRepository(directory) {
   return (await git(["rev-parse", "HEAD"], directory)).stdout.trim();
 }
 
-function buildProjectRuntime(config, manager, result) {
+function buildProjectRuntime(config, manager) {
   const workspaceAdapters = createTaskWorktreeWorkspaceOperationAdapters({ worktreeManager: manager });
   const task = Object.freeze({
     taskId: config.taskRef,
@@ -134,6 +134,8 @@ function buildProjectRuntime(config, manager, result) {
 test("one Supervisor autonomously creates/replaces files in two project-specific task worktrees in parallel", async () => {
   const directory = await mkdtemp(path.join(os.tmpdir(), "cormia-two-project-write-e2e-"));
   let supervisor;
+  let releaseProvider;
+  let cyclePromise;
   try {
     const configs = [];
     const managers = new Map();
@@ -141,7 +143,6 @@ test("one Supervisor autonomously creates/replaces files in two project-specific
     const baseCommits = new Map();
     const routeMap = new Map();
     const taskConfigMap = new Map();
-    const worktreeDispatches = [];
     const verifiedProjects = new Set();
 
     for (const config of PROJECTS) {
@@ -158,7 +159,7 @@ test("one Supervisor autonomously creates/replaces files in two project-specific
       });
       const workspace = await manager.createTaskWorkspace({ taskRef: config.taskRef });
       const store = createProjectTaskStore({
-        journalPath: path.join(directory, config.repositoryDirectory, ".cormia-state", "tasks.ndjson"),
+        journalPath: path.join(directory, config.repositoryDirectory + "-tasks.ndjson"),
         projectRef: config.projectRef,
         clock: () => new Date(NOW),
         idFactory: (() => {
@@ -185,7 +186,7 @@ test("one Supervisor autonomously creates/replaces files in two project-specific
     const runtimeRegistry = createProjectRuntimeRegistry({
       projectRuntimes: configs.map(config => ({
         projectRef: config.projectRef,
-        runtime: buildProjectRuntime(config, managers.get(config.projectRef), worktreeDispatches)
+        runtime: buildProjectRuntime(config, managers.get(config.projectRef))
       })),
       taskRoutingProvider: {
         async resolveVerifiedTaskRoute({ taskRef }) {
@@ -195,7 +196,6 @@ test("one Supervisor autonomously creates/replaces files in two project-specific
     });
 
     const providerArrivals = new Set();
-    let releaseProvider;
     let notifyBothArrived;
     const bothArrived = new Promise(resolve => { notifyBothArrived = resolve; });
     const providerGate = new Promise(resolve => { releaseProvider = resolve; });
@@ -355,8 +355,12 @@ test("one Supervisor autonomously creates/replaces files in two project-specific
     }
 
     await supervisor.start();
-    const cyclePromise = supervisor.runCycle();
-    await bothArrived;
+    cyclePromise = supervisor.runCycle();
+    const arrivalsResult = await Promise.race([
+      bothArrived.then(() => "both-arrived"),
+      new Promise(resolve => setTimeout(() => resolve("timeout"), 15_000))
+    ]);
+    assert.equal(arrivalsResult, "both-arrived", "both projects must reach the shared ModelProvider");
     releaseProvider();
     const cycle = await cyclePromise;
 
@@ -364,7 +368,6 @@ test("one Supervisor autonomously creates/replaces files in two project-specific
     assert.equal(cycle.results.every(result => result.state === "completed"), true);
     assert.deepEqual([...verifiedProjects].sort(), PROJECTS.map(item => item.projectRef).sort());
     assert.deepEqual([...providerArrivals].sort(), PROJECTS.map(item => item.projectRef).sort());
-    assert.equal(worktreeDispatches.length, 0);
 
     for (const config of configs) {
       const snapshot = await stores.get(config.projectRef).read();
@@ -379,13 +382,9 @@ test("one Supervisor autonomously creates/replaces files in two project-specific
 
     await supervisor.stop();
   } finally {
-    releaseProviderSafely();
+    releaseProvider?.();
+    await cyclePromise?.catch(() => {});
     await supervisor?.stop().catch(() => {});
     await rm(directory, { recursive: true, force: true });
   }
 });
-
-function releaseProviderSafely() {
-  // The provider gate is test-local. The task-level cleanup removes only the
-  // temporary fixture tree; it never touches an external repository path.
-}
