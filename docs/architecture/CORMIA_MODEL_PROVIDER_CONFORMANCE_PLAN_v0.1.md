@@ -314,13 +314,16 @@ This closes the real local connectivity/generation smoke gate for this model, ad
 
 ### Stage 4 — Integrated Core security conformance
 
-This stage requires a real Core-owned path for:
-- effective capability calculation and revalidation;
-- Plan–Execute state and operation-intent validation;
-- Capability Broker dispatch;
-- host adapter execution and result/evidence recording.
+**First Core enforcement slice implemented:** `runtime/core/plan-execute-capability-broker.mjs` now provides host-composed PLAN validation, digest-bound one-shot EXECUTE, just-in-time revalidation through the existing Trusted Project Resolver, separate Resource Lease admission and dispatch only through a fixed host-owned operation-adapter registry. Its contract tests use the actual broker and resolver implementation with synthetic trusted-provider and operation-adapter doubles.
 
-**Gate 4:** MP-04 and MP-05 pass against the integrated runtime using both providers. Unauthorized proposals must yield zero privileged dispatches regardless of provider.
+This advances the implementation, but does **not** close Gate 4. Production integration still requires:
+- a real Task Manifest verifier/provider (the broker captures a host-only projection port);
+- production mandate signature/key, authenticated consent, identity/accountability and independent revocation/anchor providers behind the existing resolver;
+- concrete trusted operation adapters with filesystem realpath/symlink containment and safe Git/workspace semantics;
+- composition with the actual host ResourceManager/Resource Provider and the Windows runtime;
+- end-to-end evidence of real dispatch and task-state transitions.
+
+**Gate 4 acceptance:** MP-04 and MP-05 must pass against that production-integrated runtime using both providers. Unauthorized proposals must yield zero privileged dispatches regardless of provider. The current test doubles verify the broker's control logic, not the missing production providers/adapters.
 
 ## 6. CI and local execution
 
@@ -393,3 +396,16 @@ Upstream transport reference: [llama.cpp server README](https://github.com/ggml-
 5. Re-run the same Core authorization matrix through both providers only after that integrated path exists, and publish evidence that compares actual dispatch/state outcomes.
 
 The first meaningful security milestone is not “Granite responded.” It is: **a hostile provider response cannot make Cormia perform an operation that the trusted Core has not authorized.**
+
+
+### Stage 4A — Core Plan–Execute/Capability Broker control slice
+
+Implementation: `runtime/core/plan-execute-capability-broker.mjs` and `runtime/core/plan-execute-capability-broker.test.mjs`.
+
+The broker accepts only a bounded inert plan proposal and a host-selected task reference. It obtains a verified Task Manifest projection from a captured host port, creates a task session through the existing Trusted Project Resolver, validates adapter input and authorizes every step during PLAN, then stores a Core-generated plan reference and digest. PLAN performs zero operation dispatches. EXECUTE is a separate host action bound to the digest and is one-shot; concurrent/duplicate execution is rejected.
+
+Each step is re-authorized immediately before host adapter invocation. A host Resource Admission Provider separately resolves whether a lease is needed. If required, a fixed Resource Provider must admit a task-bound lease; authority and lease activity are rechecked inside the callback immediately before dispatch. Only the pre-registered host adapter for the exact operation can execute. The broker does not expose tool definitions or dispatcher callbacks to the model.
+
+The new tests exercise the real broker and real Trusted Project Resolver implementation with synthetic identity/mandate/consent/revocation/Task Manifest providers and operation-adapter doubles. They cover protected/out-of-task/path-traversal rejection, policy/revocation/lifecycle changes between phases, lease denial and task binding, extra tool/dispatch/policy fields, plan digest, one-shot/concurrent execution and task expiry.
+
+**Boundary:** this is an isolated enforcement slice, not production Gate 4 closure. Production Task Manifest verification, production mandate/consent/identity/revocation providers, real workspace/Git operation adapters, filesystem symlink/realpath enforcement and end-to-end Windows ResourceManager composition remain absent. A failed multi-step plan stops later operations but does not roll back earlier side effects; no transactional atomicity is claimed.
