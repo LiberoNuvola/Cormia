@@ -17,8 +17,9 @@
 - `project-runtime-registry.mjs` / `.test.mjs` — isolated per-project broker composition and host-verified task routing.
 - `project-task-store.mjs` / `.test.mjs` — per-project durable task journal, queue, attempts, checkpoints and explicit restart reconciliation.
 - `project-supervisor.mjs` / `.test.mjs` — local single-instance Supervisor, round-robin scheduling, concurrency caps, task runner boundary and startup recovery.
+- `model-task-planner.mjs` / `.test.mjs` — local-provider Model Task Planner and verifier-gated model-backed executor composition.
 
-The component is deliberately outside `runtime/reference-worker/`. It does not replace, read or write the existing Local Agent Task Store v1 and does not change the IMMORTAL Agent's /resume behavior.
+The Project Lifecycle component is deliberately separated from `runtime/reference-worker/`. It does not replace, read or write the existing Local Agent Task Store v1 and does not change the IMMORTAL Agent's /resume behavior.
 
 ## 2. Lifecycle state machine
 
@@ -500,3 +501,17 @@ This is an explicit in-process scheduler, not a daemon. It does not start Window
 The configured lock is local-host only; a stale lock remains for operator inspection. Global/per-project concurrency caps do not replace Resource Leases or OS-level quotas.
 
 Production Task Manifest/routing/mandate providers, safe filesystem/Git worktree adapters, Windows ResourceManager integration, a real IMMORTAL execution path and second-project host proof remain outstanding.
+## 14. Model Task Planner and read-only CodingWorkspace bridge
+
+Implementation:
+- `model-task-planner.mjs` / `.test.mjs` — host-pinned local ModelProvider planning context, strict JSON-only inert proposal and verifier-gated model-backed task executor.
+- `../reference-worker/immortal-coding-workspace-readonly-adapter.mjs` — exact host allowlists over legacy read-only CodingWorkspace methods.
+- `../reference-worker/immortal-coding-workspace-operation-adapters.mjs` / `.test.mjs` — fixed mapping from `workspace.list/read/diff/verify` to the existing `workspace_list/read/diff/verify` methods.
+
+The planner does not receive a registry, tools, workspace handles, authority providers or dispatch functions. It only returns bounded proposal data. The Project Runtime Registry selects the Runtime from a host-verified task route; the Broker independently authorizes each operation. The Broker also forwards authorized `relativePath` values to the adapter's side-effect-free PLAN validator, which requires an exact match to the actual allowlisted file/directory input.
+
+The model-backed executor does not claim success from model output. It checkpoints before EXECUTE and requires a separate host-owned result verifier to persist evidence before the Supervisor can mark a task completed. The actual production Task Manifest/context provider and independent evidence writer remain unimplemented.
+
+Only list/read/diff/verify are exposed. Create/replace/patch/test/build, shell, Git writes, wallet and Cardano operations remain absent. The current legacy Agent approval gates are not bypassed. A task-scoped worktree and realpath/symlink-safe mutating adapters are still prerequisites before autonomous code changes can be enabled.
+
+Verification on current planner commit: [GitHub Actions run #42452250557](https://github.com/LiberoNuvola/Cormia/actions/runs/42452250557) — Core Node suite **149 PASS / 0 FAIL**; read-only operation adapter suite **7 PASS / 0 FAIL**. Synthetic host providers and contract tests do not constitute Windows end-to-end deployment.
