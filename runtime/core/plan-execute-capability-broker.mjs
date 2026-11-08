@@ -322,7 +322,7 @@ function authorizationRequest(step) {
 }
 
 function errorCode(error, fallback) {
-  return typeof error?.code === "string" && /^[A-Z0-9_]{1,96}$/.test(error.code)
+  return typeof error?.code === "string" && /^[A-Za-z0-9_-]{1,128}$/.test(error.code)
     ? error.code
     : fallback;
 }
