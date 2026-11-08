@@ -162,6 +162,8 @@ The Node test suite composes the actual broker implementation with the actual Tr
 - Task Manifest revalidation, revocation and projection-change rejection;
 - task expiry and mandatory port composition.
 
+CI: [GitHub Actions run #42449752396](https://github.com/LiberoNuvola/Cormia/actions/runs/42449752396), **110 PASS / 0 FAIL**; broker syntax check and full Core Node Runtime suite succeeded.
+
 These tests demonstrate the broker's control flow and deterministic checks. They do not authenticate a real mandate, operator, Task Manifest or revocation anchor, and do not prove safe real filesystem/Git operations.
 
 ## 9. Remaining production gates
