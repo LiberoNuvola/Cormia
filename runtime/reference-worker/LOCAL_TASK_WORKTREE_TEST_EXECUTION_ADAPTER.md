@@ -159,3 +159,11 @@ The Windows operator ran `scripts/smoke-broker-resource-manager-docker.mjs` agai
 
 The Broker currently maps a denied Local Resource Provider lease to the generic `RESOURCE_ADMISSION_DENIED` reason, so this result alone does not identify whether the host ResourceManager denied due telemetry/policy/capacity or whether its lease acquisition failed. The next diagnostic is `scripts/diagnose-local-resource-manager.mjs`, which reports a bounded snapshot and performs one `cpu-heavy` acquire/release probe directly against the same ResourceManager. Do not change thresholds or bypass admission based on this generic Broker result.
 
+## Resource denial before adapter dispatch
+
+The Broker now includes `dispatchedStepCount` in failed EXECUTE results. This count increments immediately before the host operation adapter is entered; a Resource Provider rejection that never calls the dispatch callback therefore returns `dispatchedStepCount: 0`. If a provider reports denial only after the adapter was entered, the count is non-zero and the outcome remains uncertain.
+
+The Model Task Planner recognizes only the exact tuple `reason=RESOURCE_ADMISSION_DENIED`, `dispatchedStepCount=0`, `completedStepCount=0`. It then writes a second durable checkpoint with `effectBoundary=no_external_effects` and returns a `blocked` task outcome. Supervisor persists the task as `blocked`, rather than incorrectly placing a proven non-dispatched operation in `recovery_required`. Any dispatch that started, any partial completion, any other failure, or failure to persist the checkpoint continues to follow the existing reconciliation/recovery path.
+
+This does not auto-retry a blocked task. A trusted host must re-evaluate resource availability and explicitly unblock it; this avoids busy retry loops and does not weaken ResourceManager thresholds. Broker, planner and Supervisor regression tests cover both the zero-dispatch denial and the post-dispatch denial case.
+
