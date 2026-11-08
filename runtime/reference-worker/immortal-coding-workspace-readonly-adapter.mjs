@@ -76,6 +76,12 @@ export function createReadOnlyCodingWorkspaceAdapter({
     if (!OPERATION_SET.has(operation)) {
       throw new Error("Coding Workspace operation is not exposed by the read-only adapter.");
     }
+    if (!codingWorkspace.isTool(operation)) {
+      throw new Error("CodingWorkspace does not recognize the requested operation.");
+    }
+    if (codingWorkspace.requiresApproval(operation) !== false) {
+      throw new Error("Read-only adapter refuses any operation requiring host approval.");
+    }
     if (operation === "workspace_list") {
       requireExactKeys(args ?? {}, ["path"], []);
       const normalized = args?.path === undefined || args.path === "."
