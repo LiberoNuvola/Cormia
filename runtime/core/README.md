@@ -333,3 +333,50 @@ This proves one real local generation through the adapter and normalized respons
 The smoke runner now pins non-thinking mode on this single HTTP request by setting the host-only adapter option `enableThinking: false`. The adapter maps it to llama.cpp's request-level `chat_template_kwargs: { "enable_thinking": false }`. It does not change the running server's global chat template settings, other clients or the IMMORTAL Agent. The adapter defaults to the model/server's configured thinking behavior when this option is omitted.
 
 The server must use the model's Jinja chat template. For Granite GGUF, check that `llama-server --help` exposes `--jinja`, then start the local server with `--jinja` in addition to the existing model/alias/loopback arguments. The request-level option is documented in the [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md); Granite's thinking default and disable parameter are documented in the [Granite 4.2 GGUF model card](https://huggingface.co/webAI-Official/granite-4.2-8B).
+
+
+## Core Plan–Execute and Capability Broker — first enforcement slice
+
+Files:
+- `plan-execute-capability-broker.mjs` — host-composed Core broker for bounded inert plan proposals, PLAN validation, digest-bound one-shot EXECUTE, just-in-time authority revalidation, optional resource-lease admission and fixed host operation adapters.
+- `plan-execute-capability-broker.test.mjs` — contract/integration tests composed with the existing `createTrustedProjectResolver` and synthetic trusted-port/operation-adapter doubles.
+
+### Execution boundary
+
+1. `preparePlan({ taskRef, proposal })` asks the host-only Task Authority Provider for a verified Task Manifest projection. The projection is bound to task ID, manifest digest, requested operations and expiry.
+2. The broker obtains a task session from the captured Trusted Project Resolver. The existing ADR-0010 evaluator rechecks project mandate, task scope, host policy, project lifecycle, consent, revocation and anchor state.
+3. During PLAN, the broker validates the proposal shape and bounded JSON inputs, runs each registered adapter's input validator, and authorizes every operation. No operation adapter is dispatched in this phase.
+4. The Core creates a plan reference and digest; the result is `READY`. `executePlan({ planRef, expectedPlanDigest })` is a separate host-orchestrator action. Plans are one-shot and duplicate/concurrent execute requests are fenced.
+5. During EXECUTE, each step is re-authorized. If the host Resource Admission Provider says a lease is required, the fixed Resource Provider must admit it. The broker re-authorizes once more inside the lease callback immediately before dispatch.
+6. Dispatch is possible only through the fixed host adapter registered for that operation. The model cannot supply an adapter, tool registry, dispatcher, capability set, Resource Manager operation mapping, host policy, task session or credential.
+
+The effective operation rule remains the existing mandate ∩ verified Task Request ∩ Host Policy. Resource Lease remains a separate capacity-admission prerequisite; it is not an authority set.
+
+### Host ports and trust boundary
+
+Constructor-captured host ports:
+- `trustedProjectResolver.createTaskSession(verifiedTask)`
+- `taskAuthorityProvider.loadVerifiedTask(taskRef)`
+- `resourceAdmissionProvider.resolveRequirement(context)`
+- optional `resourceProvider.withLease(...)` for steps whose trusted host requirement needs a lease;
+- a host-owned, fixed operation-adapter registry. Each adapter has a synchronous `validateInput(input, context)` and an `execute(context)` method.
+
+The Task Authority Provider must independently verify the Task Manifest and return only the bounded trusted projection. The resolver's underlying mandate-signature/key, authenticated-consent, identity/accountability and mandate-revocation/anchor providers must be real trusted implementations. Operation adapters must enforce workspace realpath/symlink containment and safe side-effect semantics. A trusted Resource Admission Provider must decide whether a step requires a lease; the broker fails closed when a required lease is unavailable or invalid.
+
+### What this slice proves — and what it does not
+
+The tests compose the actual broker code with the existing resolver code, while injecting synthetic trust providers, a synthetic Task Manifest authority and test operation adapters. They prove the broker's deterministic enforcement logic, not the authenticity of those upstream providers or the safety of a production filesystem/Git adapter.
+
+Covered cases include:
+- PLAN performs no dispatch;
+- protected, out-of-task and path-traversal proposals are denied;
+- mandate revocation, lifecycle and host-policy changes between PLAN and EXECUTE block dispatch;
+- required Resource Lease denial blocks dispatch; admitted lease is task-bound and checked at the dispatch boundary;
+- untrusted extra tool/dispatch/policy fields are rejected;
+- adapter input validation occurs before a plan becomes READY;
+- plan digest binding, one-shot execution and concurrent duplicate fencing;
+- task expiry and mandatory host-port composition.
+
+**Current implementation status:** isolated Core Plan–Execute/Capability Broker slice and contract tests implemented. **Not yet a production integrated Gate 4.** The repository still lacks production Task Manifest signature verification/provider wiring, production Project Mandate/consent/identity/revocation providers, a concrete production operation-adapter set, and end-to-end Windows workspace/ResourceManager composition. Failure after earlier steps may leave those earlier side effects in place; the broker stops later steps and reports the completed-step count, but does not claim rollback or transactional atomicity.
+
+This slice does not modify the IMMORTAL Local Agent, its prompts, task store, MCP allowlist, Granite configuration or Windows runtime.
