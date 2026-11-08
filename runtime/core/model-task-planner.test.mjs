@@ -312,6 +312,59 @@ test("model-backed executor blocks rejected plans without EXECUTE", async () => 
   assert.equal(executeCalls, 0);
 });
 
+test("model-backed executor blocks a proven pre-dispatch Resource Admission denial without recovery", async () => {
+  const checkpoints = [];
+  const executor = createModelBackedTaskExecutor({
+    planner: {
+      async proposeTaskPlan() {
+        return { requestRef: "request:resource-denied", proposal: proposal() };
+      }
+    },
+    resultVerifier: {
+      async verifyTaskResult() {
+        throw new Error("verifier must not run after admission denial");
+      }
+    }
+  });
+
+  const result = await executor.executeTask({
+    projectRef: PROJECT_REF,
+    task: task(),
+    attempt: 1,
+    async preparePlan() {
+      return {
+        accepted: true,
+        planRef: "plan:resource-denied",
+        planDigest: "sha256:" + "f".repeat(64),
+        stepCount: 1
+      };
+    },
+    async checkpoint(value) {
+      checkpoints.push(value);
+      return { appended: true };
+    },
+    async executePlan() {
+      return {
+        executed: false,
+        state: "FAILED",
+        reason: "RESOURCE_ADMISSION_DENIED",
+        completedStepCount: 0,
+        dispatchedStepCount: 0
+      };
+    }
+  });
+
+  assert.deepEqual(result, {
+    state: "blocked",
+    reasonCode: "RESOURCE_ADMISSION_DENIED",
+    evidenceRefs: []
+  });
+  assert.equal(checkpoints.length, 2);
+  assert.equal(checkpoints[0].effectBoundary, "unknown");
+  assert.equal(checkpoints[1].effectBoundary, "no_external_effects");
+  assert.equal(checkpoints[1].reasonCode, "resource_admission_denied_before_dispatch");
+});
+
 test("model-backed executor throws after uncertain execution failure so Supervisor recovers the attempt", async () => {
   const executor = createModelBackedTaskExecutor({
     planner: { async proposeTaskPlan() { return { requestRef: "request:two", proposal: proposal() }; } },
@@ -332,7 +385,13 @@ test("model-backed executor throws after uncertain execution failure so Supervis
       },
       async checkpoint() {},
       async executePlan() {
-        return { executed: false, state: "FAILED", completedStepCount: 0 };
+        return {
+          executed: false,
+          state: "FAILED",
+          reason: "RESOURCE_ADMISSION_DENIED",
+          completedStepCount: 0,
+          dispatchedStepCount: 1
+        };
       }
     }),
     error => error instanceof ModelTaskPlannerError &&
