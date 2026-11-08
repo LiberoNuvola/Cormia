@@ -793,7 +793,7 @@ export function createProjectTaskStore({
           !EFFECT_BOUNDARIES.has(command.effectBoundary)) {
         throw new TypeError("Checkpoint identity, attempt or effectBoundary is invalid.");
       }
-      return append(command, "task_checkpointed", cmd => ({
+      return append(command, "task_checkpointed", {
         intent: () => ({
           workerRef: cmd.workerRef,
           checkpointRef: cmd.checkpointRef,
@@ -811,7 +811,7 @@ export function createProjectTaskStore({
             effectBoundary: source.effectBoundary
           };
         }
-      }));
+      });
     },
 
     async complete(command) {
@@ -824,7 +824,7 @@ export function createProjectTaskStore({
         throw new TypeError("Completion must identify the active worker and attempt.");
       }
       validateReferences(command.evidenceRefs, "evidenceRefs", { min: 1 });
-      return append(command, "task_completed", cmd => ({
+      return append(command, "task_completed", {
         intent: () => ({ workerRef: cmd.workerRef }),
         create(current, source) {
           taskRequired(current);
@@ -837,7 +837,7 @@ export function createProjectTaskStore({
             workerRef: current.workerRef
           };
         }
-      }));
+      });
     },
 
     async fail(command) {
@@ -849,7 +849,7 @@ export function createProjectTaskStore({
           !Number.isSafeInteger(command.attempt) || command.attempt < 1) {
         throw new TypeError("Failure must identify the active worker and attempt.");
       }
-      return append(command, "task_failed", cmd => ({
+      return append(command, "task_failed", {
         intent: () => ({ workerRef: cmd.workerRef }),
         create(current, source) {
           taskRequired(current);
@@ -862,7 +862,7 @@ export function createProjectTaskStore({
             workerRef: current.workerRef
           };
         }
-      }));
+      });
     },
 
     async block(command) {
@@ -870,7 +870,7 @@ export function createProjectTaskStore({
         "taskRef", "expectedRevision", "actorRef", "reasonCode"
       ], ["workerRef", "attempt", "eventId", "occurredAt", "evidenceRefs"]);
       validateTaskRef(command.taskRef);
-      return append(command, "task_blocked", cmd => ({
+      return append(command, "task_blocked", {
         intent: () => ({
           workerRef: cmd.workerRef ?? null,
           attempt: cmd.attempt ?? null
@@ -893,7 +893,7 @@ export function createProjectTaskStore({
             ...(current.state === "running" ? { workerRef: current.workerRef } : {})
           };
         }
-      }));
+      });
     },
 
     async unblock(command) {
@@ -960,7 +960,7 @@ export function createProjectTaskStore({
         throw new TypeError("decision must be safe_to_retry, confirmed_complete or blocked.");
       }
       validateReferences(command.evidenceRefs, "evidenceRefs", { min: 1 });
-      return append(command, "task_recovery_reconciled", cmd => ({
+      return append(command, "task_recovery_reconciled", {
         intent: () => ({ recoveryDecision: cmd.decision }),
         create(current, source) {
           taskRequired(current);
@@ -980,7 +980,7 @@ export function createProjectTaskStore({
             recoveryDecision: source.decision
           };
         }
-      }));
+      });
     },
 
     async recover({ repairTornTail = false } = {}) {
