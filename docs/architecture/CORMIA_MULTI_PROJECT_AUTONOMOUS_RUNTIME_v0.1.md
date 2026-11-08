@@ -126,7 +126,7 @@ The task-scoped Git Worktree Manager and `workspace.create` / `workspace.replace
 
 CI [run #42455045258](https://github.com/LiberoNuvola/Cormia/actions/runs/42455045258): **152 Core PASS / 0 FAIL**, **7 read-only adapter PASS / 0 FAIL**, **16 Git worktree/write adapter PASS / 0 FAIL**. Full boundary: [Two-Project Task-Worktree Write Integration Proof](./CORMIA_MULTI_PROJECT_TASK_WORKTREE_WRITE_SYNTHETIC_INTEGRATION_v0.1.md).
 
-A separate candidate `workspace.test` adapter now accepts only a host-registered Node test profile, exact host-pinned test files and digest-pinned preloaded image. It requires a Broker Resource Lease, local Docker context, `--pull=never`, network disabled, non-root and bounded execution. CI uses a fake Docker CLI; it does not yet prove real Docker/Windows or complete write→test→verify integration. See [Local Task-Worktree Test Execution Adapter](../../runtime/reference-worker/LOCAL_TASK_WORKTREE_TEST_EXECUTION_ADAPTER.md).
+A separate candidate `workspace.test` adapter now accepts only a host-registered Node test profile, exact host-pinned test files and digest-pinned preloaded image. It requires a Broker Resource Lease, local Docker context, `--pull=never`, network disabled, non-root and bounded execution. [CI run #42457456976](https://github.com/LiberoNuvola/Cormia/actions/runs/42457456976) passed 8 test-runner adapter tests alongside 152 Core, 7 read-only adapter and 16 worktree/write adapter tests. CI uses a fake Docker CLI; it does not yet prove real Docker/Windows or complete write→test→verify integration. See [Local Task-Worktree Test Execution Adapter](../../runtime/reference-worker/LOCAL_TASK_WORKTREE_TEST_EXECUTION_ADAPTER.md).
 
 ## 3. Project execution topology
 
