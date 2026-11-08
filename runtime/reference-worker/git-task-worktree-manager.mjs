@@ -12,7 +12,7 @@
 import { execFile as execFileCallback } from "node:child_process";
 import { promisify } from "node:util";
 import { createHash } from "node:crypto";
-import { mkdir, lstat, realpath, rm } from "node:fs/promises";
+import { mkdir, open, lstat, realpath, unlink } from "node:fs/promises";
 import path from "node:path";
 
 const execFile = promisify(execFileCallback);
@@ -313,6 +313,69 @@ export function createTaskWorktreeManager({
     return workspace;
   }
 
+  async function withTaskPathLock({ taskRef, relativePath, run } = {}) {
+    if (!isText(taskRef, 256) || !isText(relativePath, 512) ||
+        typeof run !== "function") {
+      throw new TypeError("taskRef, relativePath and a trusted host callback are required.");
+    }
+    const paths = await initialize();
+    const lockDirectory = path.join(
+      paths.worktreeBaseRealPath,
+      ".cormia-task-locks",
+      "project-" + token(projectRef)
+    );
+    await mkdir(lockDirectory, { recursive: true, mode: 0o700 });
+    const canonicalLockDirectory = await assertRealDirectory(
+      lockDirectory,
+      "TASK_WORKTREE_LOCK_DIRECTORY_UNSAFE"
+    );
+    if (canonicalLockDirectory !== lockDirectory ||
+        !isWithin(paths.worktreeBaseRealPath, canonicalLockDirectory)) {
+      throw new TaskWorktreeManagerError("TASK_WORKTREE_LOCK_DIRECTORY_ESCAPE");
+    }
+
+    const lockPath = path.join(
+      canonicalLockDirectory,
+      token(projectRef + "\0" + taskRef + "\0" + relativePath) + ".lock"
+    );
+    let handle;
+    try {
+      handle = await open(lockPath, "wx", 0o600);
+    } catch (error) {
+      if (error?.code === "EEXIST") {
+        throw new TaskWorktreeManagerError(
+          "TASK_WORKTREE_PATH_LOCKED",
+          "Task path is already locked, or a stale lock requires host inspection."
+        );
+      }
+      throw new TaskWorktreeManagerError("TASK_WORKTREE_LOCK_UNAVAILABLE");
+    }
+
+    const stat = await handle.stat();
+    try {
+      await handle.writeFile(JSON.stringify({
+        projectRef,
+        taskRef,
+        relativePathDigest: "sha256:" + token(relativePath),
+        acquiredAt: new Date().toISOString()
+      }) + "\n", "utf8");
+      await handle.sync();
+      return await run(await resolveTaskWorkspace({ taskRef }));
+    } finally {
+      const current = await lstat(lockPath).catch(() => null);
+      if (!current || current.isSymbolicLink() ||
+          current.dev !== stat.dev || current.ino !== stat.ino) {
+        await handle.close().catch(() => {});
+        throw new TaskWorktreeManagerError(
+          "TASK_WORKTREE_LOCK_OWNERSHIP_CHANGED",
+          "Task path lock ownership changed; refusing to remove it."
+        );
+      }
+      await handle.close();
+      await unlink(lockPath);
+    }
+  }
+
   async function removeTaskWorkspace({ taskRef } = {}) {
     if (!isText(taskRef, 256)) throw new TypeError("taskRef must be a host-verified reference.");
     const paths = await initialize();
@@ -345,6 +408,7 @@ export function createTaskWorktreeManager({
     initialize,
     createTaskWorkspace,
     resolveTaskWorkspace,
+    withTaskPathLock,
     removeTaskWorkspace
   });
 }
