@@ -173,6 +173,32 @@ test("restart marks running tasks recovery_required and never requeues them auto
   }
 });
 
+test("an active task can be interrupted immediately into recovery_required", async () => {
+  const f = await fixture();
+  try {
+    await enqueue(f.store);
+    await claim(f.store, TASK_A, 1);
+    const interrupted = await f.store.interrupt(commandBase(2, {
+      taskRef: TASK_A,
+      workerRef: "worker:cormia-local",
+      attempt: 1,
+      evidenceRefs: ["evidence:executor-interrupted"]
+    }));
+    assert.equal(interrupted.task.state, "recovery_required");
+    assert.equal(interrupted.task.workerRef, "worker:cormia-local");
+    assert.deepEqual(await f.store.listRunnable(), []);
+
+    const reconciled = await f.store.reconcileInterrupted(commandBase(3, {
+      taskRef: TASK_A,
+      decision: "blocked",
+      evidenceRefs: ["evidence:side-effect-state-unknown"]
+    }));
+    assert.equal(reconciled.task.state, "blocked");
+  } finally {
+    await f.cleanup();
+  }
+});
+
 test("recovery safe_to_retry is denied after maxAttempts is exhausted", async () => {
   const f = await fixture();
   try {
