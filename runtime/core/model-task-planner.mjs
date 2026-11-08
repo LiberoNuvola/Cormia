@@ -408,13 +408,29 @@ export function createModelBackedTaskExecutor({
         reasonCode: "plan_ready_before_execute"
       });
 
-      // Any EXECUTE failure is treated as uncertain, even when the broker
-      // reports zero completed steps: an adapter may have side effects before
-      // it throws. Supervisor will persist recovery_required.
       const execution = await context.executePlan(plan.planRef, plan.planDigest);
-      if (!execution || execution.executed !== true ||
-          execution.state !== "COMPLETED" ||
-          execution.completedStepCount !== plan.stepCount) {
+      if (execution?.executed !== true ||
+          execution?.state !== "COMPLETED" ||
+          execution?.completedStepCount !== plan.stepCount) {
+        // Only this exact Broker proof permits a non-recovery block:
+        // resource admission was denied and no project adapter was entered.
+        // Any started dispatch, partial completion or untyped failure remains
+        // uncertain and is reconciled by Supervisor as recovery_required.
+        if (execution?.reason === "RESOURCE_ADMISSION_DENIED" &&
+            execution.dispatchedStepCount === 0 &&
+            execution.completedStepCount === 0) {
+          await context.checkpoint({
+            checkpointRef: "checkpoint:resource-denied:" + plan.planRef,
+            effectBoundary: "no_external_effects",
+            evidenceRefs: [],
+            reasonCode: "resource_admission_denied_before_dispatch"
+          });
+          return {
+            state: "blocked",
+            reasonCode: "RESOURCE_ADMISSION_DENIED",
+            evidenceRefs: []
+          };
+        }
         throw new ModelTaskPlannerError("PLAN_EXECUTION_REQUIRES_RECONCILIATION");
       }
 
