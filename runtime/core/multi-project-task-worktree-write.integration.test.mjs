@@ -365,7 +365,17 @@ test("one Supervisor autonomously creates/replaces files in two project-specific
     const cycle = await cyclePromise;
 
     assert.equal(cycle.scheduledCount, 2);
-    assert.equal(cycle.results.every(result => result.state === "completed"), true);
+    assert.equal(
+      cycle.results.every(result => result.state === "completed"),
+      true,
+      JSON.stringify({
+        cycle,
+        taskStates: await Promise.all(configs.map(async config => ({
+          projectRef: config.projectRef,
+          tasks: (await stores.get(config.projectRef).read()).tasks
+        })))
+      })
+    );
     assert.deepEqual([...verifiedProjects].sort(), PROJECTS.map(item => item.projectRef).sort());
     assert.deepEqual([...providerArrivals].sort(), PROJECTS.map(item => item.projectRef).sort());
 
