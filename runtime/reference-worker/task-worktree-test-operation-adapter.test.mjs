@@ -1,6 +1,8 @@
 import test from "node:test";
+import { EventEmitter } from "node:events";
+import { PassThrough } from "node:stream";
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, writeFile, chmod, symlink, rm } from "node:fs/promises";
+import { mkdtemp, mkdir, writeFile, symlink, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -29,6 +31,59 @@ async function temporaryWorkspace() {
   await mkdir(path.dirname(file), { recursive: true });
   await writeFile(file, "import test from 'node:test'; test('ok', () => {});\n", "utf8");
   return { rootPath, file };
+}
+
+function createFakeDockerProcessPort({
+  host = process.platform === "win32"
+    ? "npipe:////./pipe/docker_engine"
+    : "unix:///var/run/docker.sock",
+  imageAvailable = true,
+  runBehavior = "success"
+} = {}) {
+  const calls = [];
+  const processPort = {
+    async execFile(executable, args, options) {
+      calls.push({ kind: "execFile", executable, args: [...args], options });
+      if (args[0] === "context" && args[1] === "inspect") {
+        return { stdout: JSON.stringify(host), stderr: "" };
+      }
+      if (args[0] === "--context" && args[2] === "image" && args[3] === "inspect") {
+        if (!imageAvailable) throw new Error("image is not preloaded");
+        return { stdout: "", stderr: "" };
+      }
+      throw new Error("unexpected fake Docker preflight call");
+    },
+    spawn(executable, args, options) {
+      calls.push({ kind: "spawn", executable, args: [...args], options });
+      const child = new EventEmitter();
+      child.stdout = new PassThrough();
+      child.stderr = new PassThrough();
+      child.closed = false;
+      child.kill = signal => {
+        if (!child.closed) {
+          child.closed = true;
+          setImmediate(() => {
+            child.stdout.end();
+            child.stderr.end();
+            child.emit("close", null, signal);
+          });
+        }
+        return true;
+      };
+      if (runBehavior === "success") {
+        setImmediate(() => {
+          if (child.closed) return;
+          child.stdout.write(JSON.stringify(args));
+          child.stdout.end();
+          child.stderr.end();
+          child.closed = true;
+          child.emit("close", 0, null);
+        });
+      }
+      return child;
+    }
+  };
+  return { processPort, calls };
 }
 
 test("test adapter accepts only a host-registered execution profile", () => {
@@ -141,22 +196,18 @@ test("test adapter passes only the host profile and task worktree to its fixed r
 
 test("Docker runner uses a fixed no-network sandbox and host-pinned test files", async () => {
   const workspace = await temporaryWorkspace();
-  const directory = path.dirname(workspace.rootPath);
-  const fakeDocker = path.join(directory, "fake-docker");
-  await writeFile(fakeDocker,
-    "#!/usr/bin/env node\nconst args = process.argv.slice(2);\nif (args[0] === \"context\") { process.stdout.write(JSON.stringify(\"unix:///var/run/docker.sock\")); }\nelse if (args[0] === \"--context\" && args[2] === \"image\") { process.exit(0); }\nelse if (args[0] === \"--context\" && args[2] === \"run\") { process.stdout.write(JSON.stringify(args)); }\nelse { process.exit(19); }\n",
-    "utf8");
-  await chmod(fakeDocker, 0o755);
-
+  const fake = createFakeDockerProcessPort();
   try {
-    const runner = createDockerTaskWorktreeTestRunner({ dockerExecutable: fakeDocker });
+    const runner = createDockerTaskWorktreeTestRunner({ processPort: fake.processPort });
     const result = await runner.run({
       profile: PROFILE,
       workspace: { rootPath: workspace.rootPath },
       assertResourceActive() { return true; }
     });
     assert.equal(result.passed, true);
-    const args = JSON.parse(result.stdout);
+    const spawnCall = fake.calls.find(call => call.kind === "spawn");
+    assert.ok(spawnCall);
+    const args = spawnCall.args;
     assert.deepEqual(args.slice(0, 4), ["--context", "default", "run", "--pull=never"]);
     assert.ok(args.includes("--network"));
     assert.ok(args.includes("none"));
@@ -225,18 +276,12 @@ test("Docker runner rejects file symlink escapes before process launch", async t
 
 test("Docker runner terminates when the task resource lease is revoked", async () => {
   const workspace = await temporaryWorkspace();
-  const directory = path.dirname(workspace.rootPath);
-  const fakeDocker = path.join(directory, "fake-sleep-docker");
-  await writeFile(fakeDocker,
-    "#!/usr/bin/env node\nconst args = process.argv.slice(2);\nif (args[0] === \"context\") { process.stdout.write(JSON.stringify(\"unix:///var/run/docker.sock\")); }\nelse if (args[0] === \"--context\" && args[2] === \"image\") { process.exit(0); }\nelse if (args[0] === \"--context\" && args[2] === \"run\") { setTimeout(() => process.exit(0), 5000); }\nelse { process.exit(23); }\n",
-    "utf8");
-  await chmod(fakeDocker, 0o755);
-
+  const fake = createFakeDockerProcessPort({ runBehavior: "hold" });
   let checks = 0;
   try {
     const runner = createDockerTaskWorktreeTestRunner({
-      dockerExecutable: fakeDocker,
-      stopGraceMs: 100
+      stopGraceMs: 100,
+      processPort: fake.processPort
     });
     await assert.rejects(runner.run({
       profile: { ...PROFILE, maxRuntimeMs: 8_000 },
@@ -247,40 +292,25 @@ test("Docker runner terminates when the task resource lease is revoked", async (
         return true;
       }
     }), error => error.code === "TEST_RESOURCE_LEASE_LOST");
+    assert.ok(fake.calls.some(call => call.kind === "spawn"));
   } finally {
     await rm(workspace.rootPath, { recursive: true, force: true });
   }
 });
 
 
-async function writeDockerPreflightStub(directory, { host, imageAvailable }) {
-  const executable = path.join(directory, "fake-docker-preflight");
-  const source = [
-    "#!/usr/bin/env node",
-    "const args = process.argv.slice(2);",
-    "if (args[0] === 'context') { process.stdout.write(JSON.stringify(" + JSON.stringify(host) + ")); }",
-    "else if (args[0] === '--context' && args[2] === 'image') { process.exit(" + (imageAvailable ? "0" : "1") + "); }",
-    "else { process.exit(23); }",
-    ""
-  ].join("\n");
-  await writeFile(executable, source, "utf8");
-  await chmod(executable, 0o755);
-  return executable;
-}
 
 test("Docker runner refuses a remote Docker context", async () => {
   const workspace = await temporaryWorkspace();
-  const executable = await writeDockerPreflightStub(path.dirname(workspace.rootPath), {
-    host: "tcp://192.0.2.10:2376",
-    imageAvailable: true
-  });
+  const fake = createFakeDockerProcessPort({ host: "tcp://192.0.2.10:2376" });
   try {
-    const runner = createDockerTaskWorktreeTestRunner({ dockerExecutable: executable });
+    const runner = createDockerTaskWorktreeTestRunner({ processPort: fake.processPort });
     await assert.rejects(runner.run({
       profile: PROFILE,
       workspace: { rootPath: workspace.rootPath },
       assertResourceActive() { return true; }
     }), error => error.code === "DOCKER_CONTEXT_NOT_LOCAL");
+    assert.equal(fake.calls.some(call => call.kind === "spawn"), false);
   } finally {
     await rm(workspace.rootPath, { recursive: true, force: true });
   }
@@ -288,17 +318,15 @@ test("Docker runner refuses a remote Docker context", async () => {
 
 test("Docker runner refuses to pull a missing image", async () => {
   const workspace = await temporaryWorkspace();
-  const executable = await writeDockerPreflightStub(path.dirname(workspace.rootPath), {
-    host: "unix:///var/run/docker.sock",
-    imageAvailable: false
-  });
+  const fake = createFakeDockerProcessPort({ imageAvailable: false });
   try {
-    const runner = createDockerTaskWorktreeTestRunner({ dockerExecutable: executable });
+    const runner = createDockerTaskWorktreeTestRunner({ processPort: fake.processPort });
     await assert.rejects(runner.run({
       profile: PROFILE,
       workspace: { rootPath: workspace.rootPath },
       assertResourceActive() { return true; }
     }), error => error.code === "TEST_IMAGE_NOT_PRELOADED");
+    assert.equal(fake.calls.some(call => call.kind === "spawn"), false);
   } finally {
     await rm(workspace.rootPath, { recursive: true, force: true });
   }
