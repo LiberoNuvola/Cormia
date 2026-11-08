@@ -523,3 +523,10 @@ Verification on current planner commit: [GitHub Actions run #42452250557](https:
 CI [run #42452775680](https://github.com/LiberoNuvola/Cormia/actions/runs/42452775680): **150 Core tests PASS / 0 FAIL** and **7 read-only workspace-adapter tests PASS / 0 FAIL**.
 
 This is not a live Windows/Granite/IMMORTAL run, not a production signature/authority proof and not an integrated two-project model-backed execution. Multi-project registry and round-robin scheduling remain covered by their separate component tests. No mutating workspace operation is exposed.
+## 16. Two-project concurrent task-path integration regression
+
+`multi-project-parallel-task-path.integration.test.mjs` composes two independent Project Runtime/Broker instances, two Task Authority/resolver/workspace-adapter fixtures and two durable Task Stores under one Project Supervisor. One deterministic ModelProvider, one Model Task Planner and one model-backed executor are shared as services. A concurrency gate makes both tasks enter the shared provider before either response returns; the test then verifies both projects dispatch only their own exact allowlisted path and persist separate checkpoint/evidence state.
+
+CI [run #42453075948](https://github.com/LiberoNuvola/Cormia/actions/runs/42453075948): **151 Core PASS / 0 FAIL** and **7 read-only adapter PASS / 0 FAIL**.
+
+This is a synthetic concurrent two-project execution proof, not real Granite/Windows or production authority/evidence. The exact boundaries are recorded in [CORMIA_MULTI_PROJECT_PARALLEL_TASK_PATH_SYNTHETIC_INTEGRATION_v0.1.md](../../docs/architecture/CORMIA_MULTI_PROJECT_PARALLEL_TASK_PATH_SYNTHETIC_INTEGRATION_v0.1.md).
