@@ -144,7 +144,7 @@ test("Docker runner uses a fixed no-network sandbox and host-pinned test files",
   const directory = path.dirname(workspace.rootPath);
   const fakeDocker = path.join(directory, "fake-docker");
   await writeFile(fakeDocker,
-    "#!/usr/bin/env node\nprocess.stdout.write(JSON.stringify(process.argv.slice(2)));\n",
+    "#!/usr/bin/env node\nconst args = process.argv.slice(2);\nif (args[0] === \"context\") { process.stdout.write(JSON.stringify(\"unix:///var/run/docker.sock\")); }\nelse if (args[0] === \"--context\" && args[2] === \"image\") { process.exit(0); }\nelse if (args[0] === \"--context\" && args[2] === \"run\") { process.stdout.write(JSON.stringify(args)); }\nelse { process.exit(19); }\n",
     "utf8");
   await chmod(fakeDocker, 0o755);
 
@@ -157,7 +157,7 @@ test("Docker runner uses a fixed no-network sandbox and host-pinned test files",
     });
     assert.equal(result.passed, true);
     const args = JSON.parse(result.stdout);
-    assert.deepEqual(args.slice(0, 2), ["run", "--rm"]);
+    assert.deepEqual(args.slice(0, 4), ["--context", "default", "run", "--pull=never"]);
     assert.ok(args.includes("--network"));
     assert.ok(args.includes("none"));
     assert.ok(args.includes("--read-only"));
