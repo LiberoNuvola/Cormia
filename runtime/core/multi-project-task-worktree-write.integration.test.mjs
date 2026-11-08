@@ -62,6 +62,7 @@ async function git(args, cwd) {
 async function createSourceRepository(directory) {
   await mkdir(directory, { recursive: true });
   await git(["init", "--initial-branch=main"], directory);
+  await git(["config", "core.autocrlf", "false"], directory);
   await git(["config", "user.name", "Cormia Integration Test"], directory);
   await git(["config", "user.email", "cormia-integration@example.invalid"], directory);
   await mkdir(path.join(directory, "src"));
