@@ -260,7 +260,7 @@ test("execute refuses an unapproved or mismatched Broker authorization context",
   }
 });
 
-test("workspace.create and workspace.replace reject symlinked parent and target paths", async () => {
+test("workspace.create rejects symlinked parent directories", async t => {
   const f = await fixture();
   const outsideDirectory = path.join(f.directory, "outside");
   try {
@@ -269,7 +269,10 @@ test("workspace.create and workspace.replace reject symlinked parent and target 
     try {
       await symlink(outsideDirectory, linkPath, "junction");
     } catch (error) {
-      if (["EPERM", "EACCES", "ENOTSUP"].includes(error?.code)) return;
+      if (["EPERM", "EACCES", "ENOTSUP"].includes(error?.code)) {
+        t.skip("Host does not permit directory junction creation");
+        return;
+      }
       throw error;
     }
 
@@ -285,11 +288,28 @@ test("workspace.create and workspace.replace reject symlinked parent and target 
       readFile(path.join(outsideDirectory, "pwned.txt"), "utf8"),
       error => error.code === "ENOENT"
     );
+  } finally {
+    await f.cleanup();
+  }
+});
 
+test("workspace.replace rejects a file-symlink target", async t => {
+  const f = await fixture();
+  const outsideDirectory = path.join(f.directory, "outside");
+  try {
+    await mkdir(outsideDirectory);
     const outsideTarget = path.join(outsideDirectory, "target.txt");
     await writeFile(outsideTarget, "outside-content", "utf8");
     const targetLink = path.join(f.workspace.rootPath, "src", "linked.txt");
-    await symlink(outsideTarget, targetLink);
+    try {
+      await symlink(outsideTarget, targetLink);
+    } catch (error) {
+      if (["EPERM", "EACCES", "ENOTSUP"].includes(error?.code)) {
+        t.skip("Host does not permit file symbolic-link creation");
+        return;
+      }
+      throw error;
+    }
     const replaceInput = f.adapters["workspace.replace"].validateInput(
       {
         path: "src/linked.txt",
