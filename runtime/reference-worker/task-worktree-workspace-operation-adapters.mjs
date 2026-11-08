@@ -292,9 +292,15 @@ export function createTaskWorktreeWorkspaceOperationAdapters({
     if (!isText(context?.taskRef, 256) ||
         context?.phase !== "PLAN" ||
         context?.operation !== operation ||
-        !isText(context?.relativePath, 512) ||
-        !exactDataObject(input, ["path", "content"], []) &&
-        operation === "workspace.create") {
+        !isText(context?.relativePath, 512)) {
+      throw new TaskWorkspaceOperationError("TASK_WORKSPACE_PLAN_INPUT_INVALID");
+    }
+    const inputShapeValid = operation === "workspace.create"
+      ? exactDataObject(input, ["path", "content"])
+      : operation === "workspace.replace"
+        ? exactDataObject(input, ["path", "expectedSha256", "content"])
+        : false;
+    if (!inputShapeValid) {
       throw new TaskWorkspaceOperationError("TASK_WORKSPACE_PLAN_INPUT_INVALID");
     }
 
@@ -359,16 +365,6 @@ export function createTaskWorktreeWorkspaceOperationAdapters({
 
         const relativePath = normalizeRelativePath(context.input.path);
         const segments = relativePath.split("/");
-        const parentPath = await resolveParentDirectory(
-          workspace.rootPath,
-          segments.slice(0, -1),
-          { createParents: operation === "workspace.create" }
-        );
-        const targetPath = path.join(parentPath, segments.at(-1));
-        if (!isWithin(workspace.rootPath, targetPath)) {
-          throw new TaskWorkspaceOperationError("TASK_WORKSPACE_PATH_ESCAPE");
-        }
-
         const contentBuffer = validateContent(context.input.content, maxFileBytes);
         return worktreeManager.withTaskPathLock({
           taskRef: context.taskRef,
@@ -376,6 +372,15 @@ export function createTaskWorktreeWorkspaceOperationAdapters({
           run: async lockedWorkspace => {
             if (lockedWorkspace.rootPath !== workspace.rootPath) {
               throw new TaskWorkspaceOperationError("TASK_WORKSPACE_ROOT_CHANGED");
+            }
+            const parentPath = await resolveParentDirectory(
+              lockedWorkspace.rootPath,
+              segments.slice(0, -1),
+              { createParents: operation === "workspace.create" }
+            );
+            const targetPath = path.join(parentPath, segments.at(-1));
+            if (!isWithin(lockedWorkspace.rootPath, targetPath)) {
+              throw new TaskWorkspaceOperationError("TASK_WORKSPACE_PATH_ESCAPE");
             }
             if (operation === "workspace.create") {
               const existing = await inspectTarget(targetPath, workspace.rootPath);
