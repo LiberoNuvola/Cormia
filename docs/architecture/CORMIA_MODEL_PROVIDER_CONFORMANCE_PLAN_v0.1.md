@@ -408,4 +408,6 @@ Each step is re-authorized immediately before host adapter invocation. A host Re
 
 The new tests exercise the real broker and real Trusted Project Resolver implementation with synthetic identity/mandate/consent/revocation/Task Manifest providers and operation-adapter doubles. They cover protected/out-of-task/path-traversal rejection, policy/revocation/lifecycle changes between phases, lease denial and task binding, extra tool/dispatch/policy fields, plan digest, one-shot/concurrent execution, task expiry and Task Manifest revalidation/revocation.
 
+**CI evidence:** [GitHub Actions run #42449752396](https://github.com/LiberoNuvola/Cormia/actions/runs/42449752396) — workflow success, **110 PASS / 0 FAIL**, including the broker tests and Task Manifest revalidation regressions.
+
 **Boundary:** this is an isolated enforcement slice, not production Gate 4 closure. Production Task Manifest verification, production mandate/consent/identity/revocation providers, real workspace/Git operation adapters, filesystem symlink/realpath enforcement and end-to-end Windows ResourceManager composition remain absent. A failed multi-step plan stops later operations but does not roll back earlier side effects; no transactional atomicity is claimed.
