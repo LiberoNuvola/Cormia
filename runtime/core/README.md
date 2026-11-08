@@ -18,6 +18,7 @@
 - `project-task-store.mjs` / `.test.mjs` — per-project durable task journal, queue, attempts, checkpoints and explicit restart reconciliation.
 - `project-supervisor.mjs` / `.test.mjs` — local single-instance Supervisor, round-robin scheduling, concurrency caps, task runner boundary and startup recovery.
 - `model-task-planner.mjs` / `.test.mjs` — local-provider Model Task Planner and verifier-gated model-backed executor composition.
+- `multi-project-autonomous-path.integration.test.mjs` — full synthetic task→Supervisor→ModelProvider→Registry/Broker→read-only workspace→evidence-verifier regression test.
 
 The Project Lifecycle component is deliberately separated from `runtime/reference-worker/`. It does not replace, read or write the existing Local Agent Task Store v1 and does not change the IMMORTAL Agent's /resume behavior.
 
@@ -515,3 +516,10 @@ The model-backed executor does not claim success from model output. It checkpoin
 Only list/read/diff/verify are exposed. Create/replace/patch/test/build, shell, Git writes, wallet and Cardano operations remain absent. The current legacy Agent approval gates are not bypassed. A task-scoped worktree and realpath/symlink-safe mutating adapters are still prerequisites before autonomous code changes can be enabled.
 
 Verification on current planner commit: [GitHub Actions run #42452250557](https://github.com/LiberoNuvola/Cormia/actions/runs/42452250557) — Core Node suite **149 PASS / 0 FAIL**; read-only operation adapter suite **7 PASS / 0 FAIL**. Synthetic host providers and contract tests do not constitute Windows end-to-end deployment.
+## 15. Synthetic full-path integration regression
+
+`multi-project-autonomous-path.integration.test.mjs` composes the real Task Store, Supervisor, deterministic ModelProvider, Model Task Planner, Project Runtime Registry, Capability Broker and read-only CodingWorkspace operation adapters. Synthetic host trust/mandate/Task Authority providers and a synthetic result verifier are used. The test proves one bounded read-only task can travel through the complete in-process path and leave a durable checkpoint plus verifier evidence reference in the Cormia Task Store.
+
+CI [run #42452775680](https://github.com/LiberoNuvola/Cormia/actions/runs/42452775680): **150 Core tests PASS / 0 FAIL** and **7 read-only workspace-adapter tests PASS / 0 FAIL**.
+
+This is not a live Windows/Granite/IMMORTAL run, not a production signature/authority proof and not an integrated two-project model-backed execution. Multi-project registry and round-robin scheduling remain covered by their separate component tests. No mutating workspace operation is exposed.
