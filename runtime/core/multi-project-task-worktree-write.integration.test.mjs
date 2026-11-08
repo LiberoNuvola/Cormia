@@ -277,38 +277,61 @@ test("one Supervisor autonomously creates/replaces files in two project-specific
       planner,
       resultVerifier: {
         async verifyTaskResult({ projectRef, task, attempt, plan, execution }) {
-          const config = taskConfigMap.get(task.taskRef);
-          assert.ok(config);
-          assert.equal(projectRef, config.projectRef);
-          assert.equal(attempt, 1);
-          assert.equal(plan.stepCount, 2);
-          assert.equal(execution.state, "COMPLETED");
-          assert.equal(execution.completedStepCount, 2);
+          try {
+            const config = taskConfigMap.get(task.taskRef);
+            assert.ok(config);
+            assert.equal(projectRef, config.projectRef);
+            assert.equal(attempt, 1);
+            assert.equal(plan.stepCount, 2);
+            assert.equal(execution.state, "COMPLETED");
+            assert.equal(execution.completedStepCount, 2);
 
-          const workspace = await managers.get(projectRef).resolveTaskWorkspace({
-            taskRef: task.taskRef
-          });
-          const created = await readFile(path.join(workspace.rootPath, CREATE_FILE), "utf8");
-          const replaced = await readFile(path.join(workspace.rootPath, MAIN_FILE), "utf8");
-          assert.equal(created, CREATED_CONTENT);
-          assert.equal(replaced, REPLACED_CONTENT);
-          const createdStat = await stat(path.join(workspace.rootPath, CREATE_FILE));
-          assert.equal(createdStat.isFile(), true);
+            const workspace = await managers.get(projectRef).resolveTaskWorkspace({
+              taskRef: task.taskRef
+            });
+            const created = await readFile(path.join(workspace.rootPath, CREATE_FILE), "utf8");
+            const replaced = await readFile(path.join(workspace.rootPath, MAIN_FILE), "utf8");
+            assert.equal(created, CREATED_CONTENT);
+            assert.equal(replaced, REPLACED_CONTENT);
+            const createdStat = await stat(path.join(workspace.rootPath, CREATE_FILE));
+            assert.equal(createdStat.isFile(), true);
 
-          assert.equal(
-            await readFile(path.join(config.repositoryPath, MAIN_FILE), "utf8"),
-            ORIGINAL_CONTENT
-          );
-          await assert.rejects(
-            readFile(path.join(config.repositoryPath, CREATE_FILE), "utf8"),
-            error => error.code === "ENOENT"
-          );
+            assert.equal(
+              await readFile(path.join(config.repositoryPath, MAIN_FILE), "utf8"),
+              ORIGINAL_CONTENT
+            );
+            await assert.rejects(
+              readFile(path.join(config.repositoryPath, CREATE_FILE), "utf8"),
+              error => error.code === "ENOENT"
+            );
 
-          verifiedProjects.add(projectRef);
-          return {
-            verified: true,
-            evidenceRefs: ["evidence:workspace-write:" + projectRef + ":" + task.taskRef]
-          };
+            verifiedProjects.add(projectRef);
+            return {
+              verified: true,
+              evidenceRefs: ["evidence:workspace-write:" + projectRef + ":" + task.taskRef]
+            };
+          } catch (error) {
+            const config = taskConfigMap.get(task.taskRef);
+            const workspace = await managers.get(projectRef).resolveTaskWorkspace({ taskRef: task.taskRef }).catch(() => null);
+            verificationDiagnostics.push({
+              projectRef,
+              taskRef: task.taskRef,
+              errorName: error?.name,
+              errorMessage: error?.message,
+              plan,
+              execution,
+              createdContent: workspace
+                ? await readFile(path.join(workspace.rootPath, CREATE_FILE), "utf8").catch(e => "READ_ERROR:" + e.code)
+                : "WORKTREE_UNAVAILABLE",
+              replacedContent: workspace
+                ? await readFile(path.join(workspace.rootPath, MAIN_FILE), "utf8").catch(e => "READ_ERROR:" + e.code)
+                : "WORKTREE_UNAVAILABLE",
+              sourceContent: config
+                ? await readFile(path.join(config.repositoryPath, MAIN_FILE), "utf8").catch(e => "READ_ERROR:" + e.code)
+                : "SOURCE_UNAVAILABLE"
+            });
+            throw error;
+          }
         }
       }
     });
@@ -373,7 +396,8 @@ test("one Supervisor autonomously creates/replaces files in two project-specific
         taskStates: await Promise.all(configs.map(async config => ({
           projectRef: config.projectRef,
           tasks: (await stores.get(config.projectRef).read()).tasks
-        })))
+        }))),
+        verificationDiagnostics
       })
     );
     assert.deepEqual([...verifiedProjects].sort(), PROJECTS.map(item => item.projectRef).sort());
