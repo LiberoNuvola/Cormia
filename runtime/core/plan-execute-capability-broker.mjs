@@ -404,7 +404,7 @@ export function createPlanExecuteCapabilityBroker({
         return {
           accepted: false,
           state: "BLOCKED",
-          reason: errorCode(session, "TRUSTED_TASK_SESSION_UNAVAILABLE")
+          reason: typeof session?.reason === "string" ? session.reason : "TRUSTED_TASK_SESSION_UNAVAILABLE"
         };
       }
 
@@ -552,6 +552,12 @@ export function createPlanExecuteCapabilityBroker({
         );
 
         const dispatch = async leaseContext => {
+          if (requirement.required && (!leaseContext ||
+              !isPlainObject(leaseContext.lease) ||
+              leaseContext.lease.leaseState !== "active" ||
+              typeof leaseContext.assertActive !== "function")) {
+            throw new PlanExecuteBrokerError("RESOURCE_LEASE_CONTEXT_INVALID");
+          }
           if (leaseContext && typeof leaseContext.assertActive === "function") {
             leaseContext.assertActive();
           }
@@ -606,10 +612,7 @@ export function createPlanExecuteCapabilityBroker({
           });
           if (!admission || admission.allowed !== true ||
               admission.lease?.leaseState !== "released") {
-            throw new PlanExecuteBrokerError(
-              admission?.reason === "undefined" ? "RESOURCE_ADMISSION_DENIED" :
-                (typeof admission?.reason === "string" ? "RESOURCE_ADMISSION_DENIED" : "RESOURCE_ADMISSION_DENIED")
-            );
+            throw new PlanExecuteBrokerError("RESOURCE_ADMISSION_DENIED");
           }
           result = admission.result;
         } else {
