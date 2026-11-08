@@ -47,6 +47,7 @@ jobs:
           node --check runtime/core/project-lifecycle-reducer.mjs
           node --check runtime/core/project-lifecycle-journal.mjs
           node --check runtime/core/model-provider-contract.mjs
+          node --check runtime/core/model-task-planner.mjs
           node --check runtime/core/deterministic-model-provider.mjs
           node --check runtime/core/llama-cpp-model-provider.mjs
           node --check runtime/core/llama-cpp-local-smoke.mjs
@@ -54,5 +55,9 @@ jobs:
           node --check runtime/core/project-runtime-registry.mjs
           node --check runtime/core/project-task-store.mjs
           node --check runtime/core/project-supervisor.mjs
+          node --check runtime/reference-worker/immortal-coding-workspace-readonly-adapter.mjs
+          node --check runtime/reference-worker/immortal-coding-workspace-operation-adapters.mjs
       - name: Run Project Lifecycle Runtime tests
         run: node --test runtime/core/*.test.mjs
+      - name: Run read-only CodingWorkspace operation adapter tests
+        run: node --test runtime/reference-worker/immortal-coding-workspace-operation-adapters.test.mjs
