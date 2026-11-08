@@ -73,7 +73,7 @@ function makeMandateClaims() {
     },
     autonomyPolicy: {
       acceptInScopeTasksAutomatically: true,
-      allowAgentCreatedSubtasks: false,
+      allowAgentCreatedSubtasks: true,
       humanApprovalPerOperation: false,
       continueIndependentTasksOnBlock: true,
       stopOnTrustFailure: true
