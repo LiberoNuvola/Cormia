@@ -270,7 +270,8 @@ function applyTaskEvent(tasks, event, projectRef) {
   }
 
   if (!current) fail("Task event references a task that was never created.");
-  if (event.fromState !== current.state || event.attempt !== current.attempt) {
+  if (event.fromState !== current.state ||
+      (event.eventType !== "task_claimed" && event.attempt !== current.attempt)) {
     fail("Task event fromState or attempt does not match the prior projection.");
   }
 
@@ -631,7 +632,7 @@ export function createProjectTaskStore({
       }
 
       const taskState = loaded.replayed.tasks.get(command.taskRef) ?? null;
-      const specific = buildSpecific.create(taskState, command);
+      const specific = buildSpecific.create(taskState, command, loaded.replayed.tasks);
       const unsigned = {
         schemaVersion: SCHEMA_VERSION,
         recordType: RECORD_TYPE,
@@ -732,9 +733,16 @@ export function createProjectTaskStore({
       validateTaskPayload(payload);
       return append(command, "task_created", {
         intent: () => ({ task: payload }),
-        create(current, cmd) {
+        create(current, cmd, tasks) {
           if (current !== null) {
             throw new ProjectTaskStoreError("taskRef already exists in this project.", "PROJECT_TASK_DUPLICATE");
+          }
+          if (payload.dependsOn.includes(cmd.taskRef) ||
+              payload.dependsOn.some(ref => !tasks.has(ref))) {
+            throw new ProjectTaskStoreError(
+              "Task dependencies must refer to previously created tasks in this project.",
+              "PROJECT_TASK_DEPENDENCY_INVALID"
+            );
           }
           return { fromState: null, toState: "queued", attempt: 0, task: payload };
         }
@@ -749,7 +757,7 @@ export function createProjectTaskStore({
       if (!isText(command.workerRef, 256)) throw new TypeError("workerRef must be a non-empty trusted host reference.");
       return append(command, "task_claimed", {
         intent: cmd => ({ workerRef: cmd.workerRef }),
-        create(current, cmd) {
+        create(current, cmd, tasks) {
           taskRequired(current);
           if (current.state !== "queued") {
             throw new ProjectTaskStoreError("Only queued tasks may be claimed.", "PROJECT_TASK_NOT_QUEUED");
@@ -757,8 +765,12 @@ export function createProjectTaskStore({
           if (current.attempt >= current.maxAttempts) {
             throw new ProjectTaskStoreError("Task has exhausted maxAttempts.", "PROJECT_TASK_ATTEMPTS_EXHAUSTED");
           }
-          const allTasks = []; // Dependency validation is repeated by event replay before commit.
-          void allTasks;
+          if (!current.dependsOn.every(ref => tasks.get(ref)?.state === "completed")) {
+            throw new ProjectTaskStoreError(
+              "Task dependencies have not all completed.",
+              "PROJECT_TASK_DEPENDENCIES_NOT_READY"
+            );
+          }
           return {
             fromState: current.state,
             toState: "running",
