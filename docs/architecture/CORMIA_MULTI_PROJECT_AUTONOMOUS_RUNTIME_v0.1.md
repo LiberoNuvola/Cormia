@@ -79,6 +79,12 @@ The slice composes one separate Plan–Execute broker per host-configured projec
 
 **Verification status:** implementation and contract tests added; CI result pending for the current commit at the time of this update. This is an in-process composition slice only. It does not yet provide a durable task router, persistent project registry, task engine, Supervisor scheduler, recovery, worktree adapters or real Windows/IMMORTAL end-to-end execution.
 
+## 2.6 First Cormia-owned durable task queue (2026-11-08)
+
+Implemented in `runtime/core/project-task-store.mjs` and tested by `runtime/core/project-task-store.test.mjs`. Each project receives a separate local append-only task journal, with revision-CAS claims, checkpoints, dependency gating and evidence references. A running task found at restart becomes `recovery_required`; it cannot be requeued until the trusted host appends an evidence-backed reconciliation decision. The store does not touch the IMMORTAL Local Agent Task Store v1.
+
+Detailed contract: [Cormia Durable Project Task Store v0.1](./CORMIA_PROJECT_TASK_STORE_v0.1.md). This remains a persistence slice, not yet the Supervisor, fair scheduler, Resource Lease integration or autonomous execution loop.
+
 ## 3. Project execution topology
 
 | Component | Responsibility |
