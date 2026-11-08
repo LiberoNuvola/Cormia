@@ -20,7 +20,8 @@ import {
 import { createHash, randomUUID } from "node:crypto";
 import path from "node:path";
 
-const DIGEST_PATTERN = /^[a-f0-9]{64}$/;
+const MANIFEST_DIGEST_PATTERN = /^sha256:[a-f0-9]{64}$/;
+const FILE_SHA256_PATTERN = /^[a-f0-9]{64}$/;
 const DEFAULT_MAX_FILE_BYTES = 256 * 1024;
 
 export class TaskWorkspaceOperationError extends Error {
@@ -325,7 +326,7 @@ export function createTaskWorktreeWorkspaceOperationAdapters({
     if (operation === "workspace.replace") {
       if (!exactDataObject(input, ["path", "expectedSha256", "content"]) ||
           typeof input.expectedSha256 !== "string" ||
-          !DIGEST_PATTERN.test(input.expectedSha256)) {
+          !FILE_SHA256_PATTERN.test(input.expectedSha256)) {
         throw new TaskWorkspaceOperationError("TASK_WORKSPACE_REPLACE_INPUT_INVALID");
       }
       const content = validateContent(input.content, maxFileBytes);
@@ -354,7 +355,7 @@ export function createTaskWorktreeWorkspaceOperationAdapters({
             context.operation !== operation ||
             context.authorization?.allowed !== true ||
             context.authorization?.operation !== operation ||
-            !DIGEST_PATTERN.test(context.manifestDigest)) {
+            !MANIFEST_DIGEST_PATTERN.test(context.manifestDigest)) {
           throw new TaskWorkspaceOperationError("TASK_WORKSPACE_EXECUTE_CONTEXT_INVALID");
         }
 
@@ -404,7 +405,7 @@ export function createTaskWorktreeWorkspaceOperationAdapters({
             }
 
             const expectedSha256 = context.input.expectedSha256;
-            if (!DIGEST_PATTERN.test(expectedSha256)) {
+            if (!FILE_SHA256_PATTERN.test(expectedSha256)) {
               throw new TaskWorkspaceOperationError("TASK_WORKSPACE_REPLACE_INPUT_INVALID");
             }
             const previousSha256 = await atomicReplaceFile(
