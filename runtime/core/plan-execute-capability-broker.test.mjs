@@ -576,7 +576,9 @@ test("plan digest is bound at EXECUTE and a READY plan is one-shot", async () =>
 
 test("concurrent EXECUTE requests cannot dispatch the same step twice", async () => {
   let release;
+  let markStarted;
   const barrier = new Promise(resolve => { release = resolve; });
+  const started = new Promise(resolve => { markStarted = resolve; });
   const calls = [];
   const { broker } = fixture({
     adapterOverrides: {
@@ -584,6 +586,7 @@ test("concurrent EXECUTE requests cannot dispatch the same step twice", async ()
         validateInput(input) { return input; },
         async execute(context) {
           calls.push(context.operation);
+          markStarted();
           await barrier;
           return { ok: true };
         }
@@ -605,6 +608,7 @@ test("concurrent EXECUTE requests cannot dispatch the same step twice", async ()
   });
   assert.equal(second.executed, false);
   assert.equal(second.reason, "PLAN_NOT_EXECUTABLE");
+  await started;
   assert.deepEqual(calls, ["workspace.read"]);
 
   release();
