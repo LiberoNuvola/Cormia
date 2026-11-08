@@ -382,3 +382,7 @@ Covered cases include:
 **Current implementation status:** isolated Core Plan–Execute/Capability Broker slice and contract tests implemented. **Not yet a production integrated Gate 4.** The repository still lacks production Task Manifest signature verification/provider wiring, production Project Mandate/consent/identity/revocation providers, a concrete production operation-adapter set, and end-to-end Windows workspace/ResourceManager composition. Failure after earlier steps may leave those earlier side effects in place; the broker stops later steps and reports the completed-step count, but does not claim rollback or transactional atomicity.
 
 This slice does not modify the IMMORTAL Local Agent, its prompts, task store, MCP allowlist, Granite configuration or Windows runtime.
+
+## Primary product priority: autonomous multi-project work
+
+The current execution target is one local Supervisor operating independent Project Runtime instances, with IMMORTAL Protocol as the first project and other projects isolated by their own mandate, task queue, workspace, evidence and resource budget. See [CORMIA Multi-Project Autonomous Runtime v0.1](../../docs/architecture/CORMIA_MULTI_PROJECT_AUTONOMOUS_RUNTIME_v0.1.md). The Supervisor, durable task engine, task-scoped worktree manager and integrated plan→execute→verify loop are not yet implemented; existing ModelProvider, trusted resolver, broker and local adapters are component slices.
