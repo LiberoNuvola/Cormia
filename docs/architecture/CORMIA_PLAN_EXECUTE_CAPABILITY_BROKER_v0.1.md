@@ -111,7 +111,7 @@ The host orchestrator separately calls \`executePlan({ planRef, expectedPlanDige
 The state changes synchronously from \`READY\` to \`EXECUTING\` before the first await. Duplicate and concurrent calls cannot run the same plan twice. The expected digest must match the Core-stored digest.
 
 For every step:
-1. Recheck task expiry and task-session authorization.
+1. Revalidate the Task Manifest signature/status and exact task projection, check task expiry, then recheck task-session authorization.
 2. Ask the host-only Resource Admission Provider whether capacity is needed.
 3. If required, acquire through the captured Resource Provider using a task-bound lease.
 4. Inside the lease callback, assert lease activity and re-authorize mandate, task, host policy, consent, revocation and lifecycle immediately before dispatch.
@@ -137,7 +137,7 @@ The Task Authority Provider, Trusted Project Resolver's backing providers, Resou
 ## 7. Failure behavior
 
 Fail-closed conditions include:
-- missing or expired verified task;
+- missing, expired, revoked or changed verified task;
 - invalid proposal shape, unknown fields or oversized input;
 - missing host adapter or rejected adapter input;
 - unresolved/expired/revoked mandate, invalid consent, unhealthy revocation anchor or inactive project;
@@ -159,6 +159,7 @@ The Node test suite composes the actual broker implementation with the actual Tr
 - rejection of untrusted tool/dispatch/policy fields;
 - adapter input rejection;
 - plan digest binding, one-shot and concurrent duplicate fencing;
+- Task Manifest revalidation, revocation and projection-change rejection;
 - task expiry and mandatory port composition.
 
 These tests demonstrate the broker's control flow and deterministic checks. They do not authenticate a real mandate, operator, Task Manifest or revocation anchor, and do not prove safe real filesystem/Git operations.
