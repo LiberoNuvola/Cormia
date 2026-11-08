@@ -223,7 +223,7 @@ test("planner refuses caller-selected or task-mismatched project identity", asyn
   await assert.rejects(
     planner.proposeTaskPlan({
       projectRef: PROJECT_REF,
-      task: { ...task(), projectRef: PROJECT_B },
+      task: { ...task(), projectRef: "project:other" },
       attempt: 1
     }),
     error => error.code === "MODEL_TASK_INPUT_INVALID"
