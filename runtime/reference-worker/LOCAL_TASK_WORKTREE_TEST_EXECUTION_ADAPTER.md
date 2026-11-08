@@ -70,3 +70,8 @@ CI workflow adds syntax checks and a dedicated Node test step. Existing `multi-p
 ## 8. Next integration
 
 Connect the existing local ResourceManager through the Broker Resource Provider; define a host-reviewed Node test profile only after inspecting the target repository's actual test tooling and selecting exact tests; then run a local Windows smoke test with a disposable synthetic repository before registering the IMMORTAL project. Do not touch IMMORTAL V3, Reveal, PRE-RICH economic semantics or the old Agent `/code` + `APPROVO` compatibility path.
+## Broker and ResourceManager composition
+
+`runtime/core/task-worktree-test-resource-broker.integration.test.mjs` composes the real Project Runtime/Plan–Execute Broker, fixed-profile `workspace.test` adapter, `createImmortalResourceProvider()` and `withLocalResourceLease()`. It proves the Broker's required Resource Offer causes the fixed `workspace-test` → `cpu-heavy` ResourceManager operation, the adapter receives an active task-bound lease, the test result returns through the Broker, and the release closure runs once.
+
+CI [run #42457906806](https://github.com/LiberoNuvola/Cormia/actions/runs/42457906806): 153 Core PASS, 7 read-only adapter PASS, 16 worktree/write adapter PASS, 8 test-runner adapter PASS and 4 ResourceManager composition PASS. The ResourceManager and test runner are fake fixtures; no real Docker or Windows host was used.
