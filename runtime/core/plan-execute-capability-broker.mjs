@@ -446,11 +446,17 @@ export function createPlanExecuteCapabilityBroker({
 
         let input;
         try {
-          input = adapterInput(adapter, proposed.input, {
+          const adapterValidationContext = {
             phase: "PLAN",
             taskRef,
             operation: proposed.operation
-          });
+          };
+          for (const field of AUTHORIZATION_FIELDS) {
+            if (Object.hasOwn(proposed, field)) {
+              adapterValidationContext[field] = proposed[field];
+            }
+          }
+          input = adapterInput(adapter, proposed.input, adapterValidationContext);
         } catch {
           return {
             accepted: false,
