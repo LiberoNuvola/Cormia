@@ -532,7 +532,7 @@ function intentOf(command, eventType, taskRef, specific = {}) {
 }
 
 function sameIntent(prior, intent) {
-  return stableStringify({
+  const priorIntent = {
     eventType: prior.eventType,
     taskRef: prior.taskRef,
     actorRef: prior.actorRef,
@@ -543,10 +543,24 @@ function sameIntent(prior, intent) {
     checkpointRef: prior.checkpointRef ?? null,
     effectBoundary: prior.effectBoundary ?? null,
     recoveryDecision: prior.recoveryDecision ?? null
-  }) === stableStringify({
-    workerRef: null, task: null, checkpointRef: null, effectBoundary: null, recoveryDecision: null,
-    ...intent
-  });
+  };
+  const expectedIntent = {
+    eventType: intent.eventType,
+    taskRef: intent.taskRef,
+    actorRef: intent.actorRef,
+    reasonCode: intent.reasonCode,
+    evidenceRefs: intent.evidenceRefs,
+    workerRef: intent.workerRef ?? null,
+    task: intent.task ?? null,
+    checkpointRef: intent.checkpointRef ?? null,
+    effectBoundary: intent.effectBoundary ?? null,
+    recoveryDecision: intent.recoveryDecision ?? null
+  };
+  if (Object.hasOwn(intent, "attempt")) {
+    priorIntent.attempt = prior.attempt;
+    expectedIntent.attempt = intent.attempt;
+  }
+  return stableStringify(priorIntent) === stableStringify(expectedIntent);
 }
 
 export function createProjectTaskStore({
@@ -794,8 +808,9 @@ export function createProjectTaskStore({
         throw new TypeError("Checkpoint identity, attempt or effectBoundary is invalid.");
       }
       return append(command, "task_checkpointed", {
-        intent: () => ({
+        intent: cmd => ({
           workerRef: cmd.workerRef,
+          attempt: cmd.attempt,
           checkpointRef: cmd.checkpointRef,
           effectBoundary: cmd.effectBoundary
         }),
@@ -825,7 +840,7 @@ export function createProjectTaskStore({
       }
       validateReferences(command.evidenceRefs, "evidenceRefs", { min: 1 });
       return append(command, "task_completed", {
-        intent: () => ({ workerRef: cmd.workerRef }),
+        intent: cmd => ({ workerRef: cmd.workerRef, attempt: cmd.attempt }),
         create(current, source) {
           taskRequired(current);
           if (current.state !== "running" || current.workerRef !== source.workerRef ||
@@ -850,7 +865,7 @@ export function createProjectTaskStore({
         throw new TypeError("Failure must identify the active worker and attempt.");
       }
       return append(command, "task_failed", {
-        intent: () => ({ workerRef: cmd.workerRef }),
+        intent: cmd => ({ workerRef: cmd.workerRef, attempt: cmd.attempt }),
         create(current, source) {
           taskRequired(current);
           if (current.state !== "running" || current.workerRef !== source.workerRef ||
@@ -871,9 +886,9 @@ export function createProjectTaskStore({
       ], ["workerRef", "attempt", "eventId", "occurredAt", "evidenceRefs"]);
       validateTaskRef(command.taskRef);
       return append(command, "task_blocked", {
-        intent: () => ({
+        intent: cmd => ({
           workerRef: cmd.workerRef ?? null,
-          attempt: cmd.attempt ?? null
+          ...(cmd.attempt === undefined ? {} : { attempt: cmd.attempt })
         }),
         create(current, source) {
           taskRequired(current);
@@ -961,7 +976,7 @@ export function createProjectTaskStore({
       }
       validateReferences(command.evidenceRefs, "evidenceRefs", { min: 1 });
       return append(command, "task_recovery_reconciled", {
-        intent: () => ({ recoveryDecision: cmd.decision }),
+        intent: cmd => ({ recoveryDecision: cmd.decision }),
         create(current, source) {
           taskRequired(current);
           if (current.state !== "recovery_required") {
