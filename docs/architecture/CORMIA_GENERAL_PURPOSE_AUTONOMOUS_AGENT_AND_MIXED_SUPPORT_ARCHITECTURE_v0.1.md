@@ -409,3 +409,13 @@ For an active project, the Runtime can create a task session from a host-verifie
 This is not yet a production resolver. The repository still lacks real host key/bootstrap and mandate-signature providers, OS-authenticated operator/consent broker, trusted steward/accountability registry, mandate-specific persistent revocation/monotonic-anchor provider, project descriptor registry and host-policy store. The tests use synthetic in-memory provider doubles; missing or unhealthy provider results fail closed. The resolver does not integrate with Agent/Granite or start the autonomous project loop.
 
 Verification: [run #105](https://github.com/LiberoNuvola/Cormia/actions/runs/41586377831) passed 110 tests (41 Python Core/schema + 31 EXP + 38 Node journal/reducer/resolver); [grant/authority regression run #37](https://github.com/LiberoNuvola/Cormia/actions/runs/41586377749) passed 65 existing crypto/authority/revocation-model tests.
+
+## 10B. Implementation progress — isolated multi-project write and test execution (2026-11-08)
+
+The synthetic path has advanced beyond read-only execution. A single Supervisor and shared deterministic ModelProvider have passed an integration test with two separate temporary Git repositories and two task-specific detached worktrees. Both project tasks create and replace files through separate Runtime/Broker instances and task journals; source repositories remain unchanged. CI [run #42455045258](https://github.com/LiberoNuvola/Cormia/actions/runs/42455045258) passed 152 Core, 7 read-only adapter and 16 worktree/write adapter tests.
+
+A candidate task-worktree `workspace.test` adapter now executes only a host-registered Node test profile using exact test files and a digest-pinned image in a local, no-network Docker context. It requires an active Broker Resource Lease and refuses image pulls. Its CI uses a fake Docker CLI and does not constitute a real Docker or Windows host run.
+
+These are synthetic software-composition and safety-contract proofs. They do not activate production project mandates, signed Task Manifest verification, consent/key/revocation providers, actual ResourceManager leases, production evidence writing, or the user's Windows/IMMORTAL workspace. The full final architecture and its community-support/resource/economic/Cardano/Materios/governed-evolution goals remain unchanged.
+
+Next implementation work: connect production trust providers and the real ResourceManager; define a host-reviewed Node test profile for a disposable local repository; perform Windows Docker/lease smoke tests; then run the same path on IMMORTAL's authorized work branch and a second independent project.
