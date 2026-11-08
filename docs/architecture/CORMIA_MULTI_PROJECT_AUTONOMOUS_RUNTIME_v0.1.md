@@ -1,13 +1,21 @@
 # Cormia Multi-Project Autonomous Runtime v0.1
 
 - **Date:** 2026-11-08
-- **Status:** execution architecture / implementation plan; integrated autonomous multi-project runtime not yet implemented
+- **Status:** near-term implementation-priority plan under the existing Cormia general architecture; not a replacement or reduction of the final architecture. Integrated autonomous multi-project runtime not yet implemented
 - **Primary product priority:** autonomously execute work across multiple independent projects on one Cormia Core
 - **First project profile:** IMMORTAL Protocol
 - **Current Cormia branch:** work/exp-generalization-crosswalk
 - **Current IMMORTAL working branch observed:** work/immortal-green-closure, HEAD 11fefbdb13a43f9e9133d8998330378daeeddc2e
 - **Related design:** [General-Purpose Autonomous Agent & Mixed Support Architecture](./CORMIA_GENERAL_PURPOSE_AUTONOMOUS_AGENT_AND_MIXED_SUPPORT_ARCHITECTURE_v0.1.md)
 - **Related enforcement slice:** [Plan–Execute Capability Broker v0.1](./CORMIA_PLAN_EXECUTE_CAPABILITY_BROKER_v0.1.md)
+
+## Role of this document — priority overlay, not architecture replacement
+
+This document determines **what Cormia should implement first**, not what Cormia is ultimately intended to become. It does not amend, narrow, replace or cancel the approved/general Cormia architecture, product vision, final capabilities, project modes, team collaboration, community support, resource reciprocity, optional financial services, AEP, IMMORTAL, Cardano, CRC, Materios or other integrations already described there.
+
+The [General-Purpose Autonomous Agent & Mixed Community-Support Architecture](./CORMIA_GENERAL_PURPOSE_AUTONOMOUS_AGENT_AND_MIXED_SUPPORT_ARCHITECTURE_v0.1.md) remains the parent and full-scope architecture. This document is a subordinate execution-priority overlay: it sequences the local autonomous multi-project execution capability first because it is the most valuable immediate operational milestone. The other architecture goals remain part of the final target and retain their existing meaning; they are deferred in implementation order only.
+
+No architecture decision, normative protocol change, scope retirement or final-goal reduction is implied by this priority plan.
 
 ## 1. Product objective
 
@@ -241,14 +249,17 @@ The first useful release is accepted only when all of the following are demonstr
 
 Passing unit tests or a local model smoke alone does not close these gates.
 
-## 13. Out of scope for this priority
+## 13. Deferred in the current implementation order — retained in the final architecture
 
-Do not prioritize now:
-- Patreon-like support pages or payment custody;
-- CRC accounting or reward pools;
-- Cardano settlement or wallet automation;
-- distributed peer mesh and remote donated compute;
-- bespoke chat/CRDT collaboration tools;
-- a new CI engine or self-improvement path that can promote itself.
+The following work is **not part of the first implementation milestone**, but remains in the broader final Cormia architecture and roadmap wherever already defined there:
+- Patreon-like project/community support, contribution records and custody integrations;
+- CRC accounting, compute reciprocity and project reward pools;
+- Cardano, wallet, AEP/economic and settlement integrations;
+- distributed peer mesh, remote donated compute and reciprocal resource offers;
+- multi-agent team collaboration, Team Room, A2A/MCP composition and optional chat/CRDT tools;
+- project-support registry, financial adapters and optional service integrations;
+- evidence certification and optional Materios integration;
+- CI/DoD/JEV composition and the broader project workbench/integration capabilities;
+- governed self-improvement/evolution capabilities, retaining the existing review and no-self-promotion boundary.
 
-These remain optional future layers. They must not delay the local-first multi-project Project Supervisor and autonomous execution loop.
+Deferral is strictly a sequencing decision. These goals are not removed, rejected or made non-goals by this document. Their definitions, constraints and open decisions remain governed by the parent general architecture and their own specifications. The immediate priority is to establish a useful autonomous local execution foundation on which those later layers can depend.
