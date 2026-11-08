@@ -481,7 +481,43 @@ test("a required Resource Lease must be admitted before the operation adapter is
   });
   assert.equal(executed.executed, false);
   assert.equal(executed.reason, "RESOURCE_ADMISSION_DENIED");
+  assert.equal(executed.completedStepCount, 0);
+  assert.equal(executed.dispatchedStepCount, 0);
   assert.equal(state.dispatches.length, 0);
+});
+
+test("a provider denial after adapter entry is not misreported as pre-dispatch", async () => {
+  const resourceProvider = {
+    async withLease(input) {
+      await input.run({
+        lease: { leaseId: "lease:entered", leaseState: "active" },
+        assertActive() { return true; }
+      });
+      return { allowed: false, reason: "lease-ended-after-dispatch" };
+    }
+  };
+  const { broker, state } = fixture({
+    requirement: {
+      required: true,
+      offerId: "offer:test",
+      capabilityProfileRef: "profile:tests",
+      requestedCapacity: { quantity: 1, unit: "concurrent-operation" }
+    },
+    resourceProvider
+  });
+  const prepared = await broker.preparePlan({
+    taskRef: "task:broker-test-1",
+    proposal: proposal([readStep()])
+  });
+  const executed = await broker.executePlan({
+    planRef: prepared.planRef,
+    expectedPlanDigest: prepared.planDigest
+  });
+
+  assert.equal(executed.executed, false);
+  assert.equal(executed.reason, "RESOURCE_ADMISSION_DENIED");
+  assert.equal(executed.dispatchedStepCount, 1);
+  assert.equal(state.dispatches.length, 1);
 });
 
 test("admitted Resource Lease is bound to task and rechecked at dispatch boundary", async () => {
