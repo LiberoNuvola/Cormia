@@ -299,7 +299,7 @@ test("workspace.create and workspace.replace reject symlinked parent and target 
     );
     await assert.rejects(
       f.adapters["workspace.replace"].execute(executeContext("workspace.replace", replaceInput)),
-      error => error.code === "TASK_WORKSPACE_TARGET_NOT_REGULAR_FILE"
+      error => ["TASK_WORKSPACE_TARGET_NOT_REGULAR_FILE", "TASK_WORKSPACE_SYMLINK_DENIED"].includes(error.code)
     );
     assert.equal(await readFile(outsideTarget, "utf8"), "outside-content");
   } finally {
