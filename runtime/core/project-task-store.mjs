@@ -362,6 +362,7 @@ function applyTaskEvent(tasks, event, projectRef) {
       fail("Task unblock requires a blocked task and evidence.");
     }
     current.state = "queued";
+    current.workerRef = null;
     current.evidenceRefs.push(...event.evidenceRefs);
   } else {
     fail("Unsupported task event type.");
@@ -711,19 +712,23 @@ export function createProjectTaskStore({
     if (!isText(taskRef, 256)) throw new TypeError("taskRef must be a non-empty reference.");
   }
 
+  async function readSnapshot() {
+    return withLock(async () => {
+      const loaded = await loadUnlocked();
+      return summarize(projectRef, loaded.replayed, loaded.events);
+    });
+  }
+
   return Object.freeze({
     projectRef,
     journalPath: absolutePath,
 
     async read() {
-      return withLock(async () => {
-        const loaded = await loadUnlocked();
-        return summarize(projectRef, loaded.replayed, loaded.events);
-      });
+      return readSnapshot();
     },
 
     async listRunnable() {
-      const snapshot = await this.read();
+      const snapshot = await readSnapshot();
       const byRef = new Map(snapshot.tasks.map(task => [task.taskRef, task]));
       return Object.freeze(snapshot.tasks.filter(task =>
         task.state === "queued" &&
@@ -934,7 +939,7 @@ export function createProjectTaskStore({
       validateBaseCommand(command, [
         "actorRef", "reasonCode", "expectedRevision"
       ], ["eventId", "occurredAt"]);
-      const initial = await this.read();
+      const initial = await readSnapshot();
       if (initial.revision !== command.expectedRevision) {
         throw new ProjectTaskStoreError("Task journal revision changed before startup recovery.", "PROJECT_TASK_REVISION_CONFLICT");
       }
@@ -946,7 +951,8 @@ export function createProjectTaskStore({
           expectedRevision: revision,
           actorRef: command.actorRef,
           reasonCode: command.reasonCode,
-          ...(command.eventId ? { eventId: command.eventId + ":" + task.taskRef } : {})
+          ...(command.eventId ? { eventId: command.eventId + ":" + task.taskRef } : {}),
+          ...(command.occurredAt ? { occurredAt: command.occurredAt } : {})
         }, "task_interrupted", {
           intent: () => ({ workerRef: task.workerRef }),
           create(current) {
@@ -964,7 +970,7 @@ export function createProjectTaskStore({
         revision = result.snapshot.revision;
         recovered.push(task.taskRef);
       }
-      return Object.freeze({ recovered: Object.freeze(recovered), snapshot: await this.read() });
+      return Object.freeze({ recovered: Object.freeze(recovered), snapshot: await readSnapshot() });
     },
 
     async reconcileInterrupted(command) {
