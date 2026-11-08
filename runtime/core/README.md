@@ -356,12 +356,12 @@ The effective operation rule remains the existing mandate ∩ verified Task Requ
 
 Constructor-captured host ports:
 - `trustedProjectResolver.createTaskSession(verifiedTask)`
-- `taskAuthorityProvider.loadVerifiedTask(taskRef)`
+- `taskAuthorityProvider.loadVerifiedTask(taskRef)` and `revalidateVerifiedTask({ taskRef, expectedManifestDigest })` before every dispatch
 - `resourceAdmissionProvider.resolveRequirement(context)`
 - optional `resourceProvider.withLease(...)` for steps whose trusted host requirement needs a lease;
 - a host-owned, fixed operation-adapter registry. Each adapter has a synchronous `validateInput(input, context)` and an `execute(context)` method.
 
-The Task Authority Provider must independently verify the Task Manifest and return only the bounded trusted projection. The resolver's underlying mandate-signature/key, authenticated-consent, identity/accountability and mandate-revocation/anchor providers must be real trusted implementations. Operation adapters must enforce workspace realpath/symlink containment and safe side-effect semantics. A trusted Resource Admission Provider must decide whether a step requires a lease; the broker fails closed when a required lease is unavailable or invalid.
+The Task Authority Provider must independently verify the Task Manifest, return only the bounded trusted projection, and revalidate that the exact same task ID/digest/operation/expiry projection remains valid before each dispatch. A changed or revoked projection blocks execution. The resolver's underlying mandate-signature/key, authenticated-consent, identity/accountability and mandate-revocation/anchor providers must be real trusted implementations. Operation adapters must enforce workspace realpath/symlink containment and safe side-effect semantics. A trusted Resource Admission Provider must decide whether a step requires a lease; the broker fails closed when a required lease is unavailable or invalid.
 
 ### What this slice proves — and what it does not
 
@@ -375,7 +375,7 @@ Covered cases include:
 - untrusted extra tool/dispatch/policy fields are rejected;
 - adapter input validation occurs before a plan becomes READY;
 - plan digest binding, one-shot execution and concurrent duplicate fencing;
-- task expiry and mandatory host-port composition.
+- Task Manifest revocation/projection changes between PLAN and EXECUTE, task expiry and mandatory host-port composition.
 
 **Current implementation status:** isolated Core Plan–Execute/Capability Broker slice and contract tests implemented. **Not yet a production integrated Gate 4.** The repository still lacks production Task Manifest signature verification/provider wiring, production Project Mandate/consent/identity/revocation providers, a concrete production operation-adapter set, and end-to-end Windows workspace/ResourceManager composition. Failure after earlier steps may leave those earlier side effects in place; the broker stops later steps and reports the completed-step count, but does not claim rollback or transactional atomicity.
 
