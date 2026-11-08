@@ -377,6 +377,8 @@ Covered cases include:
 - plan digest binding, one-shot execution and concurrent duplicate fencing;
 - Task Manifest revocation/projection changes between PLAN and EXECUTE, task expiry and mandatory host-port composition.
 
+**CI evidence:** [GitHub Actions run #42449752396](https://github.com/LiberoNuvola/Cormia/actions/runs/42449752396) completed successfully on the broker/Task Manifest revalidation code path: **110 PASS / 0 FAIL**, including the new Core broker tests and its syntax check.
+
 **Current implementation status:** isolated Core Plan–Execute/Capability Broker slice and contract tests implemented. **Not yet a production integrated Gate 4.** The repository still lacks production Task Manifest signature verification/provider wiring, production Project Mandate/consent/identity/revocation providers, a concrete production operation-adapter set, and end-to-end Windows workspace/ResourceManager composition. Failure after earlier steps may leave those earlier side effects in place; the broker stops later steps and reports the completed-step count, but does not claim rollback or transactional atomicity.
 
 This slice does not modify the IMMORTAL Local Agent, its prompts, task store, MCP allowlist, Granite configuration or Windows runtime.
