@@ -363,6 +363,13 @@ test("PLAN validates an inert proposal without dispatch; EXECUTE dispatches only
   assert.equal(state.dispatches[0].operation, "workspace.read");
   assert.equal(state.dispatches[0].authorization.allowed, true);
   assert.equal(state.dispatches[0].taskRef, "task:broker-test-1");
+  assert.equal(state.inputValidations[0].context.relativePath, "src/index.mjs");
+  assert.deepEqual(state.inputValidations[0].context, {
+    phase: "PLAN",
+    taskRef: "task:broker-test-1",
+    operation: "workspace.read",
+    relativePath: "src/index.mjs"
+  });
   assert.equal(broker.getPlanStatus(prepared.planRef).state, "COMPLETED");
 });
 
