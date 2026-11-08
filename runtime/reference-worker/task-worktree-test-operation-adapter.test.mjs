@@ -206,7 +206,7 @@ test("Docker runner terminates when the task resource lease is revoked", async (
   const directory = path.dirname(workspace.rootPath);
   const fakeDocker = path.join(directory, "fake-sleep-docker");
   await writeFile(fakeDocker,
-    "#!/usr/bin/env node\nsetTimeout(() => process.exit(0), 5000);\n",
+    "#!/usr/bin/env node\nconst args = process.argv.slice(2);\nif (args[0] === \"context\") { process.stdout.write(JSON.stringify(\"unix:///var/run/docker.sock\")); }\nelse if (args[0] === \"--context\" && args[2] === \"image\") { process.exit(0); }\nelse if (args[0] === \"--context\" && args[2] === \"run\") { setTimeout(() => process.exit(0), 5000); }\nelse { process.exit(23); }\n",
     "utf8");
   await chmod(fakeDocker, 0o755);
 
