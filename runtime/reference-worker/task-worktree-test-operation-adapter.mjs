@@ -221,6 +221,7 @@ export function createDockerTaskWorktreeTestRunner({
       throw new TaskWorktreeTestError("DOCKER_MOUNT_PATH_UNSUPPORTED");
     }
 
+    assertResourceActive();
     const args = [
       "--context", "default",
       "run", "--pull=never", "--rm",
