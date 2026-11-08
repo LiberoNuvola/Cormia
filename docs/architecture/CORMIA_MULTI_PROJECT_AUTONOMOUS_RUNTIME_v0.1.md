@@ -112,6 +112,14 @@ CI [run #42452775680](https://github.com/LiberoNuvola/Cormia/actions/runs/424527
 
 This is a synthetic single-project end-to-end composition test. The route, Task Authority, mandate/consent/revocation, ModelProvider generation and result verifier are test fixtures. It does not prove real Granite, production signatures, Windows workspace safety or a two-project model-backed end-to-end run. The latter remains an explicit acceptance gate. See [Synthetic Task Path Integration v0.1](./CORMIA_AUTONOMOUS_TASK_PATH_SYNTHETIC_INTEGRATION_v0.1.md).
 
+## 2.10 Two independent projects advancing concurrently under one Supervisor (2026-11-08)
+
+Added `runtime/core/multi-project-parallel-task-path.integration.test.mjs`. It composes two separate Project Runtime/Broker instances, Task Authority/project resolver fixtures, read-only workspace adapters and durable Task Stores beneath one Supervisor. A single deterministic ModelProvider, Planner and model-backed executor are shared. The test gates provider generation until both project task requests are simultaneously present, then verifies each task dispatches only to its own project's exact allowlisted path and records a separate checkpoint and evidence reference.
+
+CI [run #42453075948](https://github.com/LiberoNuvola/Cormia/actions/runs/42453075948): **151 Core PASS / 0 FAIL** and **7 read-only adapter PASS / 0 FAIL**.
+
+Detailed evidence and limits: [Two-Project Concurrent Task Path — Synthetic Integration Proof v0.1](./CORMIA_MULTI_PROJECT_PARALLEL_TASK_PATH_SYNTHETIC_INTEGRATION_v0.1.md). This proves overlapping project-task progress in the tested in-process composition with synthetic host/provider/verifier ports. It does not yet prove the actual Windows/Granite/IMMORTAL + second-project deployment or production signature/consent/revocation/evidence services.
+
 ## 3. Project execution topology
 
 | Component | Responsibility |
@@ -272,6 +280,8 @@ The user should not have to type an approval phrase for every ordinary edit when
 9. **Only afterwards:** expand to multi-agent teams, remote workers, project support/finance, CRC, Cardano, Materios and optional community resource mesh.
 
 ## 12. Acceptance gates
+
+The in-process synthetic two-project concurrent task path is now covered by [CORMIA_MULTI_PROJECT_PARALLEL_TASK_PATH_SYNTHETIC_INTEGRATION_v0.1.md](./CORMIA_MULTI_PROJECT_PARALLEL_TASK_PATH_SYNTHETIC_INTEGRATION_v0.1.md). This closes only the code-composition/concurrency regression gate; the Windows host proof using actual IMMORTAL and a second independent project remains open.
 
 The first useful release is accepted only when all of the following are demonstrated on the operator's Windows environment:
 
