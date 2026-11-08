@@ -356,7 +356,7 @@ export function createTaskWorktreeManager({
       await handle.writeFile(JSON.stringify({
         projectRef,
         taskRef,
-        relativePathDigest: "sha256:" + token(relativePath),
+        relativePathToken: token(relativePath),
         acquiredAt: new Date().toISOString()
       }) + "\n", "utf8");
       await handle.sync();
