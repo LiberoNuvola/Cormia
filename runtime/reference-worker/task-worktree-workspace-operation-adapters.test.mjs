@@ -329,12 +329,14 @@ test("unknown task cannot access another task worktree", async () => {
       { path: "src/isolation.txt", content: "task one" },
       planContext("workspace.create", "src/isolation.txt")
     );
-    const result = await f.adapters["workspace.create"].execute(executeContext(
-      "workspace.create",
-      input,
-      { taskRef: "task:not-registered" }
-    ));
-    assert.equal(result.taskRef, "task:not-registered");
+    await assert.rejects(
+      f.adapters["workspace.create"].execute(executeContext(
+        "workspace.create",
+        input,
+        { taskRef: "task:not-registered" }
+      )),
+      error => error.code === "TASK_WORKTREE_NOT_CREATED"
+    );
     await assert.rejects(
       readFile(path.join(f.workspace.rootPath, "src", "isolation.txt"), "utf8"),
       error => error.code === "ENOENT"
