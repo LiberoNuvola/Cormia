@@ -342,7 +342,7 @@ async function makeHarness(directory) {
       output: { format: "json", content: JSON.stringify(proposal) },
       finishReason: "completed",
       warnings: [],
-      usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2, source: "synthetic" }
+      usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2, source: "unknown" }
     })
   });
 
