@@ -152,3 +152,10 @@ try {
 ```
 
 This script deliberately supplies a callback-scoped always-active test lease. It validates the runner and Docker host boundary only; it does not validate the Project Runtime Broker, production ResourceManager, signed project mandate, or an IMMORTAL Vitest profile. No image is pulled. The Node image remains a smoke-test candidate until the operator reviews the results and approves the host profile.
+
+## First real Broker/ResourceManager/Docker attempt — 2026-11-08
+
+The Windows operator ran `scripts/smoke-broker-resource-manager-docker.mjs` against the actual IMMORTAL ResourceManager module. The Project Runtime accepted the plan, but `executePlan` returned `FAILED / RESOURCE_ADMISSION_DENIED`. The Docker runner was not invoked and no container was started. The temporary synthetic Git repository/worktree is cleaned in the script's `finally` block.
+
+The Broker currently maps a denied Local Resource Provider lease to the generic `RESOURCE_ADMISSION_DENIED` reason, so this result alone does not identify whether the host ResourceManager denied due telemetry/policy/capacity or whether its lease acquisition failed. The next diagnostic is `scripts/diagnose-local-resource-manager.mjs`, which reports a bounded snapshot and performs one `cpu-heavy` acquire/release probe directly against the same ResourceManager. Do not change thresholds or bypass admission based on this generic Broker result.
+
