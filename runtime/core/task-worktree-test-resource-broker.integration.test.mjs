@@ -188,7 +188,7 @@ test("Project Runtime Broker dispatches workspace.test under the existing local 
     expectedPlanDigest: prepared.planDigest
   });
 
-  assert.equal(executed.executed, true);
+  assert.equal(executed.executed, true, JSON.stringify(executed));
   assert.equal(executed.state, "COMPLETED");
   assert.equal(executed.steps[0].result.passed, true);
   assert.equal(state.runnerInvoked, true);
