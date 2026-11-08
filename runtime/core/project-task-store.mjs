@@ -297,6 +297,7 @@ function applyTaskEvent(tasks, event, projectRef) {
     current.lastCheckpointRef = event.checkpointRef;
     current.lastEffectBoundary = event.effectBoundary;
     current.checkpointRefs.push(event.checkpointRef);
+    current.evidenceRefs.push(...event.evidenceRefs);
   } else if (event.eventType === "task_completed") {
     if (current.state !== "running" || event.toState !== "completed" ||
         event.attempt !== current.attempt || event.workerRef !== current.workerRef ||
