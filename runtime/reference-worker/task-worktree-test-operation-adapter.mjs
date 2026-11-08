@@ -10,11 +10,13 @@
  * workspace.test always requires a live task-bound Resource Lease.
  */
 
-import { spawn } from "node:child_process";
+import { execFile as execFileCallback, spawn } from "node:child_process";
+import { promisify } from "node:util";
 import { lstat, realpath } from "node:fs/promises";
 import path from "node:path";
 import { performance } from "node:perf_hooks";
 
+const execFile = promisify(execFileCallback);
 const IMAGE_DIGEST = /^[A-Za-z0-9._/-]+@sha256:[a-f0-9]{64}$/;
 const MAX_OUTPUT_BYTES = 1_048_576;
 
@@ -174,12 +176,47 @@ export function createDockerTaskWorktreeTestRunner({
     }
     assertResourceActive();
     const root = await verifyTestFiles(workspace, validated.testFiles);
+    let dockerHost;
+    try {
+      const contextResult = await execFile(dockerExecutable, [
+        "context", "inspect", "default", "--format", "{{json .Endpoints.docker.Host}}"
+      ], {
+        encoding: "utf8",
+        timeout: 5_000,
+        maxBuffer: 16_384,
+        windowsHide: true,
+        shell: false
+      });
+      dockerHost = JSON.parse(contextResult.stdout.trim());
+    } catch {
+      throw new TaskWorktreeTestError("DOCKER_LOCAL_CONTEXT_UNAVAILABLE");
+    }
+    const localEndpoint = process.platform === "win32"
+      ? typeof dockerHost === "string" && dockerHost.startsWith("npipe://")
+      : typeof dockerHost === "string" && dockerHost.startsWith("unix://");
+    if (!localEndpoint) {
+      throw new TaskWorktreeTestError("DOCKER_CONTEXT_NOT_LOCAL");
+    }
+    try {
+      await execFile(dockerExecutable, [
+        "--context", "default", "image", "inspect", validated.imageDigest
+      ], {
+        encoding: "utf8",
+        timeout: 5_000,
+        maxBuffer: 65_536,
+        windowsHide: true,
+        shell: false
+      });
+    } catch {
+      throw new TaskWorktreeTestError("TEST_IMAGE_NOT_PRELOADED");
+    }
     if (root.includes(",")) {
       throw new TaskWorktreeTestError("DOCKER_MOUNT_PATH_UNSUPPORTED");
     }
 
     const args = [
-      "run", "--rm",
+      "--context", "default",
+      "run", "--pull=never", "--rm",
       "--network", "none",
       "--read-only",
       "--cap-drop", "ALL",
