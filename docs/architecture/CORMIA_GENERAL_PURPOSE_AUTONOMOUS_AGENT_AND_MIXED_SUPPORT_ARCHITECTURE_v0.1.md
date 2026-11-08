@@ -349,11 +349,13 @@ The first Project Runtime profile is IMMORTAL Protocol on the observed working b
 “Simultaneous” means independently scheduled progress subject to global/per-project concurrency and actual CPU/GPU/inference capacity. A shared local Granite server is an inference service, not a shared project session or authority source. Resource shortage queues work rather than oversubscribing or silently switching providers.
 
 Current verified boundary:
-- Real local Granite inference through the Cormia ModelProvider passed the operator smoke test.
-- The Core Plan–Execute/Capability Broker is an isolated enforcement slice with synthetic trust/task/operation-provider test doubles; latest recorded broker suite: 110 PASS / 0 FAIL.
-- The current IMMORTAL Task Store v1 integration is a read-only inspector; it does not launch or resume tasks.
-- Coding Workspace integration is read-only; Evolution Manager integration is not wired into the Agent/Core loop and cannot self-promote candidates.
-- A multi-project Supervisor, durable Cormia task engine, task worktree manager and integrated autonomous plan→execute→verify loop are still missing.
+- Real local Granite inference through the Cormia ModelProvider passed the operator smoke test; no remote fallback or model tool dispatch was used.
+- The Core Plan–Execute/Capability Broker, host Project Runtime Registry, per-project durable Task Store and local Project Supervisor exist as tested slices. The Supervisor provides a local single-instance lock, round-robin scheduling, global/per-project concurrency caps and conservative recovery; it is not a Windows daemon.
+- The local Model Task Planner now accepts strict JSON proposals from a host-pinned local provider and the model-backed executor composition runs through the Registry/Broker and requires an independent evidence verifier. Production Task Manifest/context providers and the evidence verifier are not yet wired.
+- The first CodingWorkspace operation mapping exposes only list/read/diff/verify with exact host allowlists and `relativePath` binding. Write/replace/patch/test/build, shell and Git writes remain unavailable; existing Agent approval gates are not bypassed.
+- CI on the current planner commit passed 149 Core Node tests and 7 read-only operation-adapter tests (0 failures in both suites).
+- The current IMMORTAL Task Store v1 integration remains a read-only inspector; it is not read or written by the new Cormia Task Store, and Cormia does not launch or resume the existing Agent.
+- Task-scoped workspace/worktree adapters, production signed Task Manifest/routing and mandate/consent/revocation providers, real Windows ResourceManager composition, independent evidence persistence, Windows service integration and the second-project end-to-end proof remain outstanding.
 
 This priority does not authorize automatic changes to IMMORTAL protocol rules. The project's central checkpoint, task assignments, current branch and protected-operation boundaries remain authoritative. Ordinary in-scope edits may become unattended under a valid standing mandate; protected merges, releases, deployments, wallet/ledger actions, trust-anchor changes and mandate widening remain separate gates.
 
