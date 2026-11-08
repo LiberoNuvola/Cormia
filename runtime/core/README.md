@@ -530,3 +530,23 @@ This is not a live Windows/Granite/IMMORTAL run, not a production signature/auth
 CI [run #42453075948](https://github.com/LiberoNuvola/Cormia/actions/runs/42453075948): **151 Core PASS / 0 FAIL** and **7 read-only adapter PASS / 0 FAIL**.
 
 This is a synthetic concurrent two-project execution proof, not real Granite/Windows or production authority/evidence. The exact boundaries are recorded in [CORMIA_MULTI_PROJECT_PARALLEL_TASK_PATH_SYNTHETIC_INTEGRATION_v0.1.md](../../docs/architecture/CORMIA_MULTI_PROJECT_PARALLEL_TASK_PATH_SYNTHETIC_INTEGRATION_v0.1.md).
+
+## 17. Task-isolated worktrees and mandate-gated create/replace adapters — candidate host boundary
+
+New implementation:
+- \`../reference-worker/git-task-worktree-manager.mjs\` / \`.test.mjs\`
+- \`../reference-worker/task-worktree-workspace-operation-adapters.mjs\` / \`.test.mjs\`
+
+The Task Worktree Manager binds one host-fixed repository, repository identity, base ref and separate worktree base to one projectRef. Each task gets a deterministic but opaque path derived from the projectRef/taskRef hash. Git creates a detached worktree at the host-resolved base commit; model/task text cannot supply the repository path, base ref, worktree path, Git args or branch name. Existing worktrees are adopted only after checking canonical path, Git top-level, common Git directory and base commit. Clean worktrees can be removed; dirty/untracked worktrees are never force-removed.
+
+The workspace adapter proposes two operation IDs from the existing non-normative ADR-0007 vocabulary:
+- \`workspace.create\`: create a new UTF-8 file only, exclusive create, max 256 KiB, exact \`relativePath\` binding;
+- \`workspace.replace\`: full-file replace only when the expected SHA-256 matches, staged temp file plus re-check before atomic rename, max 256 KiB.
+
+The adapter resolves the worktree from host-bound projectRef/taskRef at EXECUTE time, checks path components and target types against symlinks/junctions, and takes a durable host-side per-task-path lock. It never calls the legacy CodingWorkspace mutating tools and does not alter the old \`/code\` + \`APPROVO\` behavior.
+
+**Important activation boundary:** these are exported candidate host adapters, not added to the default read-only Registry. A production host may register them only behind the existing Project Runtime Broker and verified Task Authority/standing project mandate. An operation not present in the current task authority or the Mandate ∩ TaskRequest ∩ HostPolicy intersection remains denied. ADR-0007 and the AEP Task Manifest capability/signing decisions remain non-normative/open; this code does not change the Task Manifest schema or freeze that vocabulary.
+
+The task worktree is a separate Git checkout but not yet an OS sandbox. This module does not run arbitrary shell, build, Docker test, Git commit/branch/push, workflow, wallet or Cardano operations. Parent-directory realpath/lstat checks and final-component no-follow flags reduce path attacks, but a hostile concurrent local process can still race path components on filesystems without openat-style APIs; production isolation still requires a host-controlled worktree root, single Supervisor, OS/container policy and real Windows host tests. Stale lock files deliberately fail closed and require host inspection.
+
+The implementation does not start a Windows service or touch the user's actual IMMORTAL checkout. It is ready for CI verification using temporary local Git repositories.
