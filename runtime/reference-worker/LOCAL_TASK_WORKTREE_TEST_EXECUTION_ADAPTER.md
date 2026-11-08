@@ -58,6 +58,22 @@ The adapter returns the fixed runner ID, image digest, exact test-file list, exi
 
 CI workflow adds syntax checks and a dedicated Node test step. Existing `multi-project-task-worktree-write.integration.test.mjs` separately proves two synthetic projects can create/replace files in two real temporary Git worktrees under one Supervisor; it does not yet include a real Docker test run.
 
+### Windows local rerun — 2026-11-08 (operator-reported)
+
+The operator fetched commit `673d448a2b23528aae4f27faedc0a0f7ad07e85f` and ran the suites on Windows PowerShell:
+
+| Suite | Result |
+|---|---:|
+| `task-worktree-workspace-operation-adapters.test.mjs` | 9 passed, 1 skipped, 0 failed |
+| `task-worktree-test-operation-adapter.test.mjs` | 8 passed, 1 skipped, 0 failed |
+| `git-task-worktree-manager.test.mjs` | 7 passed, 0 skipped, 0 failed |
+| `multi-project-task-worktree-write.integration.test.mjs` | 1 passed, 0 skipped, 0 failed |
+| `runtime/core/*.test.mjs` | 152 passed, 1 skipped, 0 failed (153 total) |
+
+The two symlink skips are explicit: Windows did not grant file-symlink creation permission. Directory-junction checks ran and passed. The synthetic Git fixtures pin `core.autocrlf=false` locally; no global Git setting was changed.
+
+This validates the Windows test harness and synthetic two-project worktree execution. The Docker runner tests use the injected fake host process port; these results do **not** establish execution against a real Docker daemon or a real digest-pinned image. The actual Windows Docker smoke test, production ResourceManager wiring and approved IMMORTAL test profile remain open.
+
 ## 7. Explicit gaps
 
 - The adapter is not yet connected to the actual Windows ResourceManager/Resource Provider.
