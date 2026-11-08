@@ -62,6 +62,7 @@ jobs:
           node --check runtime/reference-worker/git-task-worktree-manager.mjs
           node --check runtime/reference-worker/task-worktree-workspace-operation-adapters.mjs
           node --check runtime/reference-worker/task-worktree-test-operation-adapter.mjs
+          node --check runtime/reference-worker/immortal-resource-provider-composition.mjs
       - name: Run Project Lifecycle Runtime tests
         run: node --test runtime/core/*.test.mjs
       - name: Run read-only CodingWorkspace operation adapter tests
@@ -70,3 +71,5 @@ jobs:
         run: node --test runtime/reference-worker/git-task-worktree-manager.test.mjs runtime/reference-worker/task-worktree-workspace-operation-adapters.test.mjs
       - name: Run task-scoped workspace test execution adapter tests
         run: node --test runtime/reference-worker/task-worktree-test-operation-adapter.test.mjs
+      - name: Run local ResourceManager to Broker provider composition tests
+        run: node --test runtime/reference-worker/immortal-resource-provider-composition.test.mjs
