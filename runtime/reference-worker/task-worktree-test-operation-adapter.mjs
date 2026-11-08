@@ -118,7 +118,14 @@ async function verifyTestFiles(workspace, files) {
   if (!workspace || !isText(workspace.rootPath, 4_096) || !path.isAbsolute(workspace.rootPath)) {
     throw new TaskWorktreeTestError("TEST_WORKSPACE_INVALID");
   }
+  const rootStat = await lstat(workspace.rootPath);
+  if (rootStat.isSymbolicLink() || !rootStat.isDirectory()) {
+    throw new TaskWorktreeTestError("TEST_WORKSPACE_ROOT_UNSAFE");
+  }
   const root = await realpath(workspace.rootPath);
+  if (root !== workspace.rootPath) {
+    throw new TaskWorktreeTestError("TEST_WORKSPACE_ROOT_NON_CANONICAL");
+  }
   for (const relativePath of files) {
     const segments = relativePath.split("/");
     let current = root;
@@ -225,7 +232,11 @@ export function createDockerTaskWorktreeTestRunner({
       "--memory", validated.memoryMiB + "m",
       "--memory-swap", validated.memoryMiB + "m",
       "--cpus", String(validated.cpus),
-      "--user", "1000:1000",
+      "--user",
+      (typeof process.getuid === "function" && process.getuid() > 0 &&
+        typeof process.getgid === "function" && process.getgid() > 0)
+        ? String(process.getuid()) + ":" + String(process.getgid())
+        : "1000:1000",
       "--tmpfs", "/tmp:rw,nosuid,nodev,size=" + validated.tmpfsMiB + "m",
       "--mount", "type=bind,source=" + root + ",target=/workspace",
       "--workdir", "/workspace",
