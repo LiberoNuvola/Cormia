@@ -82,6 +82,14 @@ Failure evidence must demonstrate that the trusted runner has reconciled possibl
 - No task is automatically returned to queued after an exception or process restart.
 - Task-store mutations use a fresh revision and bounded retries on compare-and-set conflicts.
 
+## 7. Synthetic end-to-end composition proof
+
+The test `runtime/core/multi-project-autonomous-path.integration.test.mjs` now composes the actual per-project Task Store, Supervisor, Model Task Planner, Project Runtime Registry, Plan–Execute Broker and read-only CodingWorkspace adapter in one in-process path. A deterministic ModelProvider and synthetic identity/mandate/consent/revocation/task-route/result-verifier ports are used. The test executes one `workspace.read`, persists the pre-execute checkpoint and verifier-issued fixture evidence reference, and completes the durable task.
+
+CI [run #42452775680](https://github.com/LiberoNuvola/Cormia/actions/runs/42452775680): **150 Core PASS / 0 FAIL** plus **7 read-only adapter PASS / 0 FAIL**.
+
+This closes the synthetic component-composition gap only. It does not authenticate production trust providers, use actual Granite inference, execute against the user's IMMORTAL checkout or prove two complete model-backed Runtime instances simultaneously. The full test boundary is described in [Synthetic Task Path Integration v0.1](./CORMIA_AUTONOMOUS_TASK_PATH_SYNTHETIC_INTEGRATION_v0.1.md).
+
 ## 7. Verification and limitations
 
 Tests cover one store per registered project, route checks, success/evidence completion, round-robin fairness, concurrency caps, startup recovery, exception-to-recovery_required, wrong-project route rejection, single-instance locking and malformed runner outcomes.
@@ -92,4 +100,4 @@ No files in the user's Windows E:\AI\Immortal-Agent-v0.7 and no IMMORTAL Local A
 
 ## 8. Next implementation dependency
 
-The next work is to supply the production host ports and finish the real execution boundary: (1) signed Task Manifest and task-to-project route verification; (2) production mandate/consent/revocation/host-policy providers; (3) a host Task Context Provider derived from that authenticated manifest; (4) a task-scoped isolated worktree and realpath/symlink-safe operation adapters; (5) actual ResourceManager Lease composition; and (6) the independent evidence verifier/writer. The current read-only workspace mapping is limited to list/read/diff/verify. The model planner is now present, but the end-to-end runner has only synthetic tests and is not yet wired to the user's Windows runtime. Do not start a Windows service or enable unattended mutation until these boundaries pass host integration tests.
+The next work is to supply the production host ports and finish the real execution boundary: (1) signed Task Manifest and task-to-project route verification; (2) production mandate/consent/revocation/host-policy providers; (3) a host Task Context Provider derived from that authenticated manifest; (4) a task-scoped isolated worktree and realpath/symlink-safe operation adapters; (5) actual ResourceManager Lease composition; and (6) the independent evidence verifier/writer. The current read-only workspace mapping is limited to list/read/diff/verify. The model planner is now present, but the end-to-end runner now has a synthetic single-project composition test, but is not yet wired to the user's Windows runtime. Do not start a Windows service or enable unattended mutation until these boundaries pass host integration tests.
