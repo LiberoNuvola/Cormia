@@ -168,11 +168,12 @@ test("one Supervisor autonomously creates/replaces files in two project-specific
         })()
       });
 
-      configs.push({ ...config, repositoryPath, worktreeBasePath, workspace });
+      const hostConfig = { ...config, repositoryPath, worktreeBasePath, workspace };
+      configs.push(hostConfig);
       managers.set(config.projectRef, manager);
       stores.set(config.projectRef, store);
       baseCommits.set(config.projectRef, baseCommit);
-      taskConfigMap.set(config.taskRef, config);
+      taskConfigMap.set(config.taskRef, hostConfig);
       routeMap.set(config.taskRef, {
         schemaVersion: "0.1.0",
         status: "verified",
