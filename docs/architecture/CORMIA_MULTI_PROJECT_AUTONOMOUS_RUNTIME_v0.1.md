@@ -120,6 +120,14 @@ CI [run #42453075948](https://github.com/LiberoNuvola/Cormia/actions/runs/424530
 
 Detailed evidence and limits: [Two-Project Concurrent Task Path — Synthetic Integration Proof v0.1](./CORMIA_MULTI_PROJECT_PARALLEL_TASK_PATH_SYNTHETIC_INTEGRATION_v0.1.md). This proves overlapping project-task progress in the tested in-process composition with synthetic host/provider/verifier ports. It does not yet prove the actual Windows/Granite/IMMORTAL + second-project deployment or production signature/consent/revocation/evidence services.
 
+## 2.11 Two-project concurrent isolated writes and fixed-profile test adapter (2026-11-08)
+
+The task-scoped Git Worktree Manager and `workspace.create` / `workspace.replace` adapters now have a two-project integration test: `runtime/core/multi-project-task-worktree-write.integration.test.mjs`. One Supervisor and one shared deterministic ModelProvider run two tasks concurrently through separate Project Runtime/Broker instances, separate temporary source Git repositories, separate detached task worktrees and separate task journals. The test verifies exact created/replaced contents in each worktree and unchanged source repository contents/HEAD.
+
+CI [run #42455045258](https://github.com/LiberoNuvola/Cormia/actions/runs/42455045258): **152 Core PASS / 0 FAIL**, **7 read-only adapter PASS / 0 FAIL**, **16 Git worktree/write adapter PASS / 0 FAIL**. Full boundary: [Two-Project Task-Worktree Write Integration Proof](./CORMIA_MULTI_PROJECT_TASK_WORKTREE_WRITE_SYNTHETIC_INTEGRATION_v0.1.md).
+
+A separate candidate `workspace.test` adapter now accepts only a host-registered Node test profile, exact host-pinned test files and digest-pinned preloaded image. It requires a Broker Resource Lease, local Docker context, `--pull=never`, network disabled, non-root and bounded execution. CI uses a fake Docker CLI; it does not yet prove real Docker/Windows or complete write→test→verify integration. See [Local Task-Worktree Test Execution Adapter](../../runtime/reference-worker/LOCAL_TASK_WORKTREE_TEST_EXECUTION_ADAPTER.md).
+
 ## 3. Project execution topology
 
 | Component | Responsibility |
