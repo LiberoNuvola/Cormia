@@ -935,6 +935,36 @@ export function createProjectTaskStore({
       });
     },
 
+    async interrupt(command) {
+      validateBaseCommand(command, [
+        "taskRef", "workerRef", "attempt", "expectedRevision", "actorRef", "reasonCode"
+      ], ["eventId", "occurredAt", "evidenceRefs"]);
+      validateTaskRef(command.taskRef);
+      if (!isText(command.workerRef, 256) ||
+          !Number.isSafeInteger(command.attempt) || command.attempt < 1) {
+        throw new TypeError("Interruption must identify the active worker and attempt.");
+      }
+      return append(command, "task_interrupted", {
+        intent: cmd => ({ workerRef: cmd.workerRef, attempt: cmd.attempt }),
+        create(current, source) {
+          taskRequired(current);
+          if (current.state !== "running" || current.workerRef !== source.workerRef ||
+              current.attempt !== source.attempt) {
+            throw new ProjectTaskStoreError(
+              "Interruption does not belong to the active task attempt.",
+              "PROJECT_TASK_ATTEMPT_MISMATCH"
+            );
+          }
+          return {
+            fromState: current.state,
+            toState: "recovery_required",
+            attempt: current.attempt,
+            workerRef: current.workerRef
+          };
+        }
+      });
+    },
+
     async recoverInterruptedTasks(command) {
       validateBaseCommand(command, [
         "actorRef", "reasonCode", "expectedRevision"
