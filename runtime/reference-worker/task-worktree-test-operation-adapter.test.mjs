@@ -166,6 +166,9 @@ test("Docker runner uses a fixed no-network sandbox and host-pinned test files",
     assert.ok(args.includes("--security-opt"));
     assert.ok(args.includes("no-new-privileges"));
     assert.ok(args.includes("--memory"));
+    assert.ok(args.includes("--memory-swap"));
+    assert.ok(args.includes("--user"));
+    assert.ok(args.includes("1000:1000"));
     assert.ok(args.includes("--cpus"));
     assert.ok(args.includes("--pids-limit"));
     assert.ok(args.includes(IMAGE));
