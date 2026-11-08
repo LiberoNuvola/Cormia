@@ -1,7 +1,7 @@
 # Cormia Autonomous Task Path — Synthetic Integration Proof v0.1
 
 - Date: 2026-11-08
-- Status: full single-project path verified with synthetic host/provider ports; not a production or Windows end-to-end deployment
+- Status: full single-project path verified with synthetic host/provider ports; the separate two-project concurrent test is documented in [CORMIA_MULTI_PROJECT_PARALLEL_TASK_PATH_SYNTHETIC_INTEGRATION_v0.1.md](./CORMIA_MULTI_PROJECT_PARALLEL_TASK_PATH_SYNTHETIC_INTEGRATION_v0.1.md); neither is a production or Windows end-to-end deployment
 - Test: `runtime/core/multi-project-autonomous-path.integration.test.mjs`
 - Parent: [General Cormia architecture](./CORMIA_GENERAL_PURPOSE_AUTONOMOUS_AGENT_AND_MIXED_SUPPORT_ARCHITECTURE_v0.1.md)
 - Multi-project priority: [Multi-Project Autonomous Runtime](./CORMIA_MULTI_PROJECT_AUTONOMOUS_RUNTIME_v0.1.md)
@@ -40,7 +40,7 @@ This run includes the complete synthetic path integration test. It validates cod
 - It does not prove that Cormia can already launch unattended on the user's Windows machine.
 - It does not run the actual local Granite model; the deterministic provider is used for CI.
 - It does not use the user's actual IMMORTAL checkout, local Agent, Task Store, CodingWorkspace files or credentials.
-- It does not prove two complete project runtimes have both completed model-backed tasks simultaneously. Registry isolation and Supervisor round-robin/concurrency are covered by separate multi-project component tests; an integrated two-project host run remains a later acceptance gate.
+- The separate synthetic two-project concurrent composition test now verifies that two independent project tasks can complete through separate Runtime/Broker, Task Authority, workspace adapters and task journals under one shared Supervisor and deterministic ModelProvider. It is not a live Windows/Granite/IMMORTAL + second-project host run.
 - It does not enable code mutation. Only list/read/diff/verify are mapped, and the E2E uses `workspace.read`.
 - It does not authenticate mandate, consent, revocation or Task Manifest claims: all those host providers in this test are explicit synthetic doubles.
 - It does not issue an evidence certificate; the test verifier returns a fixture reference after checking the in-memory dispatch.
@@ -53,7 +53,7 @@ This run includes the complete synthetic path integration test. It validates cod
 4. Implement task-scoped worktree isolation and filesystem realpath/symlink-safe adapters before introducing create/replace/patch/test operations.
 5. Connect the actual Windows ResourceManager and task-bound Resource Leases.
 6. Complete the independent evidence verifier/writer using the existing evidence architecture/prior-art decisions; do not treat a model claim or Broker COMPLETED status as evidence.
-7. Run on the user's Windows environment with local Granite, first on IMMORTAL's designated branch, then on an independent second project under the same Supervisor.
+7. Run on the user's Windows environment with local Granite, first on IMMORTAL's designated branch, then on an independent second project under the same Supervisor. The existing CI proof is synthetic and is not a substitute for this host acceptance gate.
 
 ## 6. Architecture scope
 
