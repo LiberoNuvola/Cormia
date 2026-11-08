@@ -344,8 +344,9 @@ export function createPlanExecuteCapabilityBroker({
     throw new TypeError("trustedProjectResolver.createTaskSession is required.");
   }
   if (!taskAuthorityProvider ||
-      typeof taskAuthorityProvider.loadVerifiedTask !== "function") {
-    throw new TypeError("taskAuthorityProvider.loadVerifiedTask is required.");
+      typeof taskAuthorityProvider.loadVerifiedTask !== "function" ||
+      typeof taskAuthorityProvider.revalidateVerifiedTask !== "function") {
+    throw new TypeError("taskAuthorityProvider.loadVerifiedTask and revalidateVerifiedTask are required.");
   }
   if (!resourceAdmissionProvider ||
       typeof resourceAdmissionProvider.resolveRequirement !== "function") {
@@ -374,6 +375,28 @@ export function createPlanExecuteCapabilityBroker({
   function activePlan(planRef) {
     requireText(planRef, 256);
     return plans.get(planRef) ?? null;
+  }
+
+  async function revalidateTaskProjection(task) {
+    let current;
+    try {
+      current = validateTaskProjection(
+        await taskAuthorityProvider.revalidateVerifiedTask({
+          taskRef: task.taskId,
+          expectedManifestDigest: task.manifestDigest
+        }),
+        task.taskId
+      );
+    } catch {
+      throw new PlanExecuteBrokerError("TASK_AUTHORITY_REVALIDATION_FAILED");
+    }
+    if (stableStringify(current) !== stableStringify(task)) {
+      throw new PlanExecuteBrokerError("TASK_AUTHORITY_CHANGED");
+    }
+    if (current.expiresAt !== null && parseTimestamp(current.expiresAt) <= now().getTime()) {
+      throw new PlanExecuteBrokerError("TASK_AUTHORITY_EXPIRED");
+    }
+    return current;
   }
 
   async function preparePlan(command) {
@@ -535,6 +558,7 @@ export function createPlanExecuteCapabilityBroker({
           throw new PlanExecuteBrokerError("TASK_AUTHORITY_EXPIRED");
         }
 
+        await revalidateTaskProjection(record.task);
         const preflight = await record.session.authorizeOperation(step.authorization);
         if (preflight?.allowed !== true) {
           throw new PlanExecuteBrokerError(
@@ -564,6 +588,7 @@ export function createPlanExecuteCapabilityBroker({
 
           // Re-resolve mandate, consent, revocation, lifecycle and host policy
           // after resource admission and immediately before the host adapter.
+          await revalidateTaskProjection(record.task);
           const finalAuthorization = await record.session.authorizeOperation(step.authorization);
           if (finalAuthorization?.allowed !== true) {
             throw new PlanExecuteBrokerError(
