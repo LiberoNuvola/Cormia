@@ -192,8 +192,8 @@ test("one Supervisor and one shared local ModelProvider advance two isolated pro
           providerRequestRef: "synthetic-multi:" + config.projectRef,
           observedProvider: {
             providerAdapterId: "cormia.synthetic",
-            providerInstanceRef: "provider:shared-multi-project",
-            observedModelId: "synthetic-deterministic-multi-v1"
+            providerInstanceRef: "provider:synthetic:test",
+            observedModelId: "synthetic-deterministic-v1"
           },
           output: { format: "json", content: JSON.stringify(proposal) },
           finishReason: "completed",
