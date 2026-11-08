@@ -234,3 +234,209 @@ Two draft schemas are present:
 The [Local Runtime Capability Grant Contracts run #25](https://github.com/LiberoNuvola/Cormia/actions/runs/41484097123) passed 65 tests: 21 cryptographic/grant tests, 6 lifecycle-schema tests, 6 autonomous-project-mandate schema tests, 17 autonomous authority policy tests and 15 in-memory revocation-anchor tests (0 failures). A pure project authority evaluator now derives one internal task child authority and authorizes repeated in-scope edits/tests/builds without per-operation approval callbacks. It checks exact task/manifest/worktree binding, exclusions, host-policy intersection, named test profiles, branch/remote policy and expiry.
 
 The current Agent `/code` + `APPROVO` path remains an interactive compatibility mode. The new policy helper is not yet integrated into Agent execution and does not verify signatures or persist mandates. The new autonomous Runtime path is therefore not yet implemented or activated. Do not remove or bypass legacy approval checks in isolation; implement the verified mandate store, isolated worktree, credential broker, workspace I/O enforcement and autonomous task loop, then prove an end-to-end multi-step task can edit, test, repair and finish with zero per-operation prompts before enabling it.
+
+
+## 6N. IMMORTAL EXP generalization crosswalk — research coordination
+
+The cross-domain mapping of IMMORTAL EXP-01…EXP-12 against Cormia AEP and its Runtime is recorded in [IMMORTAL–Cormia EXP Generalization Crosswalk v1.0](../research/IMMORTAL_CORMIA_EXP_GENERALIZATION_CROSSWALK_v1.0.md).
+
+The crosswalk classifies each EXP as partial, architectural, open or dependent on an explicit cross-domain decision. It distinguishes authority/action composition (Cormia Runtime), economic/resource composition (IMMORTAL kernel and any explicit AEP economic adapter), and governance/jurisdiction composition (Governance Framework and profiles). It does not assume these are already one proven algorithm or theorem.
+
+Coordination notes:
+- Cormia `main` baseline is unchanged by the draft PNC work; ADR-0011 is proposed on [PR #1](https://github.com/LiberoNuvola/Cormia/pull/1), not yet merged.
+- The crosswalk is maintained on a separate branch/PR and does not alter PR #1 or its PNC-bound mandate work.
+- The AEP-to-IMMORTAL economic jurisdiction question remains OPEN: no duplicate or conflicting solvency/protection accounting may be created for the same resource.
+- No PRE-RICH constants, V3, Reveal, Issue semantics, AEP economic parameters or Runtime authority are changed by this research mapping.
+
+## 6O. AEP ↔ IMMORTAL economic jurisdiction and four EXP conformance contracts
+
+The follow-up contract is recorded in [CORMIA_AEP_IMMORTAL_ECONOMIC_JURISDICTION_AND_EXP_CONFORMANCE_v0.1.md](../research/CORMIA_AEP_IMMORTAL_ECONOMIC_JURISDICTION_AND_EXP_CONFORMANCE_v0.1.md).
+
+It distinguishes Cormia-local non-economic tasks, internal reciprocal-compute usage accounting, asset-denominated AEP task contracts, shared/cross-system economic resources subject to C-COMP, and a possible fully isolated independent AEP economic deployment. It recommends an IMMORTAL application profile for asset-denominated AEP flows that operate within an IMMORTAL-governed perimeter, while leaving the independent-jurisdiction option and fee identity as explicit open decisions.
+
+The document also specifies proposed invariants and positive/negative conformance vectors for EXP-06 (Evidence-as-Input), EXP-12 (observer/authority separation), EXP-10 (economic risk budget distinct from operational resource budget) and EXP-11 (allocation). Its formal state variables and model-check scenarios are a specification proposal. A bounded Python reference model was added at verification/exp_boundary/, and its 15 tests passed in [GitHub Actions run #4](https://github.com/LiberoNuvola/Cormia/actions/runs/41528325294) at e59f4cf35eef43304f4eaec0aeff56184a77307f. This is evidence only for the abstract model, not Cormia implementation conformance, a full-state model check, a TLA+/Quint proof, a C-COMP deployment certificate or a live AEP/IMMORTAL adapter.
+
+No AEP SPEC, schema, economic parameter, Runtime authority, IMMORTAL normative rule or PRE-RICH semantic change is made.
+
+
+## 6P. AEP lifecycle economic-effect routing — research addendum
+
+The v0.2 routing addendum in [the AEP–IMMORTAL jurisdiction/conformance contract](../research/CORMIA_AEP_IMMORTAL_ECONOMIC_JURISDICTION_AND_EXP_CONFORMANCE_v0.1.md) maps every existing AEP lifecycle point from Draft through Funded/Open/Assigned/Running/Submitted/Verifying/ChallengeWindow/Disputed/Settled/Failed/Expired/Cancelled/Refunded/Slashed to its possible economic effects and authority route.
+
+The boundary is effect-driven, not event-driven: IMMORTAL is not called for every AEP state change. Funding/escrow lock, bond lock, claim or fee accrual, settlement release, refund, slash and shared economic-resource reservation/release are economic effects. Assignment, execution, submission, verifier evidence, challenge-window opening and failure classification are Cormia task events unless they also create one of those effects. Operational CPU/GPU/RAM/time limits remain Resource Manager controls and are not converted into economic exposure.
+
+The current schemas/task-manifest.schema.json was inspected to bind the matrix to real field names. It exposes budget asset/max amount/refund address/protocol fee, worker/verifier bond profiles, deadlines/windows, policy strings and resource profile. It does not yet encode an explicit C0–C4/profile identity, a typed challenge-bond profile, verifier-reward/settlement-allocation profile, or C3 resource partition/joint-certificate references; taskId is not required by the current schema. These are recorded as schema/contract gaps, not silently added here.
+
+A fail-closed preflight reference model and tests now live in verification/exp_boundary/transition_routing.py and test_transition_routing.py. It routes C2 effects to the IMMORTAL gate, blocks C3 until canonical partition + joint certificate are present, requires reclassification for C0/C1 external claims or shared-resource effects, and keeps C4 independent. It never returns an economic admission. GitHub Actions [run #19](https://github.com/LiberoNuvola/Cormia/actions/runs/41580764675) passed all 31 bounded abstract tests (15 EXP boundary + 16 lifecycle-routing), with 0 failures. This is not implementation conformance or a C-COMP/solvency proof.
+
+No change was made to SPEC.md, schemas/task-manifest.schema.json, Runtime code, economic parameters, JUR-01…JUR-06 status, IMMORTAL normative sources, PRE-RICH or the separate PNC PR #1.
+
+
+## 6Q. AEP Runtime implementation boundary — transition model is not yet wired
+
+The current Cormia main baseline and reference-worker documents were rechecked on 2026-11-03. They describe the AEP SPEC, draft manifest schema and architecture, but no implemented AEP task engine/state reducer, scheduler, peer mesh or verifier service. The local Agent Task Store v1 inspector is a distinct read-only compatibility adapter for the existing IMMORTAL Local Agent; its pending/running/paused/failed/completed statuses are not the AEP Draft/Funded/Assigned/Settled lifecycle and it is not an AEP authority surface.
+
+The new transition-routing reference model therefore maps the SPEC vocabulary and current manifest field paths, but has no executable AEP event API against which to integrate. Its effect set is test input only; a production implementation must derive effects from a typed transition + signed/committed manifest + authoritative protocol state + versioned economic profile, never from a model/observer/caller flag. The recommended integration sequence and blockers are recorded in section 7.8 of the jurisdiction/conformance contract.
+
+No runtime files, local task-store data, manifest schema, economic parameters, wallet or settlement path were changed.
+
+
+## 6R. General-purpose Cormia Core and mixed community support — architecture correction
+
+The Core-first and mixed-support proposal is recorded in [CORMIA_GENERAL_PURPOSE_AUTONOMOUS_AGENT_AND_MIXED_SUPPORT_ARCHITECTURE_v0.1.md](CORMIA_GENERAL_PURPOSE_AUTONOMOUS_AGENT_AND_MIXED_SUPPORT_ARCHITECTURE_v0.1.md). It defines two project leadership modes (creator/team-led and agent-led, with hybrid projects) on one Core and two independent support dimensions: financial patronage and in-kind resources such as compute, storage, datasets, expertise and infrastructure. Contributions support a project or named workstream/resource pool; they are not wages to an AI agent. Agent-led projects require an explicit bounded mandate and named stewardship/accountability arrangement; the agent does not receive personal custody of community funds by default.
+
+**Core independence is a non-negotiable architecture constraint:** local/general-purpose Cormia must run with no account, subscription, wallet, Cardano, token, CRC, payment provider, AEP settlement or IMMORTAL integration. Community support, remote resource mesh, funded bounties, Cardano and IMMORTAL are optional, composable adapters. Payment/financial accounting and resource scheduling remain separate. A project's receipt of patronage or compute donations does not grant supporters tool permissions, private-data access or the ability to expand an agent's Project Mandate.
+
+The AEP–IMMORTAL economic jurisdiction contract and C0–C4 routing tests apply only to projects/tasks that explicitly opt into the relevant funded/economic profile. They do not apply to ordinary agent operations, unfunded tasks, local work, patronage as such or donated compute as such. The AEP SPEC and normative schema were not changed by this architecture clarification.
+
+
+## 6S. Four Cormia Core contracts — authority, lifecycle, resources and support
+
+The contract proposal is recorded in [CORMIA_CORE_CONTRACTS_v0.1.md](CORMIA_CORE_CONTRACTS_v0.1.md). It defines four independent surfaces: Project Mandate, Autonomous Project Lifecycle, Resource Provider, and Community Support.
+
+Reuse ADR-0010 and the existing mandate/consent claims schemas, ADR-0008/0009 trust design and local Resource Manager wrapper. Do not create a parallel mandate signer, per-operation approval flow, trust anchor or child-grant mechanism. The existing local-project mandate is coding-worktree-specific, so generalization to other project types must use versioned typed capability/resource profiles; do not silently extend the v0.1 schema.
+
+The contract keeps project lifecycle, mandate/authority lifecycle and individual task lifecycle separate. It also keeps financial patronage separate from in-kind compute/storage/data/expertise, and makes explicit that supporters and resource providers do not gain agent capabilities or mandate authority.
+
+A bounded Core reference model and 22 standard-library tests were added in `verification/core_contracts/`. GitHub Actions [run #37](https://github.com/LiberoNuvola/Cormia/actions/runs/41583031982) passed 22 Core tests plus 31 EXP boundary tests (53 total, 0 failures). This verifies only abstract contract predicates; it is not a production Core implementation, mandate/consent persistence, credential broker, Resource Provider mesh, Community Support registry or end-to-end agent loop.
+
+No runtime, mandate schema, Task Manifest, payment provider, wallet, Cardano, token, CRC or IMMORTAL economic behavior was implemented or changed.
+
+
+## 6T. Versioned Cormia Core record schemas — 2026-11-03
+
+The four Core contracts now have an initial JSON record-schema slice, catalogued in [CORMIA_CORE_INTERFACE_CATALOG_v0.1.md](CORMIA_CORE_INTERFACE_CATALOG_v0.1.md). Seven strict JSON Schema Draft 2020-12 records live under `schemas/core/`: Project Descriptor; Project Lifecycle Record and Event; Resource Offer and Lease; Financial Support Contribution; and In-Kind Support Contribution.
+
+The Project Descriptor contains a digest-bound reference to the existing mandate claims, not a second mandate representation. Project lifecycle, mandate authority and task lifecycle remain separate. Resource offers cannot become available without owner acceptance and validation evidence. Financial and in-kind support remain distinct; a settled financial contribution requires provider confirmation, while an in-kind record has no monetary equivalent.
+
+GitHub Actions [run #58](https://github.com/LiberoNuvola/Cormia/actions/runs/41584236062) passed **40 Core tests** (22 abstract predicate tests + 18 JSON Schema conformance tests) and **31 EXP boundary tests**: 71 total, zero failures. The suite now also confirms steward/accountability reference fields are mandatory; it does not verify the identity behind those references.
+
+This is contract/schema evidence only. No schema-generated Runtime types, durable project journal, lifecycle reducer, mandate resolver, persistent Resource Lease store, Community Support service or integrated autonomous Core Runtime is present. Existing signed mandate/consent schemas, ADR-0010, AEP Task Manifest and production runtime behavior remain unchanged.
+
+
+## 6U. Local Cormia Project Lifecycle journal and reducer — isolated prototype
+
+A separate local Core component now exists under `runtime/core/`:
+- `project-lifecycle-reducer.mjs`: pure deterministic reducer for the declared project-state transition map;
+- `project-lifecycle-journal.mjs`: append-only UTF-8 NDJSON event journal with project binding, contiguous sequence, SHA-256 digest chain, local exclusive lock, compare-and-set revision, idempotent event IDs, replay and explicit torn-tail recovery;
+- `project-lifecycle-journal.test.mjs`: Node-native contract tests;
+- `README.md`: storage, recovery, security and integration boundaries.
+
+The implementation is intentionally independent of the Local Agent Task Store v1 and the existing IMMORTAL Agent. It does not read or modify the Agent's task data, does not turn task status into project status, does not authenticate the `actorRef`, does not resolve steward/mandate identity, and does not authorize activation by itself. Trusted host orchestration must validate the Project Descriptor, accountability arrangement, mandate/consent/revocation state and required execution profiles before it issues lifecycle commands.
+
+**Durability limits:** every appended event is followed by file `sync()`; a directory sync is attempted when the file is first created and supported by the platform. A final non-newline tail blocks reads and requires explicit repair; a complete malformed or digest-invalid record is never truncated. A stale lock is not automatically stolen. This is a single-host local-file prototype, not a multi-host journal, signed audit ledger, database, snapshot/compaction service or proof against power-loss/privileged host compromise.
+
+GitHub Actions [run #77](https://github.com/LiberoNuvola/Cormia/actions/runs/41585273487) completed **SUCCESS**:
+- 41 Python Core/schema tests;
+- 31 EXP boundary tests;
+- 15 Node Project Lifecycle journal/reducer tests;
+- **87 total, 0 failures**.
+
+The run verifies the prototype on the hosted Linux runner. It is not evidence of execution on the user's Windows host, and does not establish the integrated Core project loop, mandate resolver, task checkpoints, Resource Provider persistence, OS quota enforcement or Community Support registry. The Local Resource Provider remains the next separate adapter slice.
+
+This changes the earlier 6S/6T “no runtime changed” baseline only for the new isolated `runtime/core/` prototype. It does not change AEP Runtime, Local Agent Task Store v1, ADR-0010, mandate/consent schemas, Task Manifest, Agent execution, wallets, chain or economic policy.
+
+
+## 6V. Trusted Project Context Resolver — fail-closed orchestration contract
+
+An isolated resolver prototype and Node tests now exist under `runtime/core/trusted-project-context-resolver.mjs`. It loads the Project Descriptor from a host-selected project store, resolves the named steward/accountability arrangement, asks the host mandate authority to verify ADR-0010 claims/signature/key status, asks the consent authority to verify the one-time project receipt, asks a mandate-specific revocation authority to reconcile the independent anchor, and reads the Project Lifecycle journal.
+
+It reuses the existing `validateLocalAutonomousProjectMandateClaims` validator and `deriveLocalProjectTaskAuthority` / `authorizeLocalProjectOperation` engine. It creates no second mandate/grant/approval system. Task sessions are created only while the project lifecycle is `active`; every operation re-resolves trust state and host policy, so revocation, expiry, pause or provider loss blocks the next operation without a new human approval prompt.
+
+**Important — provider gap remains:** this repository still has no production implementations for:
+- host-pinned Project Mandate JWS verification and signing-key lifecycle;
+- authenticated OS operator identity and a signed/replay-protected project-consent broker;
+- steward/accountability/operator-authority registry;
+- mandate-specific signed revocation events, checkpoint and independent monotonic anchor;
+- durable host policy and Project Descriptor registry.
+
+The existing ADR-008 signed grant verifier is not a Project Mandate verifier. The ADR-009 revocation anchor module is a synthetic in-memory reconciliation model for its existing grant-revocation envelope; it is not a persistent mandate-revocation provider. The current resolver accepts these services only as host-trusted injected ports and fails closed when their results are missing, invalid or inconsistent. No real trust assertion is accepted from model/task input.
+
+[GitHub Actions run #105](https://github.com/LiberoNuvola/Cormia/actions/runs/41586377831) passed 41 Python Core/schema tests, 31 EXP tests and 38 Node tests (journal + resolver): **110 total, 0 failures**. The separate [grant/authority regression run #37](https://github.com/LiberoNuvola/Cormia/actions/runs/41586377749) passed all 65 existing crypto/schema/mandate/revocation model tests. Latest resolver tests bind revocation-provider results to the exact issuer, mandate ID and digest and bind the verified mandate ID to the descriptor.
+
+This is an orchestration contract validated with synthetic in-memory provider doubles, not a production trusted Project Resolver. It does not enable the real Agent, change ADR-0010 trust semantics, or activate autonomous project execution.
+
+
+## 6W. Cormia Coordination Plane and multi-node topology — architecture proposal
+
+The new [Cormia Coordination Plane and Multi-Node Topology v0.1](CORMIA_COORDINATION_PLANE_AND_MULTI_NODE_TOPOLOGY_v0.1.md) clarifies where multi-agent/multi-PC coordination lives: in a Cormia Runtime service, not in GitHub, a blockchain or a shared sandbox. One logically authoritative coordinator per project schedules tasks and leases; worker runtimes on each PC expose only host-approved capabilities/resources and execute inside isolated task workspaces.
+
+The coordinator may be hosted on the primary PC, an always-on home server or an owner-controlled VPS/cloud instance. The recommended first topology is one owner-controlled hub plus multiple local worker nodes. GitHub remains source/version-control and review; artifact storage holds larger outputs/evidence; a ledger is only an optional AEP/economic adapter for commitments, escrow, dispute or settlement. Standalone Cormia Core must operate without that adapter.
+
+The proposal explicitly separates project/mandate/task state, coordinator state, worker-local execution and artifact storage. It also records offline/failure behavior and a phased path from one local coordinator to a second machine. This is a design clarification only: no generic coordinator, AEP scheduler, authenticated multi-node transport, peer mesh, persistent shared lease registry or multi-PC execution loop exists yet. The local Resource Manager wrapper remains process-local; the new generic worker-side Resource Provider adapter is callback-scoped and not connected to a coordinator or Agent.
+
+
+## 6X. Local worker-side Resource Provider adapter — isolated prototype
+
+A generic Core module now exists at `runtime/core/local-resource-provider.mjs`, with Node-native contract tests in `runtime/core/local-resource-provider.test.mjs`. It consumes only host-configured Resource Offers that already carry owner acceptance and validation evidence, and a trusted injected `executeWithLocalLease` port. A host-only operation mapping is captured at construction and stripped from the public offer; task/model input cannot choose a ResourceManager class.
+
+The adapter binds a lease to an exact task reference, capability profile and requested capacity. It exposes a short-lived callback-scoped lease record and an `assertActive()` check for trusted tool boundaries. Underlying local admission/release remains the responsibility of the injected existing Resource Manager adapter, which releases in `finally`.
+
+**Limits:** offers are configured by the trusted host; discovery does not perform live telemetry sampling. Leases are not persisted or shared across processes. Revocation is in-memory and checked at the next protected operation boundary; it does not terminate an OS process. There is no lease renewal, OS quota enforcement, remote provider, scheduler, coordinator or Agent integration. The module is generic and does not import IMMORTAL code.
+
+The implementation is a worker-side building block only. It is not evidence of a functioning multi-PC network or an integrated autonomous Runtime.
+
+
+**Latest worker-local provider verification — run #124:** [GitHub Actions](https://github.com/LiberoNuvola/Cormia/actions/runs/41676501029) passed 41 Python Core/schema + 31 EXP + 54 Node tests = **126 total, 0 failures**. This includes composition with the existing fixed-operation ResourceManager wrapper using a synthetic manager double. Separate [grant/authority run #50](https://github.com/LiberoNuvola/Cormia/actions/runs/41676500879) passed 65 tests. These are hosted CI contract checks, not a live Windows ResourceManager test or a multi-PC integration test.
+
+
+## 6Y. Team Collaboration Plane, Project Workbench and pre-publication integration
+
+The coordination topology has been expanded in [Cormia Coordination Plane, Team Collaboration and Multi-Node Topology v0.1](CORMIA_COORDINATION_PLANE_AND_MULTI_NODE_TOPOLOGY_v0.1.md). The Coordination Plane is no longer described as only a scheduler/dispatcher. It includes four explicit project-team stages:
+
+1. **Team Room:** agents communicate naturally, discuss plans, request help, report blockers and peer-review work. Important decisions are promoted to attributable structured records; chat itself is not authority.
+2. **Project Workbench:** a common project environment with isolated task worktrees, local source/version history, contribution patches, pair/team work under conflict controls and a shared integration workspace. Local commits do not require GitHub.
+3. **Integration & Verification Bench:** accepted contributions are composed, compiled/built, tested, reviewed and packaged into a digest-bound candidate with evidence and unresolved risks.
+4. **Delivery Gate:** a project-defined profile determines whether the output is a local action/report/artifact, a local repository result, an optional GitHub publication or another explicitly configured adapter.
+
+GitHub is now explicitly an optional external publication destination, not the place where agents first collaborate or where integration must occur. Default behavior is to request owner authorization before a verified candidate is pushed/opened as a GitHub PR; a narrow standing publication mandate may be configured explicitly. Merge, release and production deploy are distinct protected actions. Solo local tasks (for example, PC cleanup) bypass team/repository/publication stages they do not need.
+
+**Status:** architecture proposal only. Team Room, Workbench, integration worktree, conflict-managed pair editing, candidate pipeline, project delivery profiles and publication gate are not implemented. The current Local Resource Provider and Coordination Plane docs do not constitute an integrated team runtime. No production collaboration, build/test or publication pipeline is claimed.
+
+## 6Z. Project Compute Reward Pool — proposed economic extension
+
+The current Compute Reciprocity design already has:
+- CRC for non-transferable access/quota to shared inference or eligible compute after accepted useful work;
+- a community-sponsored capacity pool;
+- contribution receipts, NUWU as a measurement concept, randomized audits and optional epoch commitments as design elements.
+
+It does **not** yet define the proposed project-specific reward bucket that is funded for a project/workstream and distributed proportionally to users who contribute compute to that pool.
+
+[Compute Reciprocity Economy, section 14](../economics/COMPUTE_RECIPROCITY.md) now records a non-normative Project Compute Reward Pool candidate. It separates:
+- a host-owned Resource Offer and actual task-bound Resource Lease;
+- an accepted, verified Contribution Receipt for completed useful work;
+- a finite funded reward pool with a predeclared campaign, eligible workload and allocation policy;
+- an optional usage-right, financial/asset-denominated or non-financial benefit adapter.
+
+The candidate allocation is pro-rata over accepted useful work, not advertised capacity, uptime or raw unverified GPU time. Each user chooses a bounded amount of capacity and can revoke it. An unfunded pledge is not a distributable bucket. CRC does not become cash or a transferable asset. Financial reward requires a separate custodian/economic adapter; IMMORTAL is relevant only where the project explicitly selects an applicable governed economic profile.
+
+
+This is not yet a schema or runtime service. No percentage, NUWU conversion ratio, weighting factor, pool duration, payout cadence, anti-Sybil threshold or dispute parameter has been selected. JUR-05 (shared-resource ownership/partition) and JUR-06 (worker/verifier allocation, fairness, sponsor and anti-Sybil rules) remain open. No IMMORTAL/PRE-RICH normative parameter has been changed.
+
+## 6AA. Work Completion Evidence and Materios certification — architecture proposal
+
+Adds [CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md](CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md).
+
+The proposal connects the worker-local Cormia Node, task-specific verifiers, Materios receipt/attestation adapter and Cormia CRC accounting. It treats completion as an evidence-bearing claim, not a task status or agent self-report. The Work Completion Receipt is intended to bind project/task/attempt, assignment, worker, exact Resource Lease, workload, input/output commitments, meter profile, acceptance predicate and verification evidence.
+
+The assurance model keeps separate evidence dimensions: receipt integrity, evidence availability, assignment/provenance, resource metering, execution-environment attestation, task-outcome acceptance, execution proof and chain finality. A signature authenticates its issuer but does not prove the truth of a contributor-controlled OS/driver meter. A Merkle proof establishes correspondence to a commitment, not semantic correctness.
+
+**Materios source boundary checked 2026-11-03:** the current Orinq/cert-daemon path supports receipt commitment integrity and availability attestation (including chunk/Merkle-root verification). This does not establish that an agent executed the declared work or that the output is correct. The compute_metering_v2 self-rooted shortcut can return ROOT_VERIFIED when the manifest declares chunks=[] and base_root_sha256 equals content_hash; the verifier source says this relies on the gateway's manifest authority, so it is not independent proof of GPU execution. The TEE pallet types additional evidence families, but only ARM TrustZone has a verifier implementation in the inspected source; AMD SEV-SNP, Intel TDX, reproducible-build and ZK-VM verifier paths return NotImplemented. The pallet source also records challenge-binding work as a prerequisite to enabling evidence submission. These are not production certification guarantees today.
+
+CRC mint is gated on a task-bound accepted useful-work receipt and the declared workload verification profile; raw GPU-hours, worker signatures or receipt availability alone are insufficient. CRC remains distinct from Materios MATRA/MOTRA and from financial reward pools.
+
+**Status:** architecture proposal only. No Work Completion Receipt schema, live Cormia Node meter, independent task verifier, Materios adapter, Materios protocol change, CRC mint/burn ledger or end-to-end certification path is implemented. No Cormia Core dependency on Materios is introduced.
+
+## 6AB. Cormia prior-art composition review — 2026-11-03
+
+Adds [Cormia Prior-Art Composition Review v0.1](../research/CORMIA_PRIOR_ART_COMPOSITION_REVIEW_2026-11-03.md), the current component-level prior-art crosswalk for the Core-first, Coordination Plane, local worker/resource and Work Completion Evidence proposals. It extends the existing [prior-art register](../research/PRIOR_ART.md), [reuse/composition matrix](../research/REUSE_AND_COMPOSITION_MATRIX.md) and [decentralized inference prior-art review](../research/DECENTRALIZED_INFERENCE_PRIOR_ART.md).
+
+The review establishes **Gate 0A** in ROADMAP.md and six bounded spikes before new generic subsystems are created:
+- PA-01 — Temporal vs LangGraph/current local store for durable task execution;
+- PA-02 — Cedar/OPA and UCAN/Biscuit against existing mandate/grant boundaries;
+- PA-03 — Windows/Linux native host controls and optional stronger sandbox tiers;
+- PA-04 — in-toto/DSSE/SLSA, Orynq, OpenTelemetry and SCITT/Materios composition for work evidence;
+- PA-05 — collaboration backend only if the first A2A/MCP + Git-worktree flow leaves a real gap;
+- PA-06 — resource-market/compute-credit comparison before remote mesh or reward issuance.
+
+The architecture documents now prefer adoption/adapters over custom chat protocol, VCS, sandbox, workflow engine, CI system, signed-evidence envelope, transparency log or compute marketplace. This is a documentation/research alignment only: no runtime code, new schema, sandbox, workflow service, chat backend, remote provider network or certification adapter was added or deployed. Existing CI evidence remains bound to the previously tested code commits; no new CI run is claimed for this doc-only review.

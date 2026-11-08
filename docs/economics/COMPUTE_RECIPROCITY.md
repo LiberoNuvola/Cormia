@@ -188,3 +188,77 @@ The first no-subscription user experience SHOULD ship in this order:
 5. **On-chain audit/settlement:** only after off-chain accounting can be independently reconstructed, batch epoch commitments and challenges are implemented. No per-prompt transaction.
 
 The first mesh mode SHOULD route a whole model to one capable peer. Split-model inference is a later profile because it adds network coordination, activation-leakage and peer-collusion risks.
+
+
+## 14. Optional project compute reward pool — proposed extension
+
+The current CRC/sponsored-pool model does **not** yet define a project-specific reward bucket whose value is distributed proportionally among users who contribute compute to that project. This section records that additional design candidate; it does not change CRC v1 semantics or adopt economic parameters.
+
+### 14.1 Separate three things
+
+1. **Resource Offer / Lease:** the contributor declares how much CPU/GPU/RAM/network capacity they are willing to make available and under which time, power, thermal, privacy and workload constraints. The host owner can change or revoke the offer. A lease reserves a bounded slice for an eligible task.
+2. **Accepted Contribution Receipt:** after a task actually consumes the leased capacity, the system records the task, worker/node, workload profile, useful-work measurements, service quality, completion result and verification evidence. Merely advertising capacity, keeping a machine online or reserving an unused lease does not earn a contribution share.
+3. **Project Compute Reward Pool:** a project owner or sponsor may establish a finite, separately identified bucket for an eligible campaign/workstream. The bucket declares its target project, funding/custody status, reward type, eligible workload profiles, contribution period, allocation-rule version, caps, verification and challenge policy, and treatment of any undistributed remainder.
+
+The bucket is a reward budget, not a resource offer and not a lease. The contributor's hardware remains under the contributor's local control.
+
+### 14.2 Candidate proportional allocation
+
+The proposed rule is **pro-rata distribution over accepted useful work**, rather than over promised capacity or raw GPU-hours.
+
+At the end of a declared period or campaign, eligible accepted contribution units are aggregated under the published allocation rule. Each contributor receives a share of the distributable pool corresponding to that contributor's eligible contribution relative to all eligible contributions in the same pool. The pool, eligible workload classes, weighting/quality adjustments, caps, rounding, payout timing and challenge treatment must be fixed and disclosed before work is counted.
+
+No percentage, NUWU-to-reward ratio, quality coefficient, minimum contribution or campaign duration is selected here. The existing NUWU remains a measurement concept whose benchmark and conversion parameters are open. It must not be replaced by self-reported uptime, advertised GPU model, raw FLOPs or an unverified wall-clock counter.
+
+### 14.3 Funding and reward types
+
+A reward pool may declare one of the following distinct benefit classes:
+- **Usage-right reward:** non-transferable quota for shared inference or eligible compute. This may be represented through CRC accounting but is still subject to the separate CRC rules.
+- **Financial/asset-denominated reward:** a funded amount held by a named custodian or optional payment/economic adapter. It is not a Core wallet balance. A pledge or unfunded promise is not a distributable bucket.
+- **Non-financial project benefit:** a declared service, storage, access or other benefit with its own availability and acceptance rules.
+
+These classes are not interchangeable. CRC does not become cash or a transferable token merely because a project creates a reward pool. Financial payout is not implied by a compute contribution. If a project chooses an asset-denominated reward inside an IMMORTAL-governed perimeter, the applicable AEP/IMMORTAL economic contracts and admission rules must be used; ordinary Cormia Core execution remains independent.
+
+### 14.4 User and project controls
+
+- Each user explicitly opts in per project/pool and selects the maximum capacity, schedule and workload/privacy constraints for each node they own.
+- A user may contribute more than one PC, but each node/offer is independently validated and bounded; multiplying node identities does not multiply reward without accepted work.
+- The owner may pause or revoke an offer. A lease ends at a safe task boundary and no new lease is admitted.
+- Only completed and accepted useful work earns a share. Failed, duplicate, unverified or challenged work is excluded or held according to the published rule.
+- The project cannot promise shares beyond the funded/confirmed reward pool. If the pool is exhausted or not funded, the system must not create an implicit debt or hidden bill.
+- Contribution and reward do not grant project governance, mandate widening, private-data access, tool capabilities or ownership of the project.
+
+### 14.5 Open design questions — do not freeze yet
+
+1. Is the bucket project-wide, workstream-specific, campaign-based, or can it be nested?
+2. Is the contribution score based only on normalized useful work, or also on availability, reliability, latency, energy efficiency or quality? Any weighting must be benchmarked and anti-gamed.
+3. Are resource providers rewarded for capacity actually consumed only, or can a separately declared reservation fee exist?
+4. How are multiple PCs owned by one person aggregated, and how are Sybil/collusion controls applied?
+5. Who funds and custodies a financial bucket, and which unused/reversed funds return to whom?
+6. What are payout cadence, caps, minimum threshold, challenge window and dispute path?
+7. Does a pool distribute only to compute contributors, or also to task authors, verifiers, storage operators and maintainers under separately declared shares?
+8. Which reward types are purely internal usage rights and which require an optional financial/economic profile?
+
+This proposal is related to JUR-05 (canonical owner/partition for shared resources) and JUR-06 (worker/verifier allocation, fairness, sponsor and anti-Sybil parameters). Those decisions remain open. 
+No PRE-RICH parameter, IMMORTAL rule, CRC conversion ratio or payment mechanism is adopted by this section.
+
+## 15. Work completion certification and Materios — proposed integration boundary
+
+The Project Compute Reward Pool and CRC contribution accounting need a reliable distinction between a **declared task completion**, an **integrity-preserved receipt**, and **accepted useful work**. This section links compute reciprocity to the proposed [Cormia Work Completion Evidence and Materios Certification Adapter](../architecture/CORMIA_WORK_COMPLETION_EVIDENCE_AND_MATERIOS_CERTIFICATION_v0.1.md).
+
+A contributor's Cormia Node is the local resource authority and meter. It enforces the owner's offer/lease limits, isolates the workload and records host-observed CPU/GPU/RAM/VRAM/time counters with meter identity, units and interval. Its signature binds the report to the node key; it does not make an ordinary OS/driver reading cryptographically truthful.
+
+A task-bound Work Completion Receipt should bind the project, task and attempt, assignment/manifest, worker, exact lease, workload, committed input/output, meter profile, acceptance predicate, verifier evidence and replay-protection data. Private prompts, raw datasets, output payloads and telemetry remain off-chain and access-controlled; public commitments require privacy-aware input blinding.
+
+Do not treat all certification as one level:
+- receipt/hash/Merkle verification establishes integrity of committed evidence;
+- availability attestation establishes that the committed evidence was retrievable under the declared checks;
+- a task verifier establishes whether a workload-specific acceptance predicate passed;
+- hardware attestation establishes only the measured environment and claims supported by that hardware verifier;
+- a ZK/VM proof establishes only its explicitly specified computation and public-input bindings.
+
+**Current Materios boundary:** the existing Orinq/cert-daemon path verifies receipt data against its committed root and supports receipt availability attestation. The compute_metering_v2 self-rooted shortcut can return ROOT_VERIFIED when chunks=[] and base_root_sha256 equals content_hash, relying on the gateway's manifest assertion; it is not independent proof of GPU execution. This does not prove task execution or semantic correctness. The TEE pallet declares AMD SEV-SNP, Intel TDX, ARM TrustZone, reproducible-build and ZK-VM evidence types, but in the source examined only ARM TrustZone has a verifier implementation; the other verifier paths return NotImplemented. The source also records challenge-binding work as a prerequisite to enabling evidence submission. Treat the other evidence classes as planned/unsupported until their implementation and deployed configuration are independently verified. Materios source references and detailed caveats are in the linked architecture proposal.
+
+**CRC mint boundary:** the existing principle remains that credits are earned for accepted useful work, not declared capacity, uptime or raw GPU-hours. A task class must name its required verification profile before execution. Receipt integrity/availability alone does not qualify a task as completed useful work. No universal R2/R3/R4 profile, NUWU-to-CRC ratio, reward formula, tokenization, or Materios economic change is adopted here.
+
+CRC remains a Cormia usage-right unit; it is not MATRA or MOTRA. CRC mint for accepted contributions, CRC burn for service consumption, Materios network fees and financial Project Compute Reward Pool payouts remain separate accounting events.
