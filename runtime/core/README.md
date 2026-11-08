@@ -16,6 +16,7 @@
 - `plan-execute-capability-broker.mjs` / `.test.mjs` — inert PLAN validation and host-authorized EXECUTE boundary.
 - `project-runtime-registry.mjs` / `.test.mjs` — isolated per-project broker composition and host-verified task routing.
 - `project-task-store.mjs` / `.test.mjs` — per-project durable task journal, queue, attempts, checkpoints and explicit restart reconciliation.
+- `project-supervisor.mjs` / `.test.mjs` — local single-instance Supervisor, round-robin scheduling, concurrency caps, task runner boundary and startup recovery.
 
 The component is deliberately outside `runtime/reference-worker/`. It does not replace, read or write the existing Local Agent Task Store v1 and does not change the IMMORTAL Agent's /resume behavior.
 
@@ -471,3 +472,31 @@ A blocked task can only be unblocked with evidence. A recovery event does not re
 This store is a persistence primitive, not a complete autonomous engine. It does not authenticate Task Manifest signatures, choose a project, schedule fairly across projects, launch workers, enforce resource leases or perform side-effect reconciliation itself. The host must verify a Task Manifest before enqueueing, resolve its project route, and supply evidence-backed recovery decisions. The tests use local temporary files and synthetic host actors; they do not prove production key custody or Windows service recovery.
 
 The next layer is the host Project Supervisor: fair scheduling across the registered Runtime/store pairs, global/per-project concurrency limits, recovery invocation at startup, and the autonomous plan→execute→verify loop. The existing IMMORTAL Agent store remains untouched.
+
+## 13. Local Project Supervisor — fixed host composition and fair scheduling
+
+Implementation:
+- `project-supervisor.mjs`
+- `project-supervisor.test.mjs`
+
+`createProjectSupervisor()` composes the fixed Project Runtime Registry, one durable Project Task Store for every registered project, a trusted task-route provider, a fixed host-owned `taskExecutor.executeTask()` port, a local Supervisor process lock and host-configured global/per-project concurrency caps.
+
+At construction, store registrations must exactly match the Runtime Registry project set; journal paths must be unique. This configuration is host-owned, never proposed by a model.
+
+### Operation
+
+1. `start()` acquires an exclusive local lock. A second cooperating Supervisor cannot start against the same lock path. A stale lock is not auto-deleted.
+2. Startup classifies every still-running task as `recovery_required`; it never resumes one automatically.
+3. `runCycle()` reads each project's queue and selects work in deterministic round-robin order, subject to global and per-project caps.
+4. Before claim, the Supervisor resolves a host-verified task route and checks projectRef and Task Manifest digest. The Registry independently re-resolves the route before PLAN and EXECUTE.
+5. Claim is durable before execution. The fixed host task executor receives one task plus task-bound plan and checkpoint callbacks. It cannot nominate another project in those Registry commands.
+6. Completion requires evidence. A failed outcome must carry evidence that the trusted runner reconciled possible side effects. Exceptions, malformed outcomes or failed terminal writes become `recovery_required` (or remain `running` only if the interruption event itself cannot be persisted).
+7. `runUntilIdle()` repeats bounded cycles. Route/provider blockers are reported as blocked rather than misreported as an empty queue.
+
+### Boundaries
+
+This is an explicit in-process scheduler, not a daemon. It does not start Windows services, poll in the background, generate tasks from model goals or execute arbitrary shell/Git operations. The host must inject a trusted taskExecutor implementing the Model Provider → strict proposal → Registry → fixed adapters → verifier/evidence loop.
+
+The configured lock is local-host only; a stale lock remains for operator inspection. Global/per-project concurrency caps do not replace Resource Leases or OS-level quotas.
+
+Production Task Manifest/routing/mandate providers, safe filesystem/Git worktree adapters, Windows ResourceManager integration, a real IMMORTAL execution path and second-project host proof remain outstanding.
