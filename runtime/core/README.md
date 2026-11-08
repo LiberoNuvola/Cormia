@@ -550,3 +550,20 @@ The adapter resolves the worktree from host-bound projectRef/taskRef at EXECUTE 
 The task worktree is a separate Git checkout but not yet an OS sandbox. This module does not run arbitrary shell, build, Docker test, Git commit/branch/push, workflow, wallet or Cardano operations. Parent-directory realpath/lstat checks and final-component no-follow flags reduce path attacks, but a hostile concurrent local process can still race path components on filesystems without openat-style APIs; production isolation still requires a host-controlled worktree root, single Supervisor, OS/container policy and real Windows host tests. Stale lock files deliberately fail closed and require host inspection.
 
 The implementation does not start a Windows service or touch the user's actual IMMORTAL checkout. It is ready for CI verification using temporary local Git repositories.
+
+## 18. Task-worktree-scoped fixed-profile test execution — candidate host adapter
+
+New implementation:
+- `../reference-worker/task-worktree-test-operation-adapter.mjs`
+- `../reference-worker/task-worktree-test-operation-adapter.test.mjs`
+- `../reference-worker/LOCAL_TASK_WORKTREE_TEST_EXECUTION_ADAPTER.md`
+
+The `workspace.test` adapter accepts only a host-registered `executionProfileId`; it cannot accept a model-supplied command, arguments, image, environment, mount, test-file list or resource class. v0.1 supports only the fixed Node built-in test runner (`node --test`) with exact test files pinned by host profile and a digest-pinned container image.
+
+The runner verifies a canonical task-worktree root and every test file as a regular non-symlink file. It requires the named Docker `default` context to resolve to a local POSIX `unix://` or Windows `npipe://` endpoint, inspects the exact image locally and refuses to run if the image is not preloaded. `--pull=never` prevents implicit registry pulls. The container has no network, read-only root, dropped capabilities, no-new-privileges, non-root identity, PID/memory/swap/CPU bounds and bounded tmpfs/output/time. Only the task worktree is mounted.
+
+`workspace.test` also requires an active Broker Resource Lease. The runner polls the Broker's lease assertion while Docker is running and terminates the process on revocation/expiry. The adapter does not create or replace the lease; production composition must connect the existing local ResourceManager through the trusted Resource Provider. Docker limits and callback-scoped lease are not claimed to be OS-wide quotas.
+
+CI tests use a deterministic fake Docker CLI. They prove argv construction, local-context and preloaded-image gates, no implicit pull, symlink rejection and lease-loss termination; they do not run a real Docker daemon or certify Windows behavior. The result is raw bounded test evidence; only an independent task result verifier may accept it. See `LOCAL_TASK_WORKTREE_TEST_EXECUTION_ADAPTER.md`.
+
+Activation remains gated: no host test profile has been approved for IMMORTAL, no real Windows ResourceManager is connected, and no production mandate/consent/revocation providers are active. No arbitrary shell or non-Node runner is introduced. Other toolchains require their own reviewed fixed-profile adapters.
