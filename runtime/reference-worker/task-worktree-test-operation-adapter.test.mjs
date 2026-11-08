@@ -221,7 +221,7 @@ test("Docker runner terminates when the task resource lease is revoked", async (
       workspace: { rootPath: workspace.rootPath },
       assertResourceActive() {
         checks += 1;
-        if (checks >= 2) throw new Error("revoked");
+        if (checks >= 3) throw new Error("revoked");
         return true;
       }
     }), error => error.code === "TEST_RESOURCE_LEASE_LOST");
