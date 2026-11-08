@@ -181,7 +181,14 @@ export function createDockerTaskWorktreeTestRunner({
     if (typeof assertResourceActive !== "function") {
       throw new TaskWorktreeTestError("TEST_RESOURCE_LEASE_REQUIRED");
     }
-    assertResourceActive();
+    const assertLease = () => {
+      try {
+        assertResourceActive();
+      } catch {
+        throw new TaskWorktreeTestError("TEST_RESOURCE_LEASE_LOST");
+      }
+    };
+    assertLease();
     const root = await verifyTestFiles(workspace, validated.testFiles);
     let dockerHost;
     try {
@@ -221,7 +228,7 @@ export function createDockerTaskWorktreeTestRunner({
       throw new TaskWorktreeTestError("DOCKER_MOUNT_PATH_UNSUPPORTED");
     }
 
-    assertResourceActive();
+    assertLease();
     const args = [
       "--context", "default",
       "run", "--pull=never", "--rm",
@@ -299,7 +306,7 @@ export function createDockerTaskWorktreeTestRunner({
       timeoutHandle = setTimeout(() => terminate("TEST_RUNTIME_LIMIT_EXCEEDED"), validated.maxRuntimeMs);
       leaseHandle = setInterval(() => {
         try {
-          assertResourceActive();
+          assertLease();
         } catch {
           terminate("TEST_RESOURCE_LEASE_LOST");
         }
