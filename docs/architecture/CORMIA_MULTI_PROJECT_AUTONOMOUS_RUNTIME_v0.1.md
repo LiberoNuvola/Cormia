@@ -92,6 +92,18 @@ Implemented in `runtime/core/project-supervisor.mjs` with tests in `runtime/core
 The Supervisor composes the Runtime Registry and one durable Task Store per project. It acquires a local single-instance lock, performs conservative startup recovery, validates host task routes before claim, and uses deterministic round-robin scheduling with global and per-project concurrency caps. A fixed host-owned taskExecutor is the only execution entry point. Runner exceptions/outcome-persistence failures are classified as `recovery_required`, never automatically requeued.
 
 Status: in-process scheduling/host-executor boundary only. No Windows daemon, production Task Manifest/routing/mandate providers, actual Granite task loop, real workspace/worktree adapters or production Resource Manager composition yet. CI verification pending for this commit.
+## 2.8 Initial ModelProvider task planner and read-only execution bridge (2026-11-08)
+
+Implemented in `runtime/core/model-task-planner.mjs` and `runtime/reference-worker/immortal-coding-workspace-operation-adapters.mjs`, with dedicated tests and specification [CORMIA Model Task Planner and Read-only Workspace Execution v0.1](./CORMIA_MODEL_TASK_PLANNER_AND_READONLY_EXECUTION_v0.1.md).
+
+The planner sends a host-pinned local ModelProvider a bounded task-planning request and accepts only strict JSON `cormia.plan-proposal/0.1` data whose operations are present in the verified task context. The model receives no tools or dispatch function. The host executor goes through the existing Registry/Broker, checkpoints before execution, and requires an independent host evidence verifier before completing a task.
+
+The first concrete workspace operation adapters map only `workspace.list/read/diff/verify` to the legacy read-only CodingWorkspace tools. `relativePath` is passed from the Broker's authorization context to the adapter PLAN validator and must match the exact host-allowlisted path. Mutations, tests, shell and Git writes remain unavailable.
+
+CI [run #42452250557](https://github.com/LiberoNuvola/Cormia/actions/runs/42452250557): Core Node suite **149 PASS / 0 FAIL**; read-only adapter suite **7 PASS / 0 FAIL**.
+
+**Not yet end-to-end:** production signed Task Manifest/context and route providers, mandate/consent/revocation providers, task-scoped worktree, real Windows ResourceManager, real evidence verifier/writer, Windows service integration and the second-project host proof remain outstanding. The model-backed executor composition is tested with synthetic host providers; it is not yet wired to the user's local Agent or Windows machine.
+
 ## 3. Project execution topology
 
 | Component | Responsibility |
