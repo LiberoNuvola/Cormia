@@ -205,13 +205,15 @@ async function writeNewFile(targetPath, contentBuffer) {
   const flags = constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL |
     (constants.O_NOFOLLOW ?? 0);
   let handle;
+  let createdByThisCall = false;
   try {
     handle = await open(targetPath, flags, 0o600);
+    createdByThisCall = true;
     await handle.writeFile(contentBuffer);
     await handle.sync();
   } catch (error) {
     await handle?.close().catch(() => {});
-    await unlink(targetPath).catch(() => {});
+    if (createdByThisCall) await unlink(targetPath).catch(() => {});
     if (error?.code === "EEXIST") {
       throw new TaskWorkspaceOperationError("TASK_WORKSPACE_FILE_EXISTS");
     }
@@ -238,8 +240,10 @@ async function atomicReplaceFile(targetPath, contentBuffer, rootPath, expectedSh
   const flags = constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL |
     (constants.O_NOFOLLOW ?? 0);
   let handle;
+  let temporaryCreatedByThisCall = false;
   try {
     handle = await open(temporaryPath, flags, 0o600);
+    temporaryCreatedByThisCall = true;
     await handle.writeFile(contentBuffer);
     await handle.sync();
     await handle.close();
@@ -265,7 +269,7 @@ async function atomicReplaceFile(targetPath, contentBuffer, rootPath, expectedSh
     throw new TaskWorkspaceOperationError("TASK_WORKSPACE_REPLACE_FAILED");
   } finally {
     await handle?.close().catch(() => {});
-    await unlink(temporaryPath).catch(() => {});
+    if (temporaryCreatedByThisCall) await unlink(temporaryPath).catch(() => {});
   }
 
   return previousSha256;
