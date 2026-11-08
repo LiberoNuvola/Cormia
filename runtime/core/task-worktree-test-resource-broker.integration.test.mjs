@@ -180,7 +180,7 @@ test("Project Runtime Broker dispatches workspace.test under the existing local 
       }]
     }
   });
-  assert.equal(prepared.accepted, true);
+  assert.equal(prepared.accepted, true, JSON.stringify(prepared));
 
   const executed = await runtime.executePlan({
     taskRef: TASK,
