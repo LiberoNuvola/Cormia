@@ -196,6 +196,7 @@ test("one Supervisor autonomously creates/replaces files in two project-specific
     });
 
     const providerArrivals = new Set();
+    const verificationDiagnostics = [];
     let notifyBothArrived;
     const bothArrived = new Promise(resolve => { notifyBothArrived = resolve; });
     const providerGate = new Promise(resolve => { releaseProvider = resolve; });
