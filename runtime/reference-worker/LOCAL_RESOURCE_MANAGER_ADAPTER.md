@@ -53,3 +53,17 @@ Run from this directory:
 ```powershell
 node --test .\immortal-resource-manager-adapter.test.mjs
 ```
+
+## Broker Resource Provider composition — 2026-11-08
+
+`immortal-resource-provider-composition.mjs` now provides `createImmortalResourceProvider()`, which composes:
+
+1. the existing fixed mapping in `withLocalResourceLease()`;
+2. Cormia's `createLocalResourceProvider()` offer/lease wrapper;
+3. the Plan–Execute Broker's `resourceProvider.withLease()` contract.
+
+The host supplies the actual ResourceManager object and owner-accepted/validated offers. The offer's operation is rejected unless it is one of the reviewed fixed IDs in `RESOURCE_OPERATION_KINDS`; `workspace-test` maps to the existing `cpu-heavy` class. The model cannot select this mapping. The Broker receives a task-bound active lease during adapter execution; the ResourceManager's release closure is called in `finally`, including on thrown test-runner errors. A denied ResourceManager acquisition never invokes the operation.
+
+Four new tests cover successful acquire/release, denial, exception cleanup and rejection of arbitrary operation IDs. CI validation is running on the current branch; this is a synthetic fake-ResourceManager contract test, not a live Windows Agent connection.
+
+Limitations remain: process-local lease/offer state, no OS-wide quota, no durable lease store, and no external cancellation interface on the existing ResourceManager lease itself. Resource Provider expiry/revocation checks remain distinct from actual ResourceManager hardware enforcement. The factory does not access or modify the user's `E:\AI\Immortal-Agent-v0.7` files.
