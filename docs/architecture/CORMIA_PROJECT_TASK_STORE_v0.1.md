@@ -129,7 +129,7 @@ CI evidence is linked from the multi-project runtime plan and will be updated af
 ## 8. Explicit non-goals / next layer
 
 The task store does not implement:
-- a global Project Supervisor or fair multi-project scheduler;
+- a global Project Supervisor or fair multi-project scheduler (the first in-process host Supervisor slice is documented separately);
 - concurrency/resource quotas or durable Resource Leases;
 - automatic worker/process launch or Windows service lifecycle;
 - signed Task Manifest verification or production host identity;
