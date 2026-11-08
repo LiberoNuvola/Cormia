@@ -555,6 +555,7 @@ export function createPlanExecuteCapabilityBroker({
     // before the first await or any external side effect.
     record.state = "EXECUTING";
     const completed = [];
+    let dispatchedStepCount = 0;
 
     try {
       for (const step of record.preparedSteps) {
@@ -607,6 +608,9 @@ export function createPlanExecuteCapabilityBroker({
             leaseContext.assertActive();
           }
 
+          // Count the adapter boundary before entering user/project code.
+          // A denied Resource Provider that never calls dispatch leaves this at zero.
+          dispatchedStepCount += 1;
           const result = await step.adapter.execute(Object.freeze({
             taskRef: record.task.taskId,
             manifestDigest: record.task.manifestDigest,
@@ -674,7 +678,8 @@ export function createPlanExecuteCapabilityBroker({
         planRef: record.planRef,
         planDigest: record.planDigest,
         reason: errorCode(error, "EXECUTION_FAILED"),
-        completedStepCount: completed.length
+        completedStepCount: completed.length,
+        dispatchedStepCount
       });
     }
   }
