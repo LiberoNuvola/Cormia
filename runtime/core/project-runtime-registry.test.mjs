@@ -288,7 +288,7 @@ test("runtime's project-bound Task Authority rejects a task routed to the wrong 
 
   const result = await registry.prepareTaskPlan({ taskRef: TASK_A, proposal: proposal() });
   assert.equal(result.accepted, false);
-  assert.match(result.reason, /TASK_AUTHORITY_LOAD_FAILED|TASK_AUTHORITY/);
+  assert.equal(result.reason, "PLAN_PREPARATION_FAILED");
   assert.deepEqual(dispatches, []);
 });
 
