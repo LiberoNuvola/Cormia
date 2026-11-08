@@ -17,6 +17,7 @@ on:
       - "verification/core_contracts/**"
       - "schemas/core/**"
       - "runtime/core/**"
+      - "runtime/reference-worker/**"
       - ".github/workflows/exp-boundary-reference-model.yml"
   workflow_dispatch:
 
