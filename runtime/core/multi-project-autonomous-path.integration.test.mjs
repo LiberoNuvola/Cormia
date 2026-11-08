@@ -447,7 +447,11 @@ test("full synthetic path: durable task → Supervisor → local ModelProvider �
 
     const cycle = await supervisor.runCycle();
     assert.equal(cycle.scheduledCount, 1);
-    assert.equal(cycle.results[0].state, "completed");
+    assert.equal(
+      cycle.results[0].state,
+      "completed",
+      JSON.stringify({ result: cycle.results[0], task: (await harness.taskStore.read()).tasks[0] })
+    );
     assert.equal(cycle.results[0].projectRef, PROJECT_REF);
     assert.deepEqual(harness.dispatches, [{
       operation: "workspace_read",
