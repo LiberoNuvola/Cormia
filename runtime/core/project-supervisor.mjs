@@ -592,7 +592,8 @@ export function createProjectSupervisor({
       cycles.push(cycle);
       if (cycle.scheduledCount === 0) {
         return Object.freeze({
-          idle: true,
+          idle: cycle.skipped.length === 0,
+          blocked: cycle.skipped.length > 0,
           limitReached: false,
           cycles: Object.freeze(cycles)
         });
@@ -600,6 +601,7 @@ export function createProjectSupervisor({
     }
     return Object.freeze({
       idle: false,
+      blocked: false,
       limitReached: true,
       cycles: Object.freeze(cycles)
     });
