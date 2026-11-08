@@ -27,7 +27,7 @@ async function temporaryWorkspace() {
   const rootPath = await mkdtemp(path.join(os.tmpdir(), "cormia-test-worktree-"));
   const file = path.join(rootPath, "runtime", "core", "example.test.mjs");
   await mkdir(path.dirname(file), { recursive: true });
-  await writeFile(file, "import test from 'node:test'; test('ok', () => {});\\n", "utf8");
+  await writeFile(file, "import test from 'node:test'; test('ok', () => {});\n", "utf8");
   return { rootPath, file };
 }
 
@@ -144,7 +144,7 @@ test("Docker runner uses a fixed no-network sandbox and host-pinned test files",
   const directory = path.dirname(workspace.rootPath);
   const fakeDocker = path.join(directory, "fake-docker");
   await writeFile(fakeDocker,
-    "#!/usr/bin/env node\\nprocess.stdout.write(JSON.stringify(process.argv.slice(2)));\\n",
+    "#!/usr/bin/env node\nprocess.stdout.write(JSON.stringify(process.argv.slice(2)));\n",
     "utf8");
   await chmod(fakeDocker, 0o755);
 
@@ -205,7 +205,7 @@ test("Docker runner terminates when the task resource lease is revoked", async (
   const directory = path.dirname(workspace.rootPath);
   const fakeDocker = path.join(directory, "fake-sleep-docker");
   await writeFile(fakeDocker,
-    "#!/usr/bin/env node\\nsetTimeout(() => process.exit(0), 5000);\\n",
+    "#!/usr/bin/env node\nsetTimeout(() => process.exit(0), 5000);\n",
     "utf8");
   await chmod(fakeDocker, 0o755);
 
