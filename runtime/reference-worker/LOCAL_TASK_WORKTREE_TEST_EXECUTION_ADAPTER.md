@@ -98,6 +98,28 @@ Connect the existing local ResourceManager through the Broker Resource Provider;
 
 This closes the first real Windows Docker Desktop runner smoke test. It does **not** prove production Broker-to-ResourceManager wiring: the smoke invocation supplied a callback-scoped always-active test lease. It also does not certify Docker as a hardened VM, the IMMORTAL test toolchain, or production project authority. The full integration and an approved fixed IMMORTAL test profile remain open.
 
+## Broker → actual ResourceManager → real Docker smoke harness
+
+`scripts/smoke-broker-resource-manager-docker.mjs` composes the Project Runtime Broker, a synthetic exact-scope Task Manifest/mandate fixture, the real `createImmortalResourceProvider()`, the existing local `withLocalResourceLease()` adapter, the actual ResourceManager imported from the separate Coding Workspace root, a disposable real Git worktree, and the real Docker runner.
+
+PowerShell invocation (no image pull):
+
+```powershell
+$env:CORMIA_DOCKER_TEST_IMAGE = $image
+$env:CORMIA_CODING_ROOT = "E:\\AI\\Immortal-CodingLab\\workspace"
+try {
+    node .\\scripts\\smoke-broker-resource-manager-docker.mjs
+    if ($LASTEXITCODE -ne 0) { throw "Broker/ResourceManager/Docker smoke test failed or was blocked" }
+} finally {
+    Remove-Item Env:CORMIA_DOCKER_TEST_IMAGE -ErrorAction SilentlyContinue
+    Remove-Item Env:CORMIA_CODING_ROOT -ErrorAction SilentlyContinue
+}
+```
+
+The script uses the fixed `workspace-test` → `cpu-heavy` mapping. If the real ResourceManager denies admission, the Broker path fails closed and Docker is not started. If admitted, the real Docker runner uses the exact digest image already present locally and runs only the synthetic host-pinned Node test file in a disposable task worktree.
+
+**Trust boundary:** the ResourceManager instance and Docker daemon are real host components; the task, manifest, project mandate resolver and owner-accepted Resource Offer are synthetic fixtures created by this smoke harness. This is an integration smoke, not activation of the autonomous Agent, not a signed mandate/consent/revocation proof, and not an IMMORTAL production test profile. The existing Agent's `APPROVO`/write-approval behavior is not touched. The temporary source repo/worktree is deleted on exit.
+
 ## Broker and ResourceManager composition
 
 `runtime/core/task-worktree-test-resource-broker.integration.test.mjs` composes the real Project Runtime/Plan–Execute Broker, fixed-profile `workspace.test` adapter, `createImmortalResourceProvider()` and `withLocalResourceLease()`. It proves the Broker's required Resource Offer causes the fixed `workspace-test` → `cpu-heavy` ResourceManager operation, the adapter receives an active task-bound lease, the test result returns through the Broker, and the release closure runs once.
