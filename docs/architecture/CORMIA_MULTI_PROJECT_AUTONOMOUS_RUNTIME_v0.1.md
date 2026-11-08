@@ -85,6 +85,13 @@ Implemented in `runtime/core/project-task-store.mjs` and tested by `runtime/core
 
 Detailed contract: [Cormia Durable Project Task Store v0.1](./CORMIA_PROJECT_TASK_STORE_v0.1.md). This remains a persistence slice, not yet the Supervisor, fair scheduler, Resource Lease integration or autonomous execution loop.
 
+## 2.7 Local Project Supervisor — fair scheduling and host runner boundary (2026-11-08)
+
+Implemented in `runtime/core/project-supervisor.mjs` with tests in `runtime/core/project-supervisor.test.mjs`; full contract: [Cormia Local Project Supervisor v0.1](./CORMIA_PROJECT_SUPERVISOR_v0.1.md).
+
+The Supervisor composes the Runtime Registry and one durable Task Store per project. It acquires a local single-instance lock, performs conservative startup recovery, validates host task routes before claim, and uses deterministic round-robin scheduling with global and per-project concurrency caps. A fixed host-owned taskExecutor is the only execution entry point. Runner exceptions/outcome-persistence failures are classified as `recovery_required`, never automatically requeued.
+
+Status: in-process scheduling/host-executor boundary only. No Windows daemon, production Task Manifest/routing/mandate providers, actual Granite task loop, real workspace/worktree adapters or production Resource Manager composition yet. CI verification pending for this commit.
 ## 3. Project execution topology
 
 | Component | Responsibility |
