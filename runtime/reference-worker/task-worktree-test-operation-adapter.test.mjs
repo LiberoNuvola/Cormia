@@ -135,7 +135,7 @@ test("test adapter passes only the host profile and task worktree to its fixed r
   assert.equal(result.passed, true);
   assert.equal(result.executionProfileId, PROFILE.executionProfileId);
   assert.equal(invocation.workspace, workspace);
-  assert.equal(invocation.profile, PROFILE);
+  assert.deepEqual(invocation.profile, PROFILE);
   assert.ok(leaseChecks >= 2);
 });
 
