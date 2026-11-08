@@ -168,7 +168,8 @@ test("Docker runner uses a fixed no-network sandbox and host-pinned test files",
     assert.ok(args.includes("--memory"));
     assert.ok(args.includes("--memory-swap"));
     assert.ok(args.includes("--user"));
-    assert.ok(args.includes("1000:1000"));
+    const userIndex = args.indexOf("--user");
+    assert.match(args[userIndex + 1], /^[1-9][0-9]*:[1-9][0-9]*$/);
     assert.ok(args.includes("--cpus"));
     assert.ok(args.includes("--pids-limit"));
     assert.ok(args.includes(IMAGE));
