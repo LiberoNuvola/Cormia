@@ -229,3 +229,55 @@ test("Docker runner terminates when the task resource lease is revoked", async (
     await rm(workspace.rootPath, { recursive: true, force: true });
   }
 });
+
+
+async function writeDockerPreflightStub(directory, { host, imageAvailable }) {
+  const executable = path.join(directory, "fake-docker-preflight");
+  const source = [
+    "#!/usr/bin/env node",
+    "const args = process.argv.slice(2);",
+    "if (args[0] === 'context') { process.stdout.write(JSON.stringify(" + JSON.stringify(host) + ")); }",
+    "else if (args[0] === '--context' && args[2] === 'image') { process.exit(" + (imageAvailable ? "0" : "1") + "); }",
+    "else { process.exit(23); }",
+    ""
+  ].join("\n");
+  await writeFile(executable, source, "utf8");
+  await chmod(executable, 0o755);
+  return executable;
+}
+
+test("Docker runner refuses a remote Docker context", async () => {
+  const workspace = await temporaryWorkspace();
+  const executable = await writeDockerPreflightStub(path.dirname(workspace.rootPath), {
+    host: "tcp://192.0.2.10:2376",
+    imageAvailable: true
+  });
+  try {
+    const runner = createDockerTaskWorktreeTestRunner({ dockerExecutable: executable });
+    await assert.rejects(runner.run({
+      profile: PROFILE,
+      workspace: { rootPath: workspace.rootPath },
+      assertResourceActive() { return true; }
+    }), error => error.code === "DOCKER_CONTEXT_NOT_LOCAL");
+  } finally {
+    await rm(workspace.rootPath, { recursive: true, force: true });
+  }
+});
+
+test("Docker runner refuses to pull a missing image", async () => {
+  const workspace = await temporaryWorkspace();
+  const executable = await writeDockerPreflightStub(path.dirname(workspace.rootPath), {
+    host: "unix:///var/run/docker.sock",
+    imageAvailable: false
+  });
+  try {
+    const runner = createDockerTaskWorktreeTestRunner({ dockerExecutable: executable });
+    await assert.rejects(runner.run({
+      profile: PROFILE,
+      workspace: { rootPath: workspace.rootPath },
+      assertResourceActive() { return true; }
+    }), error => error.code === "TEST_IMAGE_NOT_PRELOADED");
+  } finally {
+    await rm(workspace.rootPath, { recursive: true, force: true });
+  }
+});
