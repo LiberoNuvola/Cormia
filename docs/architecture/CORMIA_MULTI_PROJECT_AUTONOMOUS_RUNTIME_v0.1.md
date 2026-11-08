@@ -104,6 +104,14 @@ CI [run #42452250557](https://github.com/LiberoNuvola/Cormia/actions/runs/424522
 
 **Not yet end-to-end:** production signed Task Manifest/context and route providers, mandate/consent/revocation providers, task-scoped worktree, real Windows ResourceManager, real evidence verifier/writer, Windows service integration and the second-project host proof remain outstanding. The model-backed executor composition is tested with synthetic host providers; it is not yet wired to the user's local Agent or Windows machine.
 
+## 2.9 Synthetic end-to-end task path proof (2026-11-08)
+
+Added `runtime/core/multi-project-autonomous-path.integration.test.mjs`, which composes the actual Project Task Store, Project Supervisor, deterministic ModelProvider, Model Task Planner, Project Runtime Registry, Plan–Execute Broker and read-only CodingWorkspace adapter through one complete in-process task path. It executes one bounded `workspace.read`, persists a checkpoint, requires a separate fixture verifier and records its evidence reference before task completion.
+
+CI [run #42452775680](https://github.com/LiberoNuvola/Cormia/actions/runs/42452775680): **150 Core tests PASS / 0 FAIL** and **7 workspace adapter tests PASS / 0 FAIL**.
+
+This is a synthetic single-project end-to-end composition test. The route, Task Authority, mandate/consent/revocation, ModelProvider generation and result verifier are test fixtures. It does not prove real Granite, production signatures, Windows workspace safety or a two-project model-backed end-to-end run. The latter remains an explicit acceptance gate. See [Synthetic Task Path Integration v0.1](./CORMIA_AUTONOMOUS_TASK_PATH_SYNTHETIC_INTEGRATION_v0.1.md).
+
 ## 3. Project execution topology
 
 | Component | Responsibility |
