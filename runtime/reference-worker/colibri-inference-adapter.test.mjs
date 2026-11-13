@@ -162,7 +162,11 @@ test("enforces the configured timeout even when the caller supplies an AbortSign
     modelId: "glm-5.2-colibri",
     requestTimeoutMs: 10,
     fetchImpl: async (_url, options) => new Promise((resolve, reject) => {
-      options.signal.addEventListener("abort", () => reject(options.signal.reason), { once: true });
+      const keepAlive = setTimeout(() => reject(new Error("signal was not aborted")), 500);
+      options.signal.addEventListener("abort", () => {
+        clearTimeout(keepAlive);
+        reject(options.signal.reason);
+      }, { once: true });
     })
   });
   const caller = new AbortController();
@@ -178,7 +182,11 @@ test("reports caller cancellation separately from an adapter timeout", async () 
     modelId: "glm-5.2-colibri",
     requestTimeoutMs: 1000,
     fetchImpl: async (_url, options) => new Promise((resolve, reject) => {
-      options.signal.addEventListener("abort", () => reject(options.signal.reason), { once: true });
+      const keepAlive = setTimeout(() => reject(new Error("signal was not aborted")), 500);
+      options.signal.addEventListener("abort", () => {
+        clearTimeout(keepAlive);
+        reject(options.signal.reason);
+      }, { once: true });
     })
   });
   const pending = adapter.listModels({ signal: caller.signal });
