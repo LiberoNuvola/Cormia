@@ -20,7 +20,7 @@ A fourth slice adds a host-scoped Coding Workspace adapter that exposes only lis
 
 ## Optional Colibrì inference backend
 
-A Cormia-owned HTTP adapter for the upstream Colibrì OpenAI-compatible API is implemented at `runtime/reference-worker/colibri-inference-adapter.mjs`. It is an optional model-provider compatibility slice, not a vendored inference engine. The adapter is loopback-only, host-configured and non-streaming; it never starts Colibrì, downloads model weights or executes model-proposed tool calls. Cormia's trusted policy layer remains responsible for authorizing every tool call. Eight mocked API contract tests pass. It is not wired into the existing Agent or a live Runtime. See [LOCAL_COLIBRI_INFERENCE_ADAPTER.md](./LOCAL_COLIBRI_INFERENCE_ADAPTER.md).
+A Cormia-owned HTTP adapter for the upstream Colibrì OpenAI-compatible API is implemented at `runtime/reference-worker/colibri-inference-adapter.mjs`. It is an optional model-provider compatibility slice, not a vendored inference engine. The adapter is loopback-only, host-configured and non-streaming; it never starts Colibrì, downloads model weights or executes model-proposed tool calls. Cormia's trusted policy layer remains responsible for authorizing every tool call. Ten mocked API contract tests cover the API boundary, timeout and caller cancellation; see the dedicated compatibility workflow. It is not wired into the existing Agent or a live Runtime. See [LOCAL_COLIBRI_INFERENCE_ADAPTER.md](./LOCAL_COLIBRI_INFERENCE_ADAPTER.md).
 
 ## Existing source map
 
