@@ -36,6 +36,14 @@ The existing bridge is intentionally fixed to `LiberoNuvola/Immortal-Protocol` /
 
 The v0.8.0 local agent, Granite/llama.cpp backend, task-store lineage, Resource Manager, Evolution Manager, Coding Workspace and Docker test path are the initial implementation nucleus. AEP conformance requires adapters and test vectors; v0.8.0 is not declared conformant today.
 
+### Colibrì inference adapter
+
+A Cormia-owned, optional model-provider adapter is implemented at `runtime/reference-worker/colibri-inference-adapter.mjs`. It calls only the loopback Colibrì OpenAI-compatible `/v1/models` and non-streaming `/v1/chat/completions` endpoints. The first reviewed target is Colibrì v2.1.0 with GLM-5.2; the upstream API documents tool calling for GLM-5.2 and an opt-in strict schema-checked mode.
+
+This is an API adapter, not a source-code dependency or a runtime integration. It does not install/start Colibrì, download model weights, execute returned tool calls, schedule peers, issue CRC or replace the Granite/llama.cpp path. Endpoints are loopback-only. Tool calls remain untrusted model proposals and must pass Cormia's host-owned capability/policy dispatcher. Resource Manager lease composition belongs to a trusted Runtime caller.
+
+The 8 contract tests use a mock endpoint; no live Colibrì/model test or hardware benchmark is claimed. Engine and model licenses are separate (Apache-2.0 and MIT respectively); exact binary/model checksums and the model-loader advisory disposition are deployment blockers. See [LOCAL_COLIBRI_INFERENCE_ADAPTER.md](../runtime/reference-worker/LOCAL_COLIBRI_INFERENCE_ADAPTER.md).
+
 ### Local Evolution Manager adapter
 
 A Cormia-side wrapper is implemented at `runtime/reference-worker/immortal-evolution-manager-adapter.mjs`. It checks the fixed four-entry source map (two implementation modules plus two immutable baseline-test aliases), starts and binds candidate runs to a trusted run ID, and exposes only allowlisted reads, candidate-test creation, SHA-preconditioned patches and a human review packet.
