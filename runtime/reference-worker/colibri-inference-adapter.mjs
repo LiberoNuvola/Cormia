@@ -45,11 +45,11 @@ function validateMessages(messages) {
   for (const [index, message] of messages.entries()) {
     if (!message || typeof message !== "object" || Array.isArray(message) ||
         !ALLOWED_ROLES.has(message.role)) {
-      throw new TypeError(\`messages[\${index}] has an unsupported role or shape.\`);
+      throw new TypeError(`messages[${index}] has an unsupported role or shape.`);
     }
     if (!(typeof message.content === "string" || message.content === null || Array.isArray(message.content)) &&
         message.role !== "assistant") {
-      throw new TypeError(\`messages[\${index}].content has an unsupported type.\`);
+      throw new TypeError(`messages[${index}].content has an unsupported type.`);
     }
   }
 }
@@ -60,7 +60,7 @@ function validateTools(tools) {
   for (const [index, tool] of tools.entries()) {
     if (!tool || tool.type !== "function" || !tool.function ||
         typeof tool.function.name !== "string" || !tool.function.name.trim()) {
-      throw new TypeError(\`tools[\${index}] must be an OpenAI function tool declaration.\`);
+      throw new TypeError(`tools[${index}] must be an OpenAI function tool declaration.`);
     }
   }
 }
@@ -75,13 +75,13 @@ async function readJson(response, operation) {
   try {
     payload = await response.json();
   } catch (cause) {
-    throw new ColibriAdapterError("invalid-json", \`Colibrì returned a non-JSON response for \${operation}.\`, {
+    throw new ColibriAdapterError("invalid-json", `Colibrì returned a non-JSON response for ${operation}.`, {
       status: response.status,
       cause
     });
   }
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
-    throw new ColibriAdapterError("invalid-response", \`Colibrì returned an invalid response for \${operation}.\`, {
+    throw new ColibriAdapterError("invalid-response", `Colibrì returned an invalid response for ${operation}.`, {
       status: response.status
     });
   }
@@ -89,7 +89,7 @@ async function readJson(response, operation) {
     const remoteCode = safeErrorCode(payload);
     throw new ColibriAdapterError(
       remoteCode ?? "upstream-error",
-      \`Colibrì request failed with HTTP \${response.status}\${remoteCode ? \` (\${remoteCode})\` : ""}.\`,
+      `Colibrì request failed with HTTP ${response.status}${remoteCode ? ` (${remoteCode})` : ""}.`,
       { status: response.status }
     );
   }
@@ -120,26 +120,35 @@ export function createColibriInferenceAdapter({
   if (typeof fetchImpl !== "function") throw new TypeError("fetchImpl must be a function.");
 
   const headers = { accept: "application/json" };
-  if (apiKey !== undefined) headers.authorization = \`Bearer \${apiKey}\`;
+  if (apiKey !== undefined) headers.authorization = `Bearer ${apiKey}`;
 
   async function request(path, { method = "GET", body, signal } = {}) {
-    const url = \`\${normalizedBaseUrl}\${path}\`;
+    const url = `${normalizedBaseUrl}${path}`;
+    if (signal !== undefined && !(signal instanceof AbortSignal)) {
+      throw new TypeError("signal must be an AbortSignal.");
+    }
+    const timeoutSignal = AbortSignal.timeout(requestTimeoutMs);
+    const requestSignal = signal === undefined
+      ? timeoutSignal
+      : AbortSignal.any([signal, timeoutSignal]);
     let response;
     try {
       response = await fetchImpl(url, {
         method,
         headers: body === undefined ? { ...headers } : { ...headers, "content-type": "application/json" },
         ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-        signal: signal ?? AbortSignal.timeout(requestTimeoutMs),
+        signal: requestSignal,
         redirect: "error"
       });
     } catch (cause) {
-      const code = cause?.name === "TimeoutError" || cause?.name === "AbortError"
+      const code = timeoutSignal.aborted || cause?.name === "TimeoutError"
         ? "request-timeout"
-        : "connection-failed";
-      throw new ColibriAdapterError(code, \`Could not complete local Colibrì \${method} request.\`, { cause });
+        : signal?.aborted
+          ? "request-aborted"
+          : "connection-failed";
+      throw new ColibriAdapterError(code, `Could not complete local Colibrì ${method} request.`, { cause });
     }
-    return readJson(response, \`\${method} \${path}\`);
+    return readJson(response, `${method} ${path}`);
   }
 
   return Object.freeze({
