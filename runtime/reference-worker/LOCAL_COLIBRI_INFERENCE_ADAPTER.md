@@ -58,4 +58,4 @@ node --check .\\runtime\\reference-worker\\colibri-inference-adapter.mjs
 node --test .\\runtime\\reference-worker\\colibri-inference-adapter.test.mjs
 ```
 
-The contract tests use a mocked OpenAI-compatible endpoint. They verify loopback restrictions, fixed API paths, host-held bearer authentication, strict non-streaming tool-call request shape, incomplete-generation classification, bounded upstream errors, malformed responses and transport failures. They do **not** install or execute Colibrì, download a model, verify a real server, benchmark hardware, or prove model quality/tool-call reliability on a specific checkpoint.
+The 10 contract tests use a mocked OpenAI-compatible endpoint. They verify loopback restrictions, fixed API paths, host-held bearer authentication, strict non-streaming tool-call request shape, incomplete-generation classification, bounded upstream errors, malformed responses, transport failures, enforced request timeouts and caller cancellation. They do **not** install or execute Colibrì, download a model, verify a real server, benchmark hardware, or prove model quality/tool-call reliability on a specific checkpoint.
