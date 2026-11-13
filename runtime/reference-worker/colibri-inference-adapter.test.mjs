@@ -156,3 +156,35 @@ test("maps transport timeout/failure to bounded adapter errors", async () => {
     error => error instanceof ColibriAdapterError && error.code === "request-timeout"
   );
 });
+
+test("enforces the configured timeout even when the caller supplies an AbortSignal", async () => {
+  const adapter = createColibriInferenceAdapter({
+    modelId: "glm-5.2-colibri",
+    requestTimeoutMs: 10,
+    fetchImpl: async (_url, options) => new Promise((resolve, reject) => {
+      options.signal.addEventListener("abort", () => reject(options.signal.reason), { once: true });
+    })
+  });
+  const caller = new AbortController();
+  await assert.rejects(
+    () => adapter.listModels({ signal: caller.signal }),
+    error => error instanceof ColibriAdapterError && error.code === "request-timeout"
+  );
+});
+
+test("reports caller cancellation separately from an adapter timeout", async () => {
+  const caller = new AbortController();
+  const adapter = createColibriInferenceAdapter({
+    modelId: "glm-5.2-colibri",
+    requestTimeoutMs: 1000,
+    fetchImpl: async (_url, options) => new Promise((resolve, reject) => {
+      options.signal.addEventListener("abort", () => reject(options.signal.reason), { once: true });
+    })
+  });
+  const pending = adapter.listModels({ signal: caller.signal });
+  caller.abort(new Error("cancelled by caller"));
+  await assert.rejects(
+    () => pending,
+    error => error instanceof ColibriAdapterError && error.code === "request-aborted"
+  );
+});
