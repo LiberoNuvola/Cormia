@@ -42,7 +42,7 @@ A Cormia-owned, optional model-provider adapter is implemented at `runtime/refer
 
 This is an API adapter, not a source-code dependency or a runtime integration. It does not install/start Colibrì, download model weights, execute returned tool calls, schedule peers, issue CRC or replace the Granite/llama.cpp path. Endpoints are loopback-only. Tool calls remain untrusted model proposals and must pass Cormia's host-owned capability/policy dispatcher. Resource Manager lease composition belongs to a trusted Runtime caller.
 
-The 10 contract tests use a mock endpoint and cover timeout/caller cancellation; no live Colibrì/model test or hardware benchmark is claimed. Engine and model licenses are separate (Apache-2.0 and MIT respectively); exact binary/model checksums and the model-loader advisory disposition are deployment blockers. See [LOCAL_COLIBRI_INFERENCE_ADAPTER.md](../runtime/reference-worker/LOCAL_COLIBRI_INFERENCE_ADAPTER.md).
+The 10 contract tests use a mock endpoint and cover timeout/caller cancellation; [GitHub Actions passed 10/10](https://github.com/LiberoNuvola/Cormia/actions/runs/43373173231). No live Colibrì/model test or hardware benchmark is claimed. Engine and model licenses are separate (Apache-2.0 and MIT respectively); exact binary/model checksums and the model-loader advisory disposition are deployment blockers. See [LOCAL_COLIBRI_INFERENCE_ADAPTER.md](../runtime/reference-worker/LOCAL_COLIBRI_INFERENCE_ADAPTER.md).
 
 ### Local Evolution Manager adapter
 
