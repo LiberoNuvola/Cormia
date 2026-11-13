@@ -1,0 +1,41 @@
+name: Colibrì Inference Adapter Compatibility
+
+on:
+  push:
+    branches: [main, work/exp-generalization-crosswalk, work/cormia-colibri-inference-adapter]
+    paths:
+      - "runtime/reference-worker/colibri-inference-adapter.mjs"
+      - "runtime/reference-worker/colibri-inference-adapter.test.mjs"
+      - "runtime/reference-worker/LOCAL_COLIBRI_INFERENCE_ADAPTER.md"
+      - ".github/workflows/colibri-inference-adapter.yml"
+  pull_request:
+    branches: [main, work/exp-generalization-crosswalk]
+    paths:
+      - "runtime/reference-worker/colibri-inference-adapter.mjs"
+      - "runtime/reference-worker/colibri-inference-adapter.test.mjs"
+      - "runtime/reference-worker/LOCAL_COLIBRI_INFERENCE_ADAPTER.md"
+      - ".github/workflows/colibri-inference-adapter.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compatibility:
+    name: Colibrì local adapter contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check adapter syntax
+        run: node --check runtime/reference-worker/colibri-inference-adapter.mjs
+
+      - name: Run adapter contract tests
+        run: node --test runtime/reference-worker/colibri-inference-adapter.test.mjs
