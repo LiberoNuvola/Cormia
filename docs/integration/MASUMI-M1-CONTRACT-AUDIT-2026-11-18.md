@@ -190,7 +190,7 @@ Until the unchecked items pass, M1 status is **PARTIAL / BLOCKED**, not frozen.
 
 ## 10. Next action
 
-The next implementation step is not a payment integration. It is a fixture-first, read-only M2 contract test against a pinned Preprod Registry deployment after the authentication and identifier-format questions above have been resolved. If the deployed service cannot be verified, build tests from source-pinned fixtures and leave live discovery disabled.
+The next implementation step is not a payment integration. A candidate M2 read-only adapter and offline contract tests have now been added at `runtime/reference-worker/masumi-registry-readonly-adapter.mjs` and `.test.mjs`, with a dedicated GitHub Actions workflow. The adapter requires an explicitly injected auth header (no fallback), restricts requests to the configured Registry origin and fixed query route, forces Preprod, and never calls provider/payment endpoints. The tests and syntax check have not yet been executed in this environment. Live discovery remains disabled until the authentication and identifier-format questions above have been resolved against a pinned Preprod deployment.
 
 ## 11. References
 
