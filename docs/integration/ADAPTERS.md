@@ -159,3 +159,5 @@ Masumi remains an external provider. Its registry metadata is untrusted input; i
 ## Masumi M1 source audit
 
 The source-pinned contract review is recorded in [MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md](MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md). M1 remains partial/blocked pending verification of the deployed Preprod Registry authentication header and the exact `agentIdentifier` / `assetIdentifier` / policy / asset-name relationship. M2 is limited to the Registry query endpoint in read-only mode; payment-information and all payment or wallet actions remain out of scope.
+
+The M2 read-only candidate is implemented at `runtime/reference-worker/masumi-registry-readonly-adapter.mjs` with offline contract tests and a dedicated GitHub Actions workflow. It is deliberately disabled for live use until the deployed Registry auth-header and identifier-format blockers are resolved. Tests have not yet been executed in this environment.
