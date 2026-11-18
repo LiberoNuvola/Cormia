@@ -21,7 +21,7 @@ The adapter is optional, replaceable, disabled by default, and isolated behind a
 The current Masumi documentation describes:
 
 - A Registry Service for searching agentic services and retrieving payment information.
-- A Cardano NFT identity per registered Agentic Service. The identifier is derived from the NFT asset name; it is not described as a DID.
+- A Cardano NFT identity per registered Agentic Service. The identifier is exposed by the Registry as the asset identifier. Masumi documentation also describes optional DID and Verifiable Credential material as a separate creator/trust layer; it must not be conflated with the NFT service identity.
 - A Payment Service / Masumi Node that manages wallets and Cardano payment operations.
 - An escrow-based purchase lifecycle with funds locking, result-hash submission, completion, refunds and disputes.
 - An Agentic Service API implemented by each service provider.
@@ -85,7 +85,7 @@ Rules:
 1. Masumi identity is stored as an external credential/reference attached to a Cormia peer/service record. It never replaces the Cormia node key or worker identity.
 2. NFT existence, policy ID, asset name, network and metadata must be verified against Cardano/registry evidence before marking identity VERIFIED_EXTERNAL.
 3. A registry API response alone is OBSERVED, not cryptographic verification.
-4. Registry metadata and service descriptions are untrusted data. They cannot modify task policy, capability grants, tool allowlists, trust scores or payment authorization.
+4. Registry metadata and service descriptions are untrusted data. They cannot modify task policy, capability grants, tool allowlists, trust scores or payment authorization. Optional DID/VC claims, when present, require independent issuer/schema validation and a separate trust policy.
 5. Discovery results are candidates only. AEP policy must independently decide whether the candidate is eligible for a task.
 6. No Masumi reputation score is accepted as a protocol authority or as a substitute for measured task history.
 
@@ -259,15 +259,15 @@ Mainnet and automatic hiring remain out of scope pending independent security, e
 
 Each gate requires review and tests. Passing a prior gate does not automatically authorize the next.
 
-## 11. Repository impact
+## 11. M1 source audit update (2026-11-18)\n\nThe follow-on source-level audit is recorded in [MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md](MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md). It pins the inspected Registry Service and Payment Service main commits, maps the current Registry query/search schemas, and identifies an unresolved authentication discrepancy: Registry middleware reads the `token` header while its generated OpenAPI security declaration names `API-Key`. The deployed Preprod version/header and exact identifier-to-policy/asset format remain unverified. Therefore M1 is **PARTIAL / BLOCKED**, not frozen.\n\nM2 is narrowed to `POST /api/v1/registry-entry/` only, using an operator-configured Registry origin and a verified read-only credential after the header discrepancy is resolved. `GET /api/v1/payment-information/` is deferred to a later separately authorized stage. The Payment Service API key permission flags (`canRead`, `canPay`, `canAdmin`) are not interchangeable with Registry Service authentication; no Payment Service key or wallet is needed for M2.\n\n## 12. Repository impact
 
 This proposal is deliberately additive. It does not modify SPEC.md, schemas/task-manifest.schema.json, economics, runtime, verifier, Cardano contracts, or existing adapters. The current architecture-first status remains unchanged.
 
 The existing docs/integration/ADAPTERS.md already establishes that external components are adapters and that protocol authority remains with AEP. This document specializes that boundary for Masumi; it does not supersede the general adapter policy.
 
-## 12. References
+## 13. References
 
-Masumi documentation inspected on 2026-11-18:
+Masumi documentation and source inspected on 2026-11-18:
 
 - Introduction: https://www.masumi.network/dev/masumi/documentation
 - Identity and NFT: https://www.masumi.network/dev/masumi/documentation/technical-documentation/agent-identity-nft
@@ -279,3 +279,4 @@ Masumi documentation inspected on 2026-11-18:
 - Cardano Developer Portal: https://developers.cardano.org/docs/build/integrate/ai-agents/masumi/
 
 Documentation is mutable. Pin the deployed Masumi Node, API and contract versions before implementation; this proposal does not claim a live integration or an independent audit of Masumi.
+\n\nSee also the source-pinned M1 audit: https://github.com/LiberoNuvola/Cormia/blob/work/exp-generalization-crosswalk/docs/integration/MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md\n
