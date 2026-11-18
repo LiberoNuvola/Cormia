@@ -155,3 +155,7 @@ The prototype is intentionally not wired to the local Agent. Host code must stil
 [CORMIA-MASUMI-ADAPTER-v0.1.md](CORMIA-MASUMI-ADAPTER-v0.1.md) defines a proposed optional boundary for Masumi registry discovery, Cardano NFT-backed external service identity, and Masumi-native escrow/payment observation. It is a research-backed proposal only; no runtime adapter or payment flow is implemented.
 
 Masumi remains an external provider. Its registry metadata is untrusted input; its NFT is not a Cormia node identity; its result hash is not an AEP verifier verdict; and its payment/escrow lifecycle does not issue CRC or authorize AEP task acceptance. The first proposed implementation gate is read-only discovery and identity verification. Local-only operation remains independent of Masumi.
+
+## Masumi M1 source audit
+
+The source-pinned contract review is recorded in [MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md](MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md). M1 remains partial/blocked pending verification of the deployed Preprod Registry authentication header and the exact `agentIdentifier` / `assetIdentifier` / policy / asset-name relationship. M2 is limited to the Registry query endpoint in read-only mode; payment-information and all payment or wallet actions remain out of scope.
