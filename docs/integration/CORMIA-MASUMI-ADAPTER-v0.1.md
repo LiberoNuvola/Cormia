@@ -1,6 +1,6 @@
 # Cormia–Masumi Adapter — Proposal v0.1
 
-- **Status:** proposed / research-backed interface; not implemented
+- **Status:** proposed adapter contract; M2 read-only candidate implemented with offline tests pending execution
 - **Date:** 2026-11-18
 - **Target:** Cormia / IMMORTAL AEP
 - **Scope:** optional external agent discovery, identity evidence and payment/escrow interoperability
