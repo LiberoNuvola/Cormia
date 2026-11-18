@@ -117,6 +117,7 @@ export function createMasumiRegistryReadonlyAdapter(options = {}) {
   const authHeaderName = options.authHeaderName;
   const fetchImpl = options.fetchImpl ?? globalThis.fetch;
   const maxResponseBytes = options.maxResponseBytes ?? 1_000_000;
+  const timeoutMs = options.timeoutMs ?? 10_000;
   const now = options.now ?? (() => new Date().toISOString());
 
   if (!nonEmptyString(baseUrl)) throw new TypeError("A configured Registry Service baseUrl is required.");
@@ -137,6 +138,9 @@ export function createMasumiRegistryReadonlyAdapter(options = {}) {
   if (!Number.isInteger(maxResponseBytes) || maxResponseBytes < 1 || maxResponseBytes > 5_000_000) {
     throw new TypeError("maxResponseBytes must be an integer from 1 to 5000000.");
   }
+  if (!Number.isInteger(timeoutMs) || timeoutMs < 100 || timeoutMs > 30_000) {
+    throw new TypeError("timeoutMs must be an integer from 100 to 30000.");
+  }
 
   const endpoint = new URL(REGISTRY_PATH, parsedBase.origin).toString();
 
@@ -146,6 +150,7 @@ export function createMasumiRegistryReadonlyAdapter(options = {}) {
       const response = await fetchImpl(endpoint, {
         method: "POST",
         redirect: "error",
+        signal: AbortSignal.timeout(timeoutMs),
         headers: {
           [authHeaderName]: apiKey,
           "content-type": "application/json",
