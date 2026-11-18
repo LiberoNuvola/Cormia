@@ -149,3 +149,9 @@ The current /code + APPROVO behavior remains only for the legacy Agent compatibi
 A pure policy helper now exists at runtime/reference-worker/local-autonomous-project-authority.mjs. One host-verified project mandate can derive a task child authority which is reused across repeated in-scope tool operations. Its contract tests explicitly cover multiple edits/tests under one child authority without per-operation approval callbacks. The 65-test suite in [run #25](https://github.com/LiberoNuvola/Cormia/actions/runs/41484097123) passed.
 
 The prototype is intentionally not wired to the local Agent. Host code must still provide a verified/persisted mandate, secure consent broker, revocation anchor, task-specific worktree, workspace I/O enforcement, credential broker, resource enforcement and autonomous task loop. The synthetic trust wrapper in tests is not a production signature or key store.
+
+## Candidate external agent-commerce adapter — Masumi
+
+[CORMIA-MASUMI-ADAPTER-v0.1.md](CORMIA-MASUMI-ADAPTER-v0.1.md) defines a proposed optional boundary for Masumi registry discovery, Cardano NFT-backed external service identity, and Masumi-native escrow/payment observation. It is a research-backed proposal only; no runtime adapter or payment flow is implemented.
+
+Masumi remains an external provider. Its registry metadata is untrusted input; its NFT is not a Cormia node identity; its result hash is not an AEP verifier verdict; and its payment/escrow lifecycle does not issue CRC or authorize AEP task acceptance. The first proposed implementation gate is read-only discovery and identity verification. Local-only operation remains independent of Masumi.
