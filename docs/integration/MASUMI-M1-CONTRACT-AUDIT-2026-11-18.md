@@ -166,7 +166,7 @@ The official Masumi Network GitHub organization publishes these Registry NFT pol
 
 These are network-specific source anchors. The Preprod value can be used as an expected policy reference when independently checking a Registry NFT, but it does not prove that a returned `agentIdentifier` encodes the NFT asset name, nor does it establish that any Registry record is present on-chain. The exact asset name/hex, transaction reference, datum/metadata and confirmation point still need independent chain evidence.
 
-The Registry Service repository README explicitly describes `https://registry.masumi.network/docs/` as a public service intended for testing and development, and warns that it is experimental and may change or be removed. It also publishes a public test API key. That public key is excluded from this integration. The hostname is therefore a **public testing/development endpoint**, not evidence of a pinned production service or of a particular Preprod deployment's image, version or authentication policy.
+The Registry Service README at the exact source pin recorded in section 2 (`27cfbbec01c5b2301f151e32d86814c954b61d4b`) explicitly describes `https://registry.masumi.network/docs/` as a public service intended only for testing and development, says not to use it in production, and warns that it is experimental and may change or be removed. It also publishes a public test API key. That public key is excluded from this integration. The hostname is therefore a **public testing/development endpoint**, not evidence of a pinned production service or of a particular Preprod deployment's image, version or authentication policy.
 
 The probe remains pinned to `https://registry.masumi.network` to prevent destination substitution, but now additionally requires the operator to acknowledge locally that this is the public test/development target. This acknowledgement is only a guard against accidental use; it is not deployment attestation and does not close M1. A token may be supplied only when it was explicitly issued for that exact endpoint. No credential should be sent before the operator has independently confirmed the intended target.
 
@@ -225,6 +225,7 @@ Live discovery remains disabled. M1 is still **PARTIAL / BLOCKED** until the int
 Official source repositories and documentation:
 
 - https://github.com/masumi-network/masumi-registry-service
+- https://github.com/masumi-network/masumi-registry-service/blob/27cfbbec01c5b2301f151e32d86814c954b61d4b/README.md
 - https://github.com/masumi-network/masumi-payment-service
 - https://github.com/masumi-network
 - https://www.masumi.network/dev/masumi/core-concepts/identity
