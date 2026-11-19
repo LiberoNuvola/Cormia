@@ -15,7 +15,17 @@ const entry = {
 };
 
 function response(payload, status = 200) {
-  return { ok: status >= 200 && status < 300, status, text: async () => payload };
+  const bytes = new TextEncoder().encode(payload);
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    body: new ReadableStream({
+      start(controller) {
+        controller.enqueue(bytes);
+        controller.close();
+      }
+    })
+  };
 }
 
 function adapter(fetchImpl, overrides = {}) {
@@ -105,6 +115,24 @@ test("enforces a bounded response size", async () => {
       .queryRegistry({ network: "Preprod" }),
     /size limit/
   );
+});
+
+test("cancels a streamed response as soon as the byte limit is crossed", async () => {
+  let cancelled = false;
+  const oversizedStream = new ReadableStream({
+    pull(controller) {
+      controller.enqueue(new Uint8Array(32));
+    },
+    cancel() {
+      cancelled = true;
+    }
+  });
+  await assert.rejects(
+    adapter(async () => ({ ok: true, status: 200, body: oversizedStream }), { maxResponseBytes: 16 })
+      .queryRegistry({ network: "Preprod" }),
+    /size limit/
+  );
+  assert.equal(cancelled, true);
 });
 
 test("rejects non-object input and unsupported request fields", () => {
