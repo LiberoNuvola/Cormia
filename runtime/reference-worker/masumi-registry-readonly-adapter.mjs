@@ -90,6 +90,39 @@ export function validateMasumiRegistryQuery(input) {
   };
 }
 
+async function readBoundedResponseText(response, maxBytes) {
+  if (!response.body || typeof response.body.getReader !== "function") {
+    throw new TypeError("Registry response must expose a readable body stream.");
+  }
+  const reader = response.body.getReader();
+  const chunks = [];
+  let totalBytes = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!(value instanceof Uint8Array)) {
+        throw new TypeError("Registry response stream returned a non-byte chunk.");
+      }
+      totalBytes += value.byteLength;
+      if (totalBytes > maxBytes) {
+        await reader.cancel("Registry response size limit exceeded.");
+        throw new Error("Masumi Registry response exceeded the configured size limit.");
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const bytes = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(bytes);
+}
+
 function validateRegistryResponse(payload) {
   if (!isPlainObject(payload) || !Array.isArray(payload.entries)) {
     throw new TypeError("Registry response must contain an entries array.");
@@ -158,17 +191,13 @@ export function createMasumiRegistryReadonlyAdapter(options = {}) {
         },
         body: JSON.stringify(body)
       });
-      if (!response || typeof response.text !== "function") {
+      if (!response || typeof response.ok !== "boolean" || !response.body) {
         throw new TypeError("Registry fetch returned an invalid response.");
       }
       if (!response.ok) {
         throw new Error("Masumi Registry returned HTTP " + response.status + ".");
       }
-      const raw = await response.text();
-      const byteLength = new TextEncoder().encode(raw).byteLength;
-      if (byteLength > maxResponseBytes) {
-        throw new Error("Masumi Registry response exceeded the configured size limit.");
-      }
+      const raw = await readBoundedResponseText(response, maxResponseBytes);
       let payload;
       try {
         payload = JSON.parse(raw);
