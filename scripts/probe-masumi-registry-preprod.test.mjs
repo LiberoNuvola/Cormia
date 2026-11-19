@@ -54,8 +54,8 @@ test("summarizes only aggregate Preprod evidence and omits raw identities", () =
 
 test("sends no request and exits NOT_RUN when required credentials are absent", () => {
   const env = { ...process.env };
-  delete env.MASUMI_REGISTRY_ORIGIN;
   delete env.MASUMI_REGISTRY_READONLY_TOKEN;
+  env.MASUMI_REGISTRY_ORIGIN = "https://attacker.example";
   const scriptPath = resolve(
     dirname(fileURLToPath(import.meta.url)),
     "probe-masumi-registry-preprod.mjs"
@@ -71,8 +71,9 @@ test("sends no request and exits NOT_RUN when required credentials are absent", 
   assert.equal(child.stderr, "");
   assert.deepEqual(JSON.parse(child.stdout), {
     status: "NOT_RUN",
-    missing: ["MASUMI_REGISTRY_ORIGIN", "MASUMI_REGISTRY_READONLY_TOKEN"],
-    requestSent: false
+    missing: ["MASUMI_REGISTRY_READONLY_TOKEN"],
+    requestSent: false,
+    registryOrigin: "https://registry.masumi.network"
   });
 });
 
