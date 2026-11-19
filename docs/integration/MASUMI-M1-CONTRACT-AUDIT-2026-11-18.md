@@ -218,7 +218,11 @@ M1 may be marked **FROZEN** only when:
 - [ ] Deployed Preprod authentication policy verified by a controlled read-only probe after target confirmation.
 - [ ] Exact deployed response fixtures captured and redacted.
 - [ ] `agentIdentifier` / `assetIdentifier` / policy / asset-name relationship verified on Preprod chain.
-- [x] Official Preprod Registry policy ID recorded as an expected source anchor.
+- [x] Official V1/V2 Registry policy generations, current V2 policy and previous V2 retirement recorded from pinned source.
+- [x] V2 `assetIdentifier` prefix and 32-byte asset-name/version structure mapped from pinned source.
+- [x] V2 permissionless minting limitation identified; policy presence alone is explicitly insufficient for genuine-registration trust.
+- [ ] Authoritative operator allowlist endpoint (the contract README mentions `GET /api/v1/registry`, absent from the pinned Registry router) or authorized selling-wallet vkey set identified and verified.
+- [ ] Exact asset tuple `(network, policyId, assetName)` cross-checked against the authoritative registration source and chain provenance.
 - [ ] Deployed Registry contract/version pinned and source policy cross-checked against chain evidence.
 - [ ] Registry pagination and health/status freshness semantics tested against deployment.
 
