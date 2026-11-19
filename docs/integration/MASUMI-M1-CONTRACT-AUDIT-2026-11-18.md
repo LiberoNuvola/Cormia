@@ -182,7 +182,8 @@ M1 may be marked **FROZEN** only when:
 - [x] M2 scope excludes payment-information and all side effects.
 - [x] M2 read-only adapter syntax and 12 offline contract tests passed in GitHub Actions on commit `009da2d85eb9bea1ab4408ddd4c917a56997c9c0` (push run #14 and PR run #15).
 - [ ] Deployed Preprod Registry Service version and image digest pinned.
-- [ ] Authentication header discrepancy resolved by controlled read-only probe.
+- [x] Current official docs cross-checked: `token` is the strongest documented auth-header candidate and the managed Registry URL is identified.
+- [ ] Deployed Preprod authentication policy verified by a controlled read-only probe.
 - [ ] Exact deployed response fixtures captured and redacted.
 - [ ] `agentIdentifier` / `assetIdentifier` / policy / asset-name relationship verified on Preprod chain.
 - [ ] Source policy ID and contract version pinned for the target network.
@@ -196,7 +197,9 @@ The next implementation step is not a payment integration. The M2 read-only adap
 
 **M2 offline verification:** the syntax check and all 12 contract tests passed on commit `009da2d85eb9bea1ab4408ddd4c917a56997c9c0` in [push run #14](https://github.com/LiberoNuvola/Cormia/actions/runs/44461546644) and [PR run #15](https://github.com/LiberoNuvola/Cormia/actions/runs/44461553018). This proves the isolated adapter contract against synthetic fetch responses only; it does not establish deployed Preprod compatibility.
 
-Live discovery remains disabled. M1 is still **PARTIAL / BLOCKED** until the deployed Registry version/image digest, authentication header, exact response fixture, identifier-to-NFT mapping, source policy/contract version, pagination and freshness semantics are verified against Preprod. No live endpoint, credential, wallet, payment or chain transaction was used.
+A local operator-only probe is now available at `scripts/probe-masumi-registry-preprod.mjs`. It requires an explicitly provisioned read-only token through environment variables, sends one Preprod Registry query with the documented `token` header, and prints only aggregate response counts. Missing configuration produces `NOT_RUN` with no network request. The probe has not been run because no operator credential was supplied to this environment; it does not use the public experimental key.
+
+Live discovery remains disabled. M1 is still **PARTIAL / BLOCKED** until the exact deployed Registry version/image digest, deployment-specific authentication behavior, response fixture, identifier-to-NFT mapping, source policy/contract version, pagination and freshness semantics are verified against Preprod. No live endpoint, credential, wallet, payment or chain transaction was used.
 
 ## 11. References
 
