@@ -95,7 +95,9 @@ async function readBoundedResponseText(response, maxBytes) {
     throw new TypeError("Registry response must expose a readable body stream.");
   }
   const reader = response.body.getReader();
-  const chunks = [];
+  // A fixed-size buffer bounds memory even when the provider fragments the
+  // response into a very large number of tiny chunks.
+  const bytes = new Uint8Array(maxBytes);
   let totalBytes = 0;
   try {
     while (true) {
@@ -104,23 +106,25 @@ async function readBoundedResponseText(response, maxBytes) {
       if (!(value instanceof Uint8Array)) {
         throw new TypeError("Registry response stream returned a non-byte chunk.");
       }
-      totalBytes += value.byteLength;
-      if (totalBytes > maxBytes) {
-        await reader.cancel("Registry response size limit exceeded.");
+      if (totalBytes + value.byteLength > maxBytes) {
         throw new Error("Masumi Registry response exceeded the configured size limit.");
       }
-      chunks.push(value);
+      bytes.set(value, totalBytes);
+      totalBytes += value.byteLength;
     }
+  } catch (error) {
+    // Stop upstream work on oversized, malformed or failed streams. Preserve
+    // the original read/validation error if cancellation itself also fails.
+    try {
+      await reader.cancel(error);
+    } catch {
+      // The stream may already be errored or cancelled.
+    }
+    throw error;
   } finally {
     reader.releaseLock();
   }
-  const bytes = new Uint8Array(totalBytes);
-  let offset = 0;
-  for (const chunk of chunks) {
-    bytes.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  return new TextDecoder().decode(bytes);
+  return new TextDecoder().decode(bytes.subarray(0, totalBytes));
 }
 
 function validateRegistryResponse(payload) {
