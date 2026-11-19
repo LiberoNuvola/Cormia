@@ -157,20 +157,34 @@ Contract requirements:
 9. No API key is forwarded to any provider endpoint.
 10. Errors, stale results, unknown enum values, malformed amounts or schema drift fail closed; raw input is retained only within configured size/redaction bounds.
 
-### 7.1 Official network policy identifiers and public Registry target classification (2026-11-19)
+### 7.1 Registry policies, asset identifiers and public Registry target (2026-11-19)
 
-The official Masumi Network GitHub organization publishes these Registry NFT policy IDs:
+The Registry Service source pinned in section 2 distinguishes two policy generations:
 
-- **Preprod:** `7e8bdaf2b2b919a3a4b94002cafb50086c0c845fe535d07a77ab7f77`
-- **Mainnet:** `ad6424e3ce9e47bbd8364984bd731b41de591f1d11f6d7d43d0da9b9`
+| Generation | Preprod policy ID | Mainnet policy ID | Source disposition |
+|---|---|---|---|
+| V1 | `7e8bdaf2b2b919a3a4b94002cafb50086c0c845fe535d07a77ab7f77` | `ad6424e3ce9e47bbd8364984bd731b41de591f1d11f6d7d43d0da9b9` | Network-specific policies |
+| V2 current | `67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b` | Same as Preprod | Unparameterized validator; same policy hash on both networks |
+| V2 previous | `7890b485b808043ef80136a447a3a43c18893a309dc323d1f8b0a13d` | Same old V2 hash | Replaced after the Aiken v1.1.23 recompilation; migration repoints sources to current V2 policy |
 
-These are network-specific source anchors. The Preprod value can be used as an expected policy reference when independently checking a Registry NFT, but it does not prove that a returned `agentIdentifier` encodes the NFT asset name, nor does it establish that any Registry record is present on-chain. The exact asset name/hex, transaction reference, datum/metadata and confirmation point still need independent chain evidence.
+The source config and contract test pin current V2 to `67ab0c92...`; the migration explicitly records the old-to-new V2 policy change. The earlier two-value policy list is therefore the **V1** pair, not the complete current Registry policy set. Do not treat a V1 policy ID as the only valid Registry policy or treat the previous V2 policy as current.
+
+For all generations, the source code extracts the leading 56 hex characters of `assetIdentifier` as the policy ID, i.e. the serialized identifier is `policyId ++ assetName`. For V2 specifically, the asset name is exactly 32 bytes: `nonce(1 byte) ++ root_hash(28 bytes) ++ version(3 bytes)`. The final three bytes encode a big-endian version; an update burns the previous asset and mints a replacement with the same nonce/root hash and incremented version. The V2 stable lineage key is the full identifier without that three-byte version suffix. Do not apply the V2 asset-name shape to V1 records.
 
 The Registry Service README at the exact source pin recorded in section 2 (`27cfbbec01c5b2301f151e32d86814c954b61d4b`) explicitly describes `https://registry.masumi.network/docs/` as a public service intended only for testing and development, says not to use it in production, and warns that it is experimental and may change or be removed. It also publishes a public test API key. That public key is excluded from this integration. The hostname is therefore a **public testing/development endpoint**, not evidence of a pinned production service or of a particular Preprod deployment's image, version or authentication policy.
 
-The probe remains pinned to `https://registry.masumi.network` to prevent destination substitution, but now additionally requires the operator to acknowledge locally that this is the public test/development target. This acknowledgement is only a guard against accidental use; it is not deployment attestation and does not close M1. A token may be supplied only when it was explicitly issued for that exact endpoint. No credential should be sent before the operator has independently confirmed the intended target.
+The probe remains pinned to `https://registry.masumi.network` to prevent destination substitution, but additionally requires the operator to acknowledge locally that this is the public test/development target. This acknowledgement is only a guard against accidental use; it is not deployment attestation and does not close M1. A token may be supplied only when explicitly issued for that exact endpoint. No credential should be sent before the operator has independently confirmed the intended target.
 
 ## 8. Identity verification policy
+
+### 8.1 V2 policy presence is not proof of a genuine Masumi registration
+
+The pinned V2 contract README states that its minting policy is intentionally permissionless: it has no payment-source parameter, admin signer or Registry-owner check. Any wallet can mint an asset satisfying the nonce/root-hash naming rule. The on-chain policy guarantees asset-name uniqueness and mint/update/burn quantity rules; it does **not** certify that metadata was created through the Masumi operator API or belongs to a recognized payment source.
+
+Consequently, `NFT_CONFIRMED` must not mean only “an asset exists under the expected policy”. For V2, qualification must additionally bind the exact `(policyId, assetName)` to an authoritative known-good registration source, or verify the minting transaction against an independently pinned set of authorized selling-wallet vkeys. The upstream V2 contract README describes the operator API's `GET /api/v1/registry` as the known-good list of assets minted through its API. However, that route is not present in the pinned Registry Service `src/routes/api/index.ts` router inspected for this audit. Its actual owner, route, authentication and deployment therefore remain unresolved; do not assume it is available on the public Registry host or silently substitute the Registry query endpoint.
+
+This also means the existing M2 `POST /api/v1/registry-entry/` response is discovery/indexer data, not an authoritative allowlist or an on-chain trust verdict. Keep returned entries in `OBSERVED` until the exact asset is cross-checked against the authorized registration source and chain evidence. Preserve V1/V2 generation and version lineage separately.
+
 
 Use distinct states:
 
@@ -225,6 +239,11 @@ Live discovery remains disabled. M1 is still **PARTIAL / BLOCKED** until the int
 Official source repositories and documentation:
 
 - https://github.com/masumi-network/masumi-registry-service
+- https://github.com/masumi-network/masumi-registry-service/blob/27cfbbec01c5b2301f151e32d86814c954b61d4b/src/utils/config/index.ts
+- https://github.com/masumi-network/masumi-registry-service/blob/27cfbbec01c5b2301f151e32d86814c954b61d4b/src/utils/agent-version/index.ts
+- https://github.com/masumi-network/masumi-registry-service/blob/27cfbbec01c5b2301f151e32d86814c954b61d4b/src/utils/contracts/registry-v2/README.md
+- https://github.com/masumi-network/masumi-registry-service/blob/27cfbbec01c5b2301f151e32d86814c954b61d4b/prisma/migrations/20260703000000_repoint_v2_registry_policy/migration.sql
+- https://github.com/masumi-network/masumi-registry-service/blob/27cfbbec01c5b2301f151e32d86814c954b61d4b/src/routes/api/index.ts
 - https://github.com/masumi-network/masumi-registry-service/blob/27cfbbec01c5b2301f151e32d86814c954b61d4b/README.md
 - https://github.com/masumi-network/masumi-payment-service
 - https://github.com/masumi-network
