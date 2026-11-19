@@ -124,7 +124,7 @@ A source-pinned, offline-testable adapter is present at [masumi-registry-readonl
 
 The authentication header is deliberately mandatory and has no fallback because the inspected Registry middleware reads `token` while the generated OpenAPI snapshot declares `API-Key`. Configure only after a controlled Preprod probe resolves the deployed service's behavior. The adapter accepts either name only when explicitly injected by trusted host configuration; it does not probe both.
 
-The adapter and local-probe syntax checks plus all 15 offline tests passed on PR head `3ce1f8ee06bcf3aa2463fff79561ffb2948c5831`: [PR run #35](https://github.com/LiberoNuvola/Cormia/actions/runs/44463148022). The suite contains 12 adapter contract tests and 3 probe tests, including a child-process check that missing credentials exit `NOT_RUN` without sending a request. It uses synthetic streams and a fake fetch implementation; no live endpoint, credential or provider was used. This is a read-only compatibility slice, not an AEP-conformant worker or a live Masumi integration.
+The adapter and local-probe syntax checks plus all 15 offline tests passed on PR head `35a62a2780cc708a3b0f94e0a9da59a0ca557063`: [PR run #45](https://github.com/LiberoNuvola/Cormia/actions/runs/44465093289). The suite contains 12 adapter contract tests and 3 probe tests, including a child-process check that missing credentials exit `NOT_RUN` without sending a request. It uses synthetic streams and a fake fetch implementation; no live endpoint, credential or provider was used. This is a read-only compatibility slice, not an AEP-conformant worker or a live Masumi integration.
 
 ### Controlled Preprod probe — operator-run only
 
