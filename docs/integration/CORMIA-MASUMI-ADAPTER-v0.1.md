@@ -10,7 +10,7 @@
 
 The isolated M2 Registry query adapter and the local Preprod probe pass their Node syntax checks and all 16 offline tests on code commit `b4777ed82d1b4c74ff6dfb8b4b3a932396aa725c`: [PR run #52](https://github.com/LiberoNuvola/Cormia/actions/runs/44531947039). The suite contains 12 adapter contract tests and 4 probe tests, including the new explicit-acknowledgement gate for the public testing/development Registry host. They use synthetic data and fake fetch streams. They do not call Masumi Preprod and do not resolve the M1 deployment/authentication or on-chain identity blockers. See [the M1 source audit](./MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md).
 
-The upstream Masumi Registry repository classifies `https://registry.masumi.network` as a public experimental testing/development endpoint. The local probe pins this host but requires an explicit operator acknowledgement; this is not a deployment attestation. The official Preprod Registry NFT policy ID is recorded in the M1 audit, while exact `agentIdentifier`-to-asset-name verification remains open.
+The upstream Masumi Registry repository classifies `https://registry.masumi.network` as a public experimental testing/development endpoint. The local probe pins this host but requires an explicit operator acknowledgement; this is not a deployment attestation. The source distinguishes V1 network-specific policies from the current V2 policy (`67ab0c92...`, shared by Preprod and Mainnet), and records the previous V2 policy as retired. V2 is permissionless: policy presence alone does not prove an authentic operator registration. The exact asset, version lineage and authoritative registration allowlist/wallet provenance must be verified; see the M1 audit.
 
 ## 1. Executive decision
 
@@ -33,7 +33,7 @@ The current Masumi documentation describes:
 - An Agentic Service API implemented by each service provider.
 - An alternative x402 direct-payment path which is non-refundable and therefore outside the initial adapter profile.
 
-Masumi's registry NFT is evidence of a registered service identity and published metadata. It is not proof that the service operator is honest, that a runtime is uncompromised, or that a particular task was performed correctly.
+Masumi's registry NFT is an external asset identifier, not a Cormia node identity. For V2, the minting policy is permissionless and does not itself prove that an asset was registered through the Masumi operator API; an authoritative allowlist or authorized selling-wallet provenance is additionally required. Even a fully qualified external registration is not proof that the service operator is honest, that a runtime is uncompromised, or that a particular task was performed correctly.
 
 Masumi's on-chain result hash binds a submitted result digest. It does not independently establish semantic correctness, AEP conformance, provenance completeness or successful independent verification.
 
