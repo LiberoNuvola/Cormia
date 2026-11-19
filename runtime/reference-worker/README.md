@@ -125,3 +125,29 @@ A source-pinned, offline-testable adapter is present at [masumi-registry-readonl
 The authentication header is deliberately mandatory and has no fallback because the inspected Registry middleware reads `token` while the generated OpenAPI snapshot declares `API-Key`. Configure only after a controlled Preprod probe resolves the deployed service's behavior. The adapter accepts either name only when explicitly injected by trusted host configuration; it does not probe both.
 
 The 12 offline contract tests in [masumi-registry-readonly-adapter.test.mjs](./masumi-registry-readonly-adapter.test.mjs) passed with the Node syntax check on commit `009da2d85eb9bea1ab4408ddd4c917a56997c9c0`: [push run #14](https://github.com/LiberoNuvola/Cormia/actions/runs/44461546644) and [PR run #15](https://github.com/LiberoNuvola/Cormia/actions/runs/44461553018). They use synthetic response streams and a fake fetch implementation; no live endpoint, credential or provider was used. This is a read-only compatibility slice, not an AEP-conformant worker or a live Masumi integration.
+
+### Controlled Preprod probe — operator-run only
+
+A separate local probe is available at [`scripts/probe-masumi-registry-preprod.mjs`](../../scripts/probe-masumi-registry-preprod.mjs). It requires both `MASUMI_REGISTRY_ORIGIN` and `MASUMI_REGISTRY_READONLY_TOKEN`; without them it exits as `NOT_RUN` and sends no request. When configured, it makes exactly one `POST /api/v1/registry-entry/` request with `network: "Preprod"`, `limit: 1` and the documented `token` header. It prints aggregate counts only and never prints identifiers, names, provider URLs, raw records or the token.
+
+Use an operator-provisioned read-only Registry token from the local secret store or a secure local prompt. Do not use the public experimental test key, an admin key, or paste a credential into ChatGPT/Git. The script is deliberately not called by GitHub Actions; CI tests only its redaction helper with synthetic data.
+
+PowerShell example (prompts without echoing the token):
+
+```powershell
+$env:MASUMI_REGISTRY_ORIGIN = "https://registry.masumi.network"
+$secure = Read-Host "Masumi Registry read-only token" -AsSecureString
+$ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
+try {
+    $env:MASUMI_REGISTRY_READONLY_TOKEN = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)
+    node .\scripts\probe-masumi-registry-preprod.mjs
+}
+finally {
+    Remove-Item Env:MASUMI_REGISTRY_READONLY_TOKEN -ErrorAction SilentlyContinue
+    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr)
+    $secure.Dispose()
+}
+```
+
+The default origin above is the documented managed Registry host candidate, not proof of a particular deployment's image, auth policy or Preprod contract. Confirm the exact service with the operator before running the probe. See [the M1 contract audit](../../docs/integration/MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md).
+
