@@ -71,10 +71,42 @@ test("sends no request and exits NOT_RUN when required credentials are absent", 
   assert.equal(child.stderr, "");
   assert.deepEqual(JSON.parse(child.stdout), {
     status: "NOT_RUN",
-    missing: ["MASUMI_REGISTRY_READONLY_TOKEN"],
+    missing: [
+      "MASUMI_REGISTRY_READONLY_TOKEN",
+      "MASUMI_REGISTRY_PUBLIC_TEST_ACK=I_ACKNOWLEDGE_PUBLIC_TEST_ENDPOINT"
+    ],
     requestSent: false,
-    registryOrigin: "https://registry.masumi.network"
+    registryOrigin: "https://registry.masumi.network",
+    endpointClass: "public-testing-development"
   });
+});
+
+test("does not send a credential until the public-test endpoint is explicitly acknowledged", () => {
+  const secret = "synthetic-token-must-not-appear";
+  const env = { ...process.env, MASUMI_REGISTRY_READONLY_TOKEN: secret };
+  delete env.MASUMI_REGISTRY_PUBLIC_TEST_ACK;
+  env.MASUMI_REGISTRY_ORIGIN = "https://attacker.example";
+  const scriptPath = resolve(
+    dirname(fileURLToPath(import.meta.url)),
+    "probe-masumi-registry-preprod.mjs"
+  );
+  const child = spawnSync(process.execPath, [scriptPath], {
+    env,
+    encoding: "utf8",
+    timeout: 5_000
+  });
+
+  assert.equal(child.error, undefined);
+  assert.equal(child.status, 2);
+  assert.equal(child.stderr, "");
+  const output = JSON.parse(child.stdout);
+  assert.equal(output.status, "NOT_RUN");
+  assert.equal(output.requestSent, false);
+  assert.deepEqual(output.missing, [
+    "MASUMI_REGISTRY_PUBLIC_TEST_ACK=I_ACKNOWLEDGE_PUBLIC_TEST_ENDPOINT"
+  ]);
+  assert.equal(output.registryOrigin, "https://registry.masumi.network");
+  assert.equal(child.stdout.includes(secret), false);
 });
 
 test("rejects invalid or non-Preprod probe results", () => {
