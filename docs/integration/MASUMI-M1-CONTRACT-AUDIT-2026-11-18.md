@@ -194,12 +194,12 @@ M1 may be marked **FROZEN** only when:
 - [x] Read-only versus payment/admin permission model mapped.
 - [x] M2 scope excludes payment-information and all side effects.
 - [x] Adapter and local-probe syntax checks plus all 16 offline tests passed in GitHub Actions on code commit `b4777ed82d1b4c74ff6dfb8b4b3a932396aa725c` (PR run #52).
-- [ ] Deployed Preprod Registry Service version and image digest pinned.
+- [ ] Exact intended Preprod Registry deployment/target confirmed as the source of truth.
 - [x] Current official docs cross-checked: `token` is the strongest documented auth-header candidate.
 - [x] Official source identifies `https://registry.masumi.network` as a public testing/development Registry endpoint; it is not treated as a pinned deployment attestation.
 - [x] Official Masumi Network GitHub organization policy IDs recorded for Preprod and Mainnet.
 - [x] Operator probe destination pinned to `https://registry.masumi.network`; no environment override can redirect the read-only token.
-- [ ] Exact intended Preprod Registry deployment/target approved, with deployed version and image digest pinned.
+- [ ] Exact Registry Service version and image digest pinned for that approved target.
 - [ ] A credential explicitly issued for that exact target provisioned locally; public test key and keys from other deployments excluded.
 - [ ] Deployed Preprod authentication policy verified by a controlled read-only probe after target confirmation.
 - [ ] Exact deployed response fixtures captured and redacted.
