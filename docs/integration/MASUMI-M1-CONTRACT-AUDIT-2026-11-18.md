@@ -179,6 +179,7 @@ M1 may be marked **FROZEN** only when:
 - [x] Registry query and search route paths and core request schema mapped.
 - [x] Read-only versus payment/admin permission model mapped.
 - [x] M2 scope excludes payment-information and all side effects.
+- [x] M2 read-only adapter syntax and 12 offline contract tests passed in GitHub Actions on commit `009da2d85eb9bea1ab4408ddd4c917a56997c9c0` (push run #14 and PR run #15).
 - [ ] Deployed Preprod Registry Service version and image digest pinned.
 - [ ] Authentication header discrepancy resolved by controlled read-only probe.
 - [ ] Exact deployed response fixtures captured and redacted.
@@ -190,7 +191,11 @@ Until the unchecked items pass, M1 status is **PARTIAL / BLOCKED**, not frozen.
 
 ## 10. Next action
 
-The next implementation step is not a payment integration. A candidate M2 read-only adapter and offline contract tests have now been added at `runtime/reference-worker/masumi-registry-readonly-adapter.mjs` and `.test.mjs`, with a dedicated GitHub Actions workflow. The adapter requires an explicitly injected auth header (no fallback), restricts requests to the configured Registry origin and fixed query route, forces Preprod, and never calls provider/payment endpoints. The tests and syntax check have not yet been executed in this environment. Live discovery remains disabled until the authentication and identifier-format questions above have been resolved against a pinned Preprod deployment.
+The next implementation step is not a payment integration. The M2 read-only adapter is implemented at `runtime/reference-worker/masumi-registry-readonly-adapter.mjs` with a dedicated GitHub Actions workflow. It requires an explicitly injected auth header (no fallback), restricts requests to the configured Registry origin and fixed query route, forces Preprod, rejects redirects, enforces timeout and streaming response-byte limits, and never calls provider/payment endpoints.
+
+**M2 offline verification:** the syntax check and all 12 contract tests passed on commit `009da2d85eb9bea1ab4408ddd4c917a56997c9c0` in [push run #14](https://github.com/LiberoNuvola/Cormia/actions/runs/44461546644) and [PR run #15](https://github.com/LiberoNuvola/Cormia/actions/runs/44461553018). This proves the isolated adapter contract against synthetic fetch responses only; it does not establish deployed Preprod compatibility.
+
+Live discovery remains disabled. M1 is still **PARTIAL / BLOCKED** until the deployed Registry version/image digest, authentication header, exact response fixture, identifier-to-NFT mapping, source policy/contract version, pagination and freshness semantics are verified against Preprod. No live endpoint, credential, wallet, payment or chain transaction was used.
 
 ## 11. References
 
