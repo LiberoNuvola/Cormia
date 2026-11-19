@@ -93,14 +93,15 @@ Current Registry source shows:
 
 - `authenticatedEndpointFactory` wraps registry query and payment-information endpoints with authentication middleware.
 - Middleware reads `request.headers.token` and rejects missing/invalid/revoked tokens.
-- The middleware's OpenAPI security declaration names a header `api-key`.
-- The generated OpenAPI snapshot declares a security scheme named `API-Key`.
+- The generated OpenAPI snapshot labels its security scheme `API-Key`, while the implementation-side declaration refers to `api-key`.
 
-This is a genuine source-level discrepancy. Header names are case-insensitive, but `token` and `API-Key` are different names. Do not infer that either works in the deployed environment.
+**Follow-up documentation cross-check (2026-11-19):** the current Masumi identity guide's Registry query example sends `-H "token: <your-api-key>"`; current API Reference pages describe API-key authentication via the header `token`; and the Masumi skills debug recipe uses `REGISTRY_SERVICE_URL=https://registry.masumi.network/api/v1` with `token` authentication. This makes `token` the strongest current documented candidate and aligns with the inspected middleware. See [Masumi identity documentation](https://www.masumi.network/dev/masumi/core-concepts/identity), [Registry API reference](https://www.masumi.network/dev/masumi/api-reference/registry-service/get-registry-entry-spec), and [Masumi API debug recipes](https://github.com/masumi-network/masumi-skills/blob/main/skill/references/api-debug-recipes.md).
 
-**Required resolution:** obtain the deployed Preprod Registry Service version/image digest and perform a controlled read-only contract probe using an operator-provisioned read-only key. Test the documented and implementation header names independently, record exact status codes and response shape, and freeze only the one verified for that deployment. Do not place a key in this document, a fixture, Git, model context or logs.
+This does **not** prove the authentication policy or deployed image of a particular Preprod Registry instance. The official docs have also described public/default test access, while the Registry repository README labels its public test key and endpoint experimental/testing-only. Do not infer that a key or no-auth mode for one deployment applies to another.
 
-The Registry Service repository README also labels its public test endpoint/key as experimental/testing-only and says not to use it in production. It is not a production credential or a substitute for a controlled deployment.
+**Required resolution:** pin the exact Preprod Registry origin, deployed version/image digest and operator-approved read-only credential source. Perform one controlled read-only query using the currently documented `token` header, record the exact HTTP status and response shape, and freeze the behavior only for that pinned deployment. Test another header only if that deployment's own contract requires it; never probe/fallback automatically. Do not place a key in this document, a fixture, Git, model context or logs.
+
+The repository's public test key remains explicitly excluded: it is experimental/testing-only and is not a production credential or a substitute for a controlled deployment.
 
 ## 5. Permission model
 
