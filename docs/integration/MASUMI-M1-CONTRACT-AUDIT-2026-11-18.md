@@ -205,7 +205,7 @@ M1 may be marked **FROZEN** only when:
 - [ ] Exact deployed response fixtures captured and redacted.
 - [ ] `agentIdentifier` / `assetIdentifier` / policy / asset-name relationship verified on Preprod chain.
 - [x] Official Preprod Registry policy ID recorded as an expected source anchor.
-- [ ] Deployed contract/version and exact `agentIdentifier` / `assetIdentifier` / asset-name relationship verified against the Preprod chain.
+- [ ] Deployed Registry contract/version pinned and source policy cross-checked against chain evidence.
 - [ ] Registry pagination and health/status freshness semantics tested against deployment.
 
 Until the unchecked items pass, M1 status is **PARTIAL / BLOCKED**, not frozen.
