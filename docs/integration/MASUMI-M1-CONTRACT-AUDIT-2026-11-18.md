@@ -180,7 +180,7 @@ M1 may be marked **FROZEN** only when:
 - [x] Registry query and search route paths and core request schema mapped.
 - [x] Read-only versus payment/admin permission model mapped.
 - [x] M2 scope excludes payment-information and all side effects.
-- [x] Adapter and local-probe syntax checks plus all 15 offline tests passed in GitHub Actions on PR head `3ce1f8ee06bcf3aa2463ffb2948c5831` (PR run #35).
+- [x] Adapter and local-probe syntax checks plus all 15 offline tests passed in GitHub Actions on PR head `3ce1f8ee06bcf3aa2463fff79561ffb2948c5831` (PR run #35).
 - [ ] Deployed Preprod Registry Service version and image digest pinned.
 - [x] Current official docs cross-checked: `token` is the strongest documented auth-header candidate and the managed Registry URL is identified.
 - [x] Operator probe destination pinned to `https://registry.masumi.network`; no environment override can redirect the read-only token.
@@ -198,7 +198,7 @@ The next implementation step is not a payment integration. The M2 read-only adap
 
 **M2 offline verification:** adapter and local-probe syntax checks plus all 15 tests passed on PR head `3ce1f8ee06bcf3aa2463fff79561ffb2948c5831` in [PR run #35](https://github.com/LiberoNuvola/Cormia/actions/runs/44463148022). The suite comprises 12 adapter contract tests and 3 local-probe tests, including a child-process check that missing credentials exits `NOT_RUN` without sending a request. The adapter-only 12-test slice also passed earlier in [push run #14](https://github.com/LiberoNuvola/Cormia/actions/runs/44461546644) and [PR run #15](https://github.com/LiberoNuvola/Cormia/actions/runs/44461553018). All CI checks use synthetic responses; they do not establish deployed Preprod compatibility.
 
-A local operator-only probe is now available at `scripts/probe-masumi-registry-preprod.mjs`. It requires an explicitly provisioned read-only token through environment variables, sends one Preprod Registry query with the documented `token` header, and prints only aggregate response counts. Missing configuration produces `NOT_RUN` with no network request. The probe has not been run because no operator credential was supplied to this environment; it does not use the public experimental key.
+A local operator-only probe is now available at `scripts/probe-masumi-registry-preprod.mjs`. It requires an explicitly provisioned read-only token through one environment variable and pins the destination to `https://registry.masumi.network` so the token cannot be redirected by another environment variable. It sends one Preprod Registry query with the documented `token` header and prints only aggregate response counts. Missing credentials produce `NOT_RUN` with no network request. The probe has not been run because no operator credential was supplied to this environment; it does not use the public experimental key.
 
 Live discovery remains disabled. M1 is still **PARTIAL / BLOCKED** until the exact deployed Registry version/image digest, deployment-specific authentication behavior, response fixture, identifier-to-NFT mapping, source policy/contract version, pagination and freshness semantics are verified against Preprod. No live endpoint, credential, wallet, payment or chain transaction was used.
 
