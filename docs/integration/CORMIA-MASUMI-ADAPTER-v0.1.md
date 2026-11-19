@@ -1,10 +1,14 @@
 # Cormia–Masumi Adapter — Proposal v0.1
 
-- **Status:** proposed adapter contract; M2 read-only candidate implemented with offline tests pending execution
+- **Status:** proposed adapter contract; M2 read-only candidate implemented; 12/12 offline contract tests pass in GitHub Actions; live Preprod discovery remains disabled pending M1
 - **Date:** 2026-11-18
 - **Target:** Cormia / IMMORTAL AEP
 - **Scope:** optional external agent discovery, identity evidence and payment/escrow interoperability
 - **Normative authority:** IMMORTAL AEP remains authoritative for Cormia task admission, capabilities, verification policy, CRC accounting and Cormia settlement decisions.
+
+## Verification snapshot — 2026-11-19
+
+The isolated M2 Registry query adapter passes its Node syntax check and all 12 offline contract tests on commit `009da2d85eb9bea1ab4408ddd4c917a56997c9c0`: [push run #14](https://github.com/LiberoNuvola/Cormia/actions/runs/44461546644) and [PR run #15](https://github.com/LiberoNuvola/Cormia/actions/runs/44461553018). The tests use synthetic response streams and a fake fetch implementation. They do not call Masumi Preprod and do not resolve the M1 authentication or on-chain identity blockers. See [the M1 source audit](./MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md).
 
 ## 1. Executive decision
 
