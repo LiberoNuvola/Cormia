@@ -1,6 +1,6 @@
 # Cormia–Masumi Adapter — Proposal v0.1
 
-- **Status:** proposed adapter contract; M2 read-only candidate implemented; 14/14 offline adapter/probe tests pass in GitHub Actions; live Preprod discovery remains disabled pending M1
+- **Status:** proposed adapter contract; M2 read-only candidate implemented; 15/15 offline adapter/probe tests pass in GitHub Actions; live Preprod discovery remains disabled pending M1
 - **Date:** 2026-11-18
 - **Target:** Cormia / IMMORTAL AEP
 - **Scope:** optional external agent discovery, identity evidence and payment/escrow interoperability
@@ -8,7 +8,7 @@
 
 ## Verification snapshot — 2026-11-19
 
-The isolated M2 Registry query adapter and the local Preprod probe pass their Node syntax checks and all 14 offline tests on PR head `3a914f78eeb13525da73deac0aea05a4da6444f2`: [PR run #27](https://github.com/LiberoNuvola/Cormia/actions/runs/44462604307). The suite contains 12 adapter contract tests and 2 probe-output redaction tests; all use synthetic data and fake fetch streams. They do not call Masumi Preprod and do not resolve the M1 authentication or on-chain identity blockers. See [the M1 source audit](./MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md).
+The isolated M2 Registry query adapter and the local Preprod probe pass their Node syntax checks and all 15 offline tests on PR head `3ce1f8ee06bcf3aa2463fff79561ffb2948c5831`: [PR run #35](https://github.com/LiberoNuvola/Cormia/actions/runs/44463148022). The suite contains 12 adapter contract tests and 3 probe tests, including a check that missing credentials cause no request. They use synthetic data and fake fetch streams. They do not call Masumi Preprod and do not resolve the M1 authentication or on-chain identity blockers. See [the M1 source audit](./MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md).
 
 ## 1. Executive decision
 
