@@ -128,25 +128,30 @@ The adapter and local-probe syntax checks plus all 15 offline tests passed on PR
 
 ### Controlled Preprod probe — operator-run only
 
-A separate local probe is available at [`scripts/probe-masumi-registry-preprod.mjs`](../../scripts/probe-masumi-registry-preprod.mjs). It requires only `MASUMI_REGISTRY_READONLY_TOKEN`; the destination is pinned in code to `https://registry.masumi.network` so an environment variable cannot redirect the secret to another host. Without a token it exits as `NOT_RUN` and sends no request. When configured, it makes exactly one `POST /api/v1/registry-entry/` request with `network: "Preprod"`, `limit: 1` and the documented `token` header. It prints aggregate counts only and never prints identifiers, names, provider URLs, raw records or the token.
+A separate local probe is available at [`scripts/probe-masumi-registry-preprod.mjs`](../../scripts/probe-masumi-registry-preprod.mjs). Its destination is pinned in code to `https://registry.masumi.network`, so an environment variable cannot redirect a credential to another host. Important: the upstream Masumi Registry repository classifies this public endpoint as experimental and intended only for testing/development; it is **not** proof of a specifically pinned Preprod deployment, image digest or production service. The probe therefore requires both `MASUMI_REGISTRY_READONLY_TOKEN` and an explicit local acknowledgement that this is the public testing/development endpoint. Without either, it exits as `NOT_RUN` and sends no request. With both present, it makes exactly one `POST /api/v1/registry-entry/` request with `network: "Preprod"`, `limit: 1` and the documented `token` header. It prints aggregate counts only and never prints identifiers, names, provider URLs, raw records or the token.
 
-Use an operator-provisioned read-only Registry token from the local secret store or a secure local prompt. Do not use the public experimental test key, an admin key, or paste a credential into ChatGPT/Git. The script is deliberately not called by GitHub Actions; CI tests only its redaction helper with synthetic data.
+Use only a credential explicitly provisioned for this exact public testing endpoint, from a local secret store or secure prompt. Do not use the public experimental test key, an admin key, a credential issued for another Registry deployment, or paste a credential into ChatGPT/Git. The local acknowledgement is not a deployment attestation and does not close M1. The script is deliberately not called by GitHub Actions; CI tests only its offline redaction and no-request gates with synthetic data.
 
 PowerShell example (prompts without echoing the token):
 
 ```powershell
-$secure = Read-Host "Masumi Registry read-only token" -AsSecureString
+$ack = Read-Host 'Confirm this is the public testing/development Registry endpoint only (type PUBLIC-TEST)'
+if ($ack -cne "PUBLIC-TEST") { throw "Probe not authorized for this target; no request was sent." }
+
+$secure = Read-Host "Masumi Registry read-only token for this exact endpoint" -AsSecureString
 $ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
 try {
+    $env:MASUMI_REGISTRY_PUBLIC_TEST_ACK = "I_ACKNOWLEDGE_PUBLIC_TEST_ENDPOINT"
     $env:MASUMI_REGISTRY_READONLY_TOKEN = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)
     node .\scripts\probe-masumi-registry-preprod.mjs
 }
 finally {
     Remove-Item Env:MASUMI_REGISTRY_READONLY_TOKEN -ErrorAction SilentlyContinue
+    Remove-Item Env:MASUMI_REGISTRY_PUBLIC_TEST_ACK -ErrorAction SilentlyContinue
     [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr)
     $secure.Dispose()
 }
 ```
 
-The pinned origin is the documented managed Registry host candidate, not proof of a particular deployment's image, auth policy or Preprod contract. Confirm that this is the intended Registry deployment before running the probe. See [the M1 contract audit](../../docs/integration/MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md).
+The pinned origin is the documented public testing/development Registry host. Confirm that this exact target is appropriate for the intended Preprod observation before running the probe; the acknowledgement above is not proof of a particular deployment's image, auth policy or contract. See [the M1 contract audit](../../docs/integration/MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md).
 
