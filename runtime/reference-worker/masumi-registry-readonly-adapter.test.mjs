@@ -117,6 +117,24 @@ test("enforces a bounded response size", async () => {
   );
 });
 
+test("reassembles fragmented UTF-8 chunks within the exact byte limit", async () => {
+  const expectedName = "Caffè ☕";
+  const payload = JSON.stringify({ entries: [{ ...entry, name: expectedName }] });
+  const encoded = new TextEncoder().encode(payload);
+  const fragmentedBody = new ReadableStream({
+    start(controller) {
+      for (const byte of encoded) controller.enqueue(new Uint8Array([byte]));
+      controller.close();
+    }
+  });
+  const result = await adapter(async () => ({
+    ok: true,
+    status: 200,
+    body: fragmentedBody
+  }), { maxResponseBytes: encoded.byteLength }).queryRegistry({ network: "Preprod" });
+  assert.equal(result.entries[0].name, expectedName);
+});
+
 test("cancels a streamed response as soon as the byte limit is crossed", async () => {
   let cancelled = false;
   const oversizedStream = new ReadableStream({
