@@ -193,7 +193,7 @@ M1 may be marked **FROZEN** only when:
 - [x] Registry query and search route paths and core request schema mapped.
 - [x] Read-only versus payment/admin permission model mapped.
 - [x] M2 scope excludes payment-information and all side effects.
-- [x] Adapter and local-probe syntax checks plus all 15 offline tests passed in GitHub Actions on PR head `35a62a2780cc708a3b0f94e0a9da59a0ca557063` (PR run #45).
+- [x] Adapter and local-probe syntax checks plus all 16 offline tests passed in GitHub Actions on code commit `b4777ed82d1b4c74ff6dfb8b4b3a932396aa725c` (PR run #52).
 - [ ] Deployed Preprod Registry Service version and image digest pinned.
 - [x] Current official docs cross-checked: `token` is the strongest documented auth-header candidate.
 - [x] Official source identifies `https://registry.masumi.network` as a public testing/development Registry endpoint; it is not treated as a pinned deployment attestation.
@@ -214,7 +214,7 @@ Until the unchecked items pass, M1 status is **PARTIAL / BLOCKED**, not frozen.
 
 The next implementation step is not a payment integration. The M2 read-only adapter is implemented at `runtime/reference-worker/masumi-registry-readonly-adapter.mjs` with a dedicated GitHub Actions workflow. It requires an explicitly injected auth header (no fallback), restricts requests to the configured Registry origin and fixed query route, forces Preprod, rejects redirects, enforces timeout and streaming response-byte limits, and never calls provider/payment endpoints.
 
-**M2 offline verification:** adapter and local-probe syntax checks plus all 15 tests passed on PR head `3ce1f8ee06bcf3aa2463fff79561ffb2948c5831` in [PR run #45](https://github.com/LiberoNuvola/Cormia/actions/runs/44465093289). The suite comprises 12 adapter contract tests and 3 local-probe tests, including a child-process check that missing credentials exits `NOT_RUN` without sending a request. The adapter-only 12-test slice also passed earlier in [push run #14](https://github.com/LiberoNuvola/Cormia/actions/runs/44461546644) and [PR run #15](https://github.com/LiberoNuvola/Cormia/actions/runs/44461553018). All CI checks use synthetic responses; they do not establish deployed Preprod compatibility.
+**M2 offline verification:** adapter and local-probe syntax checks plus all 16 tests passed on code commit `b4777ed82d1b4c74ff6dfb8b4b3a932396aa725c` in [PR run #52](https://github.com/LiberoNuvola/Cormia/actions/runs/44531947039). The suite comprises 12 adapter contract tests and 4 local-probe tests, including child-process checks that missing credentials or missing public-test target acknowledgement exit `NOT_RUN` without sending a request. The earlier 15-test result in [PR run #45](https://github.com/LiberoNuvola/Cormia/actions/runs/44465093289) is superseded. All CI checks use synthetic responses; they do not establish deployed Preprod compatibility.
 
 A local operator-only probe is available at `scripts/probe-masumi-registry-preprod.mjs`. It pins the destination to `https://registry.masumi.network`, which the upstream Registry repository describes as a public testing/development service. It now requires both an explicitly provisioned token for that exact endpoint and the local acknowledgement `MASUMI_REGISTRY_PUBLIC_TEST_ACK=I_ACKNOWLEDGE_PUBLIC_TEST_ENDPOINT`. Without either it returns `NOT_RUN` and sends no request. With both, it sends one Preprod Registry query with the documented `token` header and prints aggregate response counts only. It never uses the public experimental key.
 
