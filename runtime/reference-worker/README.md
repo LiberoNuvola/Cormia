@@ -128,14 +128,13 @@ The adapter and local-probe syntax checks plus all 15 offline tests passed on PR
 
 ### Controlled Preprod probe — operator-run only
 
-A separate local probe is available at [`scripts/probe-masumi-registry-preprod.mjs`](../../scripts/probe-masumi-registry-preprod.mjs). It requires both `MASUMI_REGISTRY_ORIGIN` and `MASUMI_REGISTRY_READONLY_TOKEN`; without them it exits as `NOT_RUN` and sends no request. When configured, it makes exactly one `POST /api/v1/registry-entry/` request with `network: "Preprod"`, `limit: 1` and the documented `token` header. It prints aggregate counts only and never prints identifiers, names, provider URLs, raw records or the token.
+A separate local probe is available at [`scripts/probe-masumi-registry-preprod.mjs`](../../scripts/probe-masumi-registry-preprod.mjs). It requires only `MASUMI_REGISTRY_READONLY_TOKEN`; the destination is pinned in code to `https://registry.masumi.network` so an environment variable cannot redirect the secret to another host. Without a token it exits as `NOT_RUN` and sends no request. When configured, it makes exactly one `POST /api/v1/registry-entry/` request with `network: "Preprod"`, `limit: 1` and the documented `token` header. It prints aggregate counts only and never prints identifiers, names, provider URLs, raw records or the token.
 
 Use an operator-provisioned read-only Registry token from the local secret store or a secure local prompt. Do not use the public experimental test key, an admin key, or paste a credential into ChatGPT/Git. The script is deliberately not called by GitHub Actions; CI tests only its redaction helper with synthetic data.
 
 PowerShell example (prompts without echoing the token):
 
 ```powershell
-$env:MASUMI_REGISTRY_ORIGIN = "https://registry.masumi.network"
 $secure = Read-Host "Masumi Registry read-only token" -AsSecureString
 $ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
 try {
@@ -149,5 +148,5 @@ finally {
 }
 ```
 
-The default origin above is the documented managed Registry host candidate, not proof of a particular deployment's image, auth policy or Preprod contract. Confirm the exact service with the operator before running the probe. See [the M1 contract audit](../../docs/integration/MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md).
+The pinned origin is the documented managed Registry host candidate, not proof of a particular deployment's image, auth policy or Preprod contract. Confirm that this is the intended Registry deployment before running the probe. See [the M1 contract audit](../../docs/integration/MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md).
 
