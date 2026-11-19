@@ -180,7 +180,7 @@ M1 may be marked **FROZEN** only when:
 - [x] Registry query and search route paths and core request schema mapped.
 - [x] Read-only versus payment/admin permission model mapped.
 - [x] M2 scope excludes payment-information and all side effects.
-- [x] M2 read-only adapter syntax and 12 offline contract tests passed in GitHub Actions on commit `009da2d85eb9bea1ab4408ddd4c917a56997c9c0` (push run #14 and PR run #15).
+- [x] Adapter and local-probe syntax checks plus all 14 offline tests passed in GitHub Actions on PR head `3a914f78eeb13525da73deac0aea05a4da6444f2` (PR run #27).
 - [ ] Deployed Preprod Registry Service version and image digest pinned.
 - [x] Current official docs cross-checked: `token` is the strongest documented auth-header candidate and the managed Registry URL is identified.
 - [ ] Deployed Preprod authentication policy verified by a controlled read-only probe.
@@ -195,7 +195,7 @@ Until the unchecked items pass, M1 status is **PARTIAL / BLOCKED**, not frozen.
 
 The next implementation step is not a payment integration. The M2 read-only adapter is implemented at `runtime/reference-worker/masumi-registry-readonly-adapter.mjs` with a dedicated GitHub Actions workflow. It requires an explicitly injected auth header (no fallback), restricts requests to the configured Registry origin and fixed query route, forces Preprod, rejects redirects, enforces timeout and streaming response-byte limits, and never calls provider/payment endpoints.
 
-**M2 offline verification:** the syntax check and all 12 contract tests passed on commit `009da2d85eb9bea1ab4408ddd4c917a56997c9c0` in [push run #14](https://github.com/LiberoNuvola/Cormia/actions/runs/44461546644) and [PR run #15](https://github.com/LiberoNuvola/Cormia/actions/runs/44461553018). This proves the isolated adapter contract against synthetic fetch responses only; it does not establish deployed Preprod compatibility.
+**M2 offline verification:** the adapter and probe syntax checks plus all 14 tests passed on PR head `3a914f78eeb13525da73deac0aea05a4da6444f2` in [PR run #27](https://github.com/LiberoNuvola/Cormia/actions/runs/44462604307). The suite comprises 12 adapter contract tests and 2 redacted-probe summary tests. The adapter-only 12-test slice also passed earlier in [push run #14](https://github.com/LiberoNuvola/Cormia/actions/runs/44461546644) and [PR run #15](https://github.com/LiberoNuvola/Cormia/actions/runs/44461553018). All CI checks use synthetic responses; they do not establish deployed Preprod compatibility.
 
 A local operator-only probe is now available at `scripts/probe-masumi-registry-preprod.mjs`. It requires an explicitly provisioned read-only token through environment variables, sends one Preprod Registry query with the documented `token` header, and prints only aggregate response counts. Missing configuration produces `NOT_RUN` with no network request. The probe has not been run because no operator credential was supplied to this environment; it does not use the public experimental key.
 
