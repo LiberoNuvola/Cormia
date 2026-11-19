@@ -1,6 +1,6 @@
 # Cormia–Masumi Adapter — Proposal v0.1
 
-- **Status:** proposed adapter contract; M2 read-only candidate implemented; 15/15 offline adapter/probe tests pass in GitHub Actions; live Preprod discovery remains disabled pending M1
+- **Status:** proposed adapter contract; M2 read-only candidate implemented; 16/16 offline adapter/probe tests pass in GitHub Actions; live Preprod discovery remains disabled pending M1
 - **Date:** 2026-11-18
 - **Target:** Cormia / IMMORTAL AEP
 - **Scope:** optional external agent discovery, identity evidence and payment/escrow interoperability
@@ -8,7 +8,9 @@
 
 ## Verification snapshot — 2026-11-19
 
-The isolated M2 Registry query adapter and the local Preprod probe pass their Node syntax checks and all 15 offline tests on PR head `35a62a2780cc708a3b0f94e0a9da59a0ca557063`: [PR run #45](https://github.com/LiberoNuvola/Cormia/actions/runs/44465093289). The suite contains 12 adapter contract tests and 3 probe tests, including a check that missing credentials cause no request. They use synthetic data and fake fetch streams. They do not call Masumi Preprod and do not resolve the M1 authentication or on-chain identity blockers. See [the M1 source audit](./MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md).
+The isolated M2 Registry query adapter and the local Preprod probe pass their Node syntax checks and all 16 offline tests on code commit `b4777ed82d1b4c74ff6dfb8b4b3a932396aa725c`: [PR run #52](https://github.com/LiberoNuvola/Cormia/actions/runs/44531947039). The suite contains 12 adapter contract tests and 4 probe tests, including the new explicit-acknowledgement gate for the public testing/development Registry host. They use synthetic data and fake fetch streams. They do not call Masumi Preprod and do not resolve the M1 deployment/authentication or on-chain identity blockers. See [the M1 source audit](./MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md).
+
+The upstream Masumi Registry repository classifies `https://registry.masumi.network` as a public experimental testing/development endpoint. The local probe pins this host but requires an explicit operator acknowledgement; this is not a deployment attestation. The official Preprod Registry NFT policy ID is recorded in the M1 audit, while exact `agentIdentifier`-to-asset-name verification remains open.
 
 ## 1. Executive decision
 
