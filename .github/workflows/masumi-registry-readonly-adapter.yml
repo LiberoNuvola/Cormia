@@ -6,6 +6,8 @@ on:
     paths:
       - "runtime/reference-worker/masumi-registry-readonly-adapter.mjs"
       - "runtime/reference-worker/masumi-registry-readonly-adapter.test.mjs"
+      - "scripts/probe-masumi-registry-preprod.mjs"
+      - "scripts/probe-masumi-registry-preprod.test.mjs"
       - ".github/workflows/masumi-registry-readonly-adapter.yml"
   pull_request:
     branches: [main]
@@ -32,8 +34,10 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Check adapter syntax
-        run: node --check runtime/reference-worker/masumi-registry-readonly-adapter.mjs
+      - name: Check adapter and local probe syntax
+        run: |
+          node --check runtime/reference-worker/masumi-registry-readonly-adapter.mjs
+          node --check scripts/probe-masumi-registry-preprod.mjs
 
-      - name: Run offline contract tests
-        run: node --test runtime/reference-worker/masumi-registry-readonly-adapter.test.mjs
+      - name: Run offline contract tests only
+        run: node --test runtime/reference-worker/masumi-registry-readonly-adapter.test.mjs scripts/probe-masumi-registry-preprod.test.mjs
