@@ -157,6 +157,19 @@ Contract requirements:
 9. No API key is forwarded to any provider endpoint.
 10. Errors, stale results, unknown enum values, malformed amounts or schema drift fail closed; raw input is retained only within configured size/redaction bounds.
 
+### 7.1 Official network policy identifiers and public Registry target classification (2026-11-19)
+
+The official Masumi Network GitHub organization publishes these Registry NFT policy IDs:
+
+- **Preprod:** `7e8bdaf2b2b919a3a4b94002cafb50086c0c845fe535d07a77ab7f77`
+- **Mainnet:** `ad6424e3ce9e47bbd8364984bd731b41de591f1d11f6d7d43d0da9b9`
+
+These are network-specific source anchors. The Preprod value can be used as an expected policy reference when independently checking a Registry NFT, but it does not prove that a returned `agentIdentifier` encodes the NFT asset name, nor does it establish that any Registry record is present on-chain. The exact asset name/hex, transaction reference, datum/metadata and confirmation point still need independent chain evidence.
+
+The Registry Service repository README explicitly describes `https://registry.masumi.network/docs/` as a public service intended for testing and development, and warns that it is experimental and may change or be removed. It also publishes a public test API key. That public key is excluded from this integration. The hostname is therefore a **public testing/development endpoint**, not evidence of a pinned production service or of a particular Preprod deployment's image, version or authentication policy.
+
+The probe remains pinned to `https://registry.masumi.network` to prevent destination substitution, but now additionally requires the operator to acknowledge locally that this is the public test/development target. This acknowledgement is only a guard against accidental use; it is not deployment attestation and does not close M1. A token may be supplied only when it was explicitly issued for that exact endpoint. No credential should be sent before the operator has independently confirmed the intended target.
+
 ## 8. Identity verification policy
 
 Use distinct states:
@@ -182,12 +195,17 @@ M1 may be marked **FROZEN** only when:
 - [x] M2 scope excludes payment-information and all side effects.
 - [x] Adapter and local-probe syntax checks plus all 15 offline tests passed in GitHub Actions on PR head `35a62a2780cc708a3b0f94e0a9da59a0ca557063` (PR run #45).
 - [ ] Deployed Preprod Registry Service version and image digest pinned.
-- [x] Current official docs cross-checked: `token` is the strongest documented auth-header candidate and the managed Registry URL is identified.
+- [x] Current official docs cross-checked: `token` is the strongest documented auth-header candidate.
+- [x] Official source identifies `https://registry.masumi.network` as a public testing/development Registry endpoint; it is not treated as a pinned deployment attestation.
+- [x] Official Masumi Network GitHub organization policy IDs recorded for Preprod and Mainnet.
 - [x] Operator probe destination pinned to `https://registry.masumi.network`; no environment override can redirect the read-only token.
-- [ ] Deployed Preprod authentication policy verified by a controlled read-only probe.
+- [ ] Exact intended Preprod Registry deployment/target approved, with deployed version and image digest pinned.
+- [ ] A credential explicitly issued for that exact target provisioned locally; public test key and keys from other deployments excluded.
+- [ ] Deployed Preprod authentication policy verified by a controlled read-only probe after target confirmation.
 - [ ] Exact deployed response fixtures captured and redacted.
 - [ ] `agentIdentifier` / `assetIdentifier` / policy / asset-name relationship verified on Preprod chain.
-- [ ] Source policy ID and contract version pinned for the target network.
+- [x] Official Preprod Registry policy ID recorded as an expected source anchor.
+- [ ] Deployed contract/version and exact `agentIdentifier` / `assetIdentifier` / asset-name relationship verified against the Preprod chain.
 - [ ] Registry pagination and health/status freshness semantics tested against deployment.
 
 Until the unchecked items pass, M1 status is **PARTIAL / BLOCKED**, not frozen.
@@ -198,9 +216,9 @@ The next implementation step is not a payment integration. The M2 read-only adap
 
 **M2 offline verification:** adapter and local-probe syntax checks plus all 15 tests passed on PR head `3ce1f8ee06bcf3aa2463fff79561ffb2948c5831` in [PR run #45](https://github.com/LiberoNuvola/Cormia/actions/runs/44465093289). The suite comprises 12 adapter contract tests and 3 local-probe tests, including a child-process check that missing credentials exits `NOT_RUN` without sending a request. The adapter-only 12-test slice also passed earlier in [push run #14](https://github.com/LiberoNuvola/Cormia/actions/runs/44461546644) and [PR run #15](https://github.com/LiberoNuvola/Cormia/actions/runs/44461553018). All CI checks use synthetic responses; they do not establish deployed Preprod compatibility.
 
-A local operator-only probe is now available at `scripts/probe-masumi-registry-preprod.mjs`. It requires an explicitly provisioned read-only token through one environment variable and pins the destination to `https://registry.masumi.network` so the token cannot be redirected by another environment variable. It sends one Preprod Registry query with the documented `token` header and prints only aggregate response counts. Missing credentials produce `NOT_RUN` with no network request. The probe has not been run because no operator credential was supplied to this environment; it does not use the public experimental key.
+A local operator-only probe is available at `scripts/probe-masumi-registry-preprod.mjs`. It pins the destination to `https://registry.masumi.network`, which the upstream Registry repository describes as a public testing/development service. It now requires both an explicitly provisioned token for that exact endpoint and the local acknowledgement `MASUMI_REGISTRY_PUBLIC_TEST_ACK=I_ACKNOWLEDGE_PUBLIC_TEST_ENDPOINT`. Without either it returns `NOT_RUN` and sends no request. With both, it sends one Preprod Registry query with the documented `token` header and prints aggregate response counts only. It never uses the public experimental key.
 
-Live discovery remains disabled. M1 is still **PARTIAL / BLOCKED** until the exact deployed Registry version/image digest, deployment-specific authentication behavior, response fixture, identifier-to-NFT mapping, source policy/contract version, pagination and freshness semantics are verified against Preprod. No live endpoint, credential, wallet, payment or chain transaction was used.
+Live discovery remains disabled. M1 is still **PARTIAL / BLOCKED** until the intended Preprod Registry target is explicitly confirmed, its deployed version/image digest and authentication behavior are pinned, a redacted response fixture is captured, identifier-to-NFT mapping and contract version are verified on-chain, and pagination/freshness semantics are checked. The official Preprod Registry policy ID is now known as an expected chain anchor, but it is not a substitute for observing the exact NFT asset. No live endpoint, credential, wallet, payment or chain transaction was used in this audit.
 
 ## 11. References
 
@@ -208,6 +226,7 @@ Official source repositories and documentation:
 
 - https://github.com/masumi-network/masumi-registry-service
 - https://github.com/masumi-network/masumi-payment-service
+- https://github.com/masumi-network
 - https://www.masumi.network/dev/masumi/core-concepts/identity
 - https://www.masumi.network/dev/masumi/core-concepts/registry
 - https://www.masumi.network/dev/masumi/documentation/technical-documentation/agent-identity-nft
