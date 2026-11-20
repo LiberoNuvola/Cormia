@@ -155,3 +155,16 @@ finally {
 
 The pinned origin is the documented public testing/development Registry host. Confirm that this exact target is appropriate for the intended Preprod observation before running the probe; the acknowledgement above is not proof of a particular deployment's image, auth policy or contract. See [the M1 contract audit](../../docs/integration/MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md).
 
+
+## Masumi Payment Service registration-evidence adapter — M1 follow-on
+
+A separate client is present at [masumi-payment-registry-readonly-adapter.mjs](./masumi-payment-registry-readonly-adapter.mjs). It reads only the Payment Service's fixed `GET /api/v1/registry/` route using the `token` header, and forces a Preprod query filtered to `Web3CardanoV2` plus `Registered`. It caps list pages at 20 and supports an exact identifier lookup. It validates `data.Assets`, confirmed V2 registration state, the full agent identifier and the seller wallet reference while preserving unknown fields.
+
+This is deliberately separate from the M2 Registry Service discovery adapter. Upstream Masumi source locates the authoritative registration-record list in the Payment Service. However, the official Masumi skills repository says `https://payment.masumi.network/api/v1` is the managed **Mainnet** service and there is no managed Preprod hostname; Preprod requires an operator-hosted Payment Service instance. The adapter rejects `payment.masumi.network` for Preprod and has no default target. Use an operator-configured self-hosted `/api/v1` URL only.
+
+The Payment Service credential must be provisioned separately with READ permission, PAY and ADMIN disabled, Preprod network scope, and the narrowest suitable wallet scope. The adapter cannot verify key permissions. Do not paste credentials into ChatGPT or commit them to Git. The local probe at [probe-masumi-payment-registry-preprod.mjs](../../scripts/probe-masumi-payment-registry-preprod.mjs) requires a URL, read token and explicit `MASUMI_PAYMENT_SERVICE_PREPROD_ACK` acknowledgement. Without all required values, it exits `NOT_RUN` and makes no request. It emits aggregate evidence only.
+
+The API's `Registered` filter maps to `RegistrationConfirmed` and `UpdateConfirmed`. Cursor pagination is inclusive, so page collectors must deduplicate repeated cursor records by row ID. The record's `agentIdentifier`, seller wallet vKey and current transaction hash are authoritative Payment Service claims, not on-chain proof; the exact policy/asset tuple and mint/update transaction must still be checked independently on Cardano.
+
+The dedicated Masumi workflow now includes both Registry Service and Payment Service adapter/probe suites. CI uses only synthetic responses and never contacts either live service. No Payment Service URL, credential, or live Preprod response is configured in this repository.
+
