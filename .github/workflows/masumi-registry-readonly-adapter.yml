@@ -18,8 +18,12 @@ on:
     paths:
       - "runtime/reference-worker/masumi-registry-readonly-adapter.mjs"
       - "runtime/reference-worker/masumi-registry-readonly-adapter.test.mjs"
+      - "runtime/reference-worker/masumi-payment-registry-readonly-adapter.mjs"
+      - "runtime/reference-worker/masumi-payment-registry-readonly-adapter.test.mjs"
       - "scripts/probe-masumi-registry-preprod.mjs"
       - "scripts/probe-masumi-registry-preprod.test.mjs"
+      - "scripts/probe-masumi-payment-registry-preprod.mjs"
+      - "scripts/probe-masumi-payment-registry-preprod.test.mjs"
       - ".github/workflows/masumi-registry-readonly-adapter.yml"
   workflow_dispatch:
 
