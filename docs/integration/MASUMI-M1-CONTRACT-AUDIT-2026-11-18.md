@@ -248,6 +248,8 @@ A separate read-only Cormia adapter is now implemented at `runtime/reference-wor
 
 The query source maps `filterStatus=Registered` to `RegistrationConfirmed` and `UpdateConfirmed`; cursor pagination is inclusive (the cursor record is returned again), so a future page collector must deduplicate by record ID. The Payment Service record exposes the full `agentIdentifier`, source payment type, seller wallet vKey/address and current transaction reference where present. These fields are registration evidence, not chain proof. Exact `(Preprod, policyId, assetName)` and mint/update transaction provenance still require independent on-chain verification.
 
+[Offline CI evidence — 2026-11-20] [Run #44682904809](https://github.com/LiberoNuvola/Cormia/actions/runs/44682904809) passed **35/35 tests** on code commit `a00ff5026b7d2d27723176b980d71bc7cd76dd26`: 15 Payment Service adapter tests, 4 Payment Service probe tests, 12 Registry discovery adapter tests and 4 Registry probe tests. All tests use synthetic data/fake fetch; the workflow makes no live call and does not verify a deployed Preprod instance.
+
 M1 may be reconsidered only after the operator identifies the self-hosted Preprod origin, pins its service version/image digest and read-only key scope, captures a redacted response fixture, checks pagination/freshness, and verifies identifier-to-NFT mapping plus contract version on-chain. No live endpoint, credential, wallet, payment or chain transaction was used in this audit.
 
 ## 10.1. Preprod Payment Service deployment target — 2026-11-20
