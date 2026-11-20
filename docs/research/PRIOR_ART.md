@@ -5,6 +5,12 @@
 
 This is a living register, not a legal opinion or exhaustive novelty search. Internet-Drafts are work in progress. Versions and licenses must be checked again before implementation or release.
 
+## 0. Current Cormia architecture composition review — 3 November 2026
+
+The architecture added on 2026-11-03 now has a component-by-component prior-art review. Read [Cormia Prior-Art Composition Review v0.1](CORMIA_PRIOR_ART_COMPOSITION_REVIEW_2026-11-03.md) before creating a new Runtime, Team Room, Workbench, Resource Broker, receipt schema, sandbox, evidence log or support service. That review maps each current proposal to upstream systems, records adopt/adapt/spike/reference decisions and defines six bounded implementation spikes.
+
+The existing register below remains the broad baseline for AEP/IMMORTAL prior art. The 3 November review is the current crosswalk for the newer Cormia Core-first, Coordination Plane and Materios work-completion proposals. It does not authorize code vendoring or claim production conformance.
+
 ## 1. Standards and protocol proposals
 
 | Prior art | Existing problem it addresses | Reuse / integration strategy | Boundary: what IMMORTAL must still define |
@@ -31,6 +37,7 @@ This is a living register, not a legal opinion or exhaustive novelty search. Int
 |---|---|---|
 | **OpenHands** | Open-source agent server, tools, workspaces, sandbox-oriented deployment patterns and developer control plane. | Evaluate reusable components only after license, dependency, architecture and security review. Prefer interop or isolated adapters before vendoring code. OpenHands describes multiple repositories and explicitly distinguishes UI from execution/sandbox services. |
 | **SWE-agent** | Demonstrates the importance of agent-computer interfaces for repository navigation, editing, and test execution. | Use as evidence that tool/interface design affects engineering-agent performance. Benchmark runtime interfaces rather than assuming prompt changes alone solve coding reliability. |
+| **Everything Claude Code (ECC)** | Cross-harness agent-harness toolkit: curated agents/skills/rules, hooks, context and session-memory workflows, confidence-scored “instinct” learning, verification loops and AgentShield configuration scanning. | **SPIKE / selectively ADAPT.** It optimizes agent workflow and context use, not model weights, GPU VRAM or LLM pretraining. Preserve Cormia's existing Local Agent, Task Store, Resource Manager and Evolution Manager. Treat learned instincts as untrusted suggestions, never as mandates or capabilities. Review all executable hooks/MCP configs and provider-specific support before use; the upstream README documents native-Windows defects in Continuous Learning v2. See [CORMIA_ECC_COMPOSITION_REVIEW_2026-11-06.md](CORMIA_ECC_COMPOSITION_REVIEW_2026-11-06.md). |
 | **Darwin Gödel Machine (DGM)** | Empirical iterative self-modification of coding agents, benchmarking candidate variants and retaining an archive of solutions. | Adopt the principle of empirical validation and candidate archives. AEP must add protocol-level authorization, immutable baselines, evidence linkage, risk budgets, and controlled promotion. |
 | **A Self-Improving Coding Agent** | Research on coding agents that autonomously modify themselves and evaluate improvements on benchmark tasks. | Treat as self-improvement prior art; distinguish benchmark improvements from security, economic, and on-chain correctness. |
 
@@ -46,6 +53,11 @@ The user-facing idea of sharing personal hardware to access AI without subscript
 - **Morpheus Lumerin:** separate local `llama.cpp` demo from a remote marketplace that uses MOR/ETH; useful local-first precedent, though its remote consumer path is tokenized.
 
 AEP must not claim the credit-for-compute model itself as novel. Its possible contribution is a verifiable composition of reciprocal access, task-scoped capabilities, Resource Manager enforcement, deterministic engineering gates, JEV evidence normalization, read-only audit connectors, on-chain epoch commitments, challenges and governance.
+
+
+## 4A. Local model post-training with constrained GPU memory
+
+- **Soup CLI / Layer Streaming:** open-source local LLM training/post-training toolkit. Its optional BETA streaming path keeps the frozen quantized base in CPU RAM (with NVMe overflow) and loads one decoder layer at a time into VRAM while LoRA adapters and optimizer state remain on-device. It is a candidate for low-VRAM local adapter production, not a decentralized inference mesh or a substitute for peer execution/reciprocity. The reported Llama-3.1-8B-on-4GB result is configuration-specific and Soup's own page distinguishes pre- and post-correctness-repair measurements; do not generalize the benchmark. Granite 4.0 H Tiny recipe availability does not establish Granite 4.2 8B compatibility. See [DECENTRALIZED_INFERENCE_PRIOR_ART.md](DECENTRALIZED_INFERENCE_PRIOR_ART.md), section 1A, for the bounded Cormia evaluation and provenance requirements.
 
 ## 5. Existing IMMORTAL implementation assets to preserve
 

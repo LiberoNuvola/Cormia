@@ -53,3 +53,39 @@ Run from this directory:
 ```powershell
 node --test .\immortal-resource-manager-adapter.test.mjs
 ```
+
+## Broker Resource Provider composition — 2026-11-08
+
+`immortal-resource-provider-composition.mjs` now provides `createImmortalResourceProvider()`, which composes:
+
+1. the existing fixed mapping in `withLocalResourceLease()`;
+2. Cormia's `createLocalResourceProvider()` offer/lease wrapper;
+3. the Plan–Execute Broker's `resourceProvider.withLease()` contract.
+
+The host supplies the actual ResourceManager object and owner-accepted/validated offers. The offer's operation is rejected unless it is one of the reviewed fixed IDs in `RESOURCE_OPERATION_KINDS`; `workspace-test` maps to the existing `cpu-heavy` class. The model cannot select this mapping. The Broker receives a task-bound active lease during adapter execution; the ResourceManager's release closure is called in `finally`, including on thrown test-runner errors. A denied ResourceManager acquisition never invokes the operation.
+
+Four unit tests cover successful acquire/release, denial, exception cleanup and rejection of arbitrary operation IDs. A further Core integration test, `runtime/core/task-worktree-test-resource-broker.integration.test.mjs`, now composes the actual Project Runtime Broker → `workspace.test` adapter → this Resource Provider factory → fixed `cpu-heavy` ResourceManager lease. The test runner and ResourceManager are synthetic fixtures, but the Broker, factory, lease wrapper and operation adapter are the real modules. CI [run #42457906806](https://github.com/LiberoNuvola/Cormia/actions/runs/42457906806) passed 153 Core, 7 read-only, 16 worktree/write, 8 test-runner and 4 ResourceManager composition tests (zero failures). This is not a live Windows Agent connection.
+
+Limitations remain: process-local lease/offer state, no OS-wide quota, no durable lease store, and no external cancellation interface on the existing ResourceManager lease itself. Resource Provider expiry/revocation checks remain distinct from actual ResourceManager hardware enforcement. The factory does not access or modify the user's `E:\AI\Immortal-Agent-v0.7` files.
+
+## Local cpu-heavy admission diagnostic
+
+When the Broker returns RESOURCE_ADMISSION_DENIED, run the bounded host diagnostic before changing any resource policy:
+
+```powershell
+$env:CORMIA_CODING_ROOT = "E:\AI\Immortal-CodingLab\workspace"
+try {
+    node .\scripts\diagnose-local-resource-manager.mjs
+    $diagnosticExit = $LASTEXITCODE
+    if ($diagnosticExit -eq 1) { throw "ResourceManager diagnostic itself failed" }
+    if ($diagnosticExit -eq 2) {
+        Write-Host "ResourceManager denied cpu-heavy admission; preserve the denial and inspect the reported snapshot/reason."
+    }
+} finally {
+    Remove-Item Env:CORMIA_CODING_ROOT -ErrorAction SilentlyContinue
+}
+```
+
+The script imports the existing ResourceManager, samples one fresh snapshot and performs one acquire("cpu-heavy", snapshot) probe. If granted, it immediately calls the lease release callback. It prints only aggregate recommendation fields, bounded primitive policy fields and the allow/deny reason; it does not print host identity, paths, process lists, task content or secrets. Exit code 0 means admitted and released; exit code 2 means a valid denial or unverified release; exit code 1 means the diagnostic could not run.
+
+This is a transient real admission probe, not a reservation for a later Docker run. The later Broker smoke requests a fresh lease and can still be denied if host conditions change. Do not weaken cpu-heavy thresholds merely to make a smoke test green; use the actual ResourceManager reason and policy evidence to decide whether to retry later or change only the test resource footprint through a separately reviewed host profile.

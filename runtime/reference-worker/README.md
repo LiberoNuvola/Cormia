@@ -117,3 +117,54 @@ This is not implemented yet. The current /code + APPROVO path remains the legacy
 The isolated policy engine is [local-autonomous-project-authority.mjs](./local-autonomous-project-authority.mjs), with [17 contract tests](./local-autonomous-project-authority.test.mjs). It derives one internal child authority from an already trusted project mandate and uses it across repeated in-scope edits, tests and builds without an approval callback or user-supplied token. It checks task/manifest/worktree/worker/runtime binding, expiry, excluded paths, host-policy intersection, named execution profiles, feature-branch and HTTPS-allowlist restrictions.
 
 The helper assumes host code has already verified the mandate signature, operator consent and revocation/anchor state. It does not create keys, sign/store mandates, create worktrees, run tools, broker credentials or connect to the Agent. GitHub Actions run #25 passed all 65 contracts across grant, lifecycle schemas, mandate schemas, autonomous authority and revocation-anchor model. See [ADR-0010](../../docs/adr/0010-autonomous-project-delegation-and-runtime-authority.md).
+
+## Masumi Registry read-only adapter — M2 candidate
+
+A source-pinned, offline-testable adapter is present at [masumi-registry-readonly-adapter.mjs](./masumi-registry-readonly-adapter.mjs). It can call only the configured Registry origin's fixed `POST /api/v1/registry-entry/` route, forces Preprod, caps page size at 20, bounds request duration and response bytes while streaming into a fixed-size buffer, rejects redirects, validates the response envelope, and never calls provider URLs, payment endpoints, wallets or transaction APIs.
+
+The authentication header is deliberately mandatory and has no fallback because the inspected Registry middleware reads `token` while the generated OpenAPI snapshot declares `API-Key`. Configure only after a controlled Preprod probe resolves the deployed service's behavior. The adapter accepts either name only when explicitly injected by trusted host configuration; it does not probe both. Registry query entries remain untrusted discovery data: current V2 minting is permissionless, so policy presence alone is not proof of an operator-authorized registration.
+
+The adapter and local-probe syntax checks plus all 16 offline tests passed on code commit `b4777ed82d1b4c74ff6dfb8b4b3a932396aa725c`: [PR run #52](https://github.com/LiberoNuvola/Cormia/actions/runs/44531947039). The suite contains 12 adapter contract tests and 4 probe tests, including child-process checks that missing credentials or a missing public-test target acknowledgement exit `NOT_RUN` without sending a request. It uses synthetic streams and a fake fetch implementation; no live endpoint, credential or provider was used. This is a read-only compatibility slice, not an AEP-conformant worker or a live Masumi integration.
+
+### Controlled Preprod probe — operator-run only
+
+A separate local probe is available at [`scripts/probe-masumi-registry-preprod.mjs`](../../scripts/probe-masumi-registry-preprod.mjs). Its destination is pinned in code to `https://registry.masumi.network`, so an environment variable cannot redirect a credential to another host. Important: the upstream Masumi Registry repository classifies this public endpoint as experimental and intended only for testing/development; it is **not** proof of a specifically pinned Preprod deployment, image digest or production service. The probe therefore requires both `MASUMI_REGISTRY_READONLY_TOKEN` and an explicit local acknowledgement that this is the public testing/development endpoint. Without either, it exits as `NOT_RUN` and sends no request. With both present, it makes exactly one `POST /api/v1/registry-entry/` request with `network: "Preprod"`, `limit: 1` and the documented `token` header. It prints aggregate counts only and never prints identifiers, names, provider URLs, raw records or the token.
+
+Use only a credential explicitly provisioned for this exact public testing endpoint, from a local secret store or secure prompt. Do not use the public experimental test key, an admin key, a credential issued for another Registry deployment, or paste a credential into ChatGPT/Git. The local acknowledgement is not a deployment attestation and does not close M1. The script is deliberately not called by GitHub Actions; CI tests only its offline redaction and no-request gates with synthetic data.
+
+PowerShell example (prompts without echoing the token):
+
+```powershell
+$ack = Read-Host 'Confirm this is the public testing/development Registry endpoint only (type PUBLIC-TEST)'
+if ($ack -cne "PUBLIC-TEST") { throw "Probe not authorized for this target; no request was sent." }
+
+$secure = Read-Host "Masumi Registry read-only token for this exact endpoint" -AsSecureString
+$ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
+try {
+    $env:MASUMI_REGISTRY_PUBLIC_TEST_ACK = "I_ACKNOWLEDGE_PUBLIC_TEST_ENDPOINT"
+    $env:MASUMI_REGISTRY_READONLY_TOKEN = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)
+    node .\scripts\probe-masumi-registry-preprod.mjs
+}
+finally {
+    Remove-Item Env:MASUMI_REGISTRY_READONLY_TOKEN -ErrorAction SilentlyContinue
+    Remove-Item Env:MASUMI_REGISTRY_PUBLIC_TEST_ACK -ErrorAction SilentlyContinue
+    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr)
+    $secure.Dispose()
+}
+```
+
+The pinned origin is the documented public testing/development Registry host. Confirm that this exact target is appropriate for the intended Preprod observation before running the probe; the acknowledgement above is not proof of a particular deployment's image, auth policy or contract. See [the M1 contract audit](../../docs/integration/MASUMI-M1-CONTRACT-AUDIT-2026-11-18.md).
+
+
+## Masumi Payment Service registration-evidence adapter — M1 follow-on
+
+A separate client is present at [masumi-payment-registry-readonly-adapter.mjs](./masumi-payment-registry-readonly-adapter.mjs). It reads only the Payment Service's fixed `GET /api/v1/registry/` route using the `token` header, and forces a Preprod query filtered to `Web3CardanoV2` plus `Registered`. It caps list pages at 20 and supports an exact identifier lookup. It validates `data.Assets`, confirmed V2 registration state, the full agent identifier and the seller wallet reference while preserving unknown fields.
+
+This is deliberately separate from the M2 Registry Service discovery adapter. Upstream Masumi source locates the authoritative registration-record list in the Payment Service. However, the official Masumi skills repository says `https://payment.masumi.network/api/v1` is the managed **Mainnet** service and there is no managed Preprod hostname; Preprod requires an operator-hosted Payment Service instance. The adapter rejects `payment.masumi.network` for Preprod and has no default target. Use an operator-configured self-hosted `/api/v1` URL only.
+
+The Payment Service credential must be provisioned separately with READ permission, PAY and ADMIN disabled, Preprod network scope, and the narrowest suitable wallet scope. The adapter cannot verify key permissions. Do not paste credentials into ChatGPT or commit them to Git. The local probe at [probe-masumi-payment-registry-preprod.mjs](../../scripts/probe-masumi-payment-registry-preprod.mjs) requires a URL, read token and explicit `MASUMI_PAYMENT_SERVICE_PREPROD_ACK` acknowledgement. Without all required values, it exits `NOT_RUN` and makes no request. It emits aggregate evidence only.
+
+The API's `Registered` filter maps to `RegistrationConfirmed` and `UpdateConfirmed`. Cursor pagination is inclusive, so page collectors must deduplicate repeated cursor records by row ID. The record's `agentIdentifier`, seller wallet vKey and current transaction hash are authoritative Payment Service claims, not on-chain proof; the exact policy/asset tuple and mint/update transaction must still be checked independently on Cardano.
+
+The dedicated Masumi workflow now includes both Registry Service and Payment Service adapter/probe suites. [Run #44682904809](https://github.com/LiberoNuvola/Cormia/actions/runs/44682904809) passed **35/35 tests** on code commit `a00ff5026b7d2d27723176b980d71bc7cd76dd26` (15 Payment Service adapter, 4 Payment Service probe, 12 Registry discovery adapter and 4 Registry probe tests). CI uses only synthetic responses and never contacts either live service. No Payment Service URL, credential, or live Preprod response is configured in this repository.
+

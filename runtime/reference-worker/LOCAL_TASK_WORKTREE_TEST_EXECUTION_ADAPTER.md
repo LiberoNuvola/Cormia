@@ -1,0 +1,169 @@
+# Local Task-Worktree Test Execution Adapter
+
+- Status: implemented candidate adapter and contract tests; not yet wired to a production host ResourceManager or Windows service
+- Date: 2026-11-08
+- Related: ADR-0007, ADR-0010, `git-task-worktree-manager.mjs`, `task-worktree-workspace-operation-adapters.mjs`
+
+## 1. Purpose
+
+Add the bounded `workspace.test` leg to the isolated task-worktree execution path without exposing a general shell or model-selected command. The model may propose only a host-registered `executionProfileId`; the profile fixes the runner type, digest-pinned container image, exact test files, time limit and resource bounds.
+
+This adapter is registered behind the Project Runtime Plan–Execute Capability Broker. The trusted Project Runtime must independently authorize `workspace.test` against the standing project mandate and task child authority. The adapter does not authorize itself.
+
+## 2. Host profile
+
+Each profile is host-owned configuration with exactly these fields:
+
+| Field | Contract |
+|---|---|
+| `executionProfileId` | Stable host-registered ID; this is the only profile selector exposed in a plan |
+| `runner` | Fixed literal `node-test` in v0.1 |
+| `imageDigest` | Container image reference pinned to `@sha256:<64 lowercase hex>` |
+| `testFiles` | 1–128 unique canonical relative paths, checked as regular non-symlink files inside the task worktree |
+| `maxRuntimeMs` | 1,000–600,000 |
+| `memoryMiB` | 256–8,192; Docker memory and memory-swap are both capped to this value |
+| `cpus` | 0.25–8 |
+| `pidsLimit` | 32–512 |
+| `tmpfsMiB` | 16–1,024 for `/tmp` |
+| `maxOutputBytes` | 4 KiB–1 MiB per output stream |
+
+The model cannot provide an image, command, arguments, environment, mount, path list, network setting or resource class. v0.1 invokes only `node --test <host-profile-files>`; there is no npm install, shell, arbitrary command or network endpoint.
+
+## 3. Docker boundary
+
+Before execution, the runner:
+
+1. Re-checks that the task worktree root is a canonical real directory and every host-profile test file is a regular non-symlink file contained within it.
+2. Inspects Docker's named `default` context and accepts only a local `unix://` endpoint on POSIX or `npipe://` endpoint on Windows. A TCP/SSH/remote context is denied.
+3. Inspects the exact digest-pinned image and refuses to proceed if it is not already present locally.
+4. Starts Docker with `--context default` and `--pull=never`, so a missing image cannot trigger an implicit registry pull.
+
+The container runs with network disabled, read-only container root, dropped Linux capabilities, `no-new-privileges`, non-root UID/GID, PID/memory/swap/CPU limits and bounded tmpfs. Only the task worktree is bind-mounted, at `/workspace`; no host home, credentials, Docker socket or arbitrary path is mounted. The worktree mount is writable because authorized tests may create project-local test artifacts.
+
+These are Docker configuration controls, not a claim of a hardened VM or protection against every container-kernel escape. Docker daemon availability and local context integrity remain host assumptions.
+
+## 4. Resource lease and cancellation
+
+`workspace.test` always requires an active Broker-provided Resource Lease. The adapter rejects a missing/released lease and calls the Broker's `assertResourceActive()` before and after execution. The Docker runner polls the same callback every 200 ms and terminates the Docker client if the lease expires or is revoked. It also enforces a host-profile runtime timeout and output bounds.
+
+The adapter does not create a lease itself. The production composition must map `workspace.test` to the trusted local ResourceManager through the existing Resource Provider boundary. This callback-scoped lease is admission control; it does not replace Docker limits or claim OS-wide quotas.
+
+## 5. Result semantics
+
+The adapter returns the fixed runner ID, image digest, exact test-file list, exit code, pass/fail, duration and bounded stdout/stderr. A non-zero test exit is a test result, not a successful task. The independent task result verifier must inspect `passed` and exit code before it can issue evidence or allow task completion. This adapter does not issue a Work Completion Receipt or Materios certificate.
+
+## 6. Tests and evidence
+
+`task-worktree-test-operation-adapter.test.mjs` covers host-profile selection, mandatory lease, exact worktree binding, Docker argv, non-root/resource flags, local context selection, preloaded-image/no-pull behavior, symlink rejection and lease-loss termination. [CI run #42457456976](https://github.com/LiberoNuvola/Cormia/actions/runs/42457456976) passed **152 Core tests, 7 read-only adapter tests, 16 worktree/write adapter tests and 8 test-runner adapter tests** (all zero failures). The Docker CLI is a deterministic fake in CI; the workflow does not run a real Docker daemon or claim Windows host compatibility.
+
+CI workflow adds syntax checks and a dedicated Node test step. Existing `multi-project-task-worktree-write.integration.test.mjs` separately proves two synthetic projects can create/replace files in two real temporary Git worktrees under one Supervisor; it does not yet include a real Docker test run.
+
+### Windows local rerun — 2026-11-08 (operator-reported)
+
+The operator fetched commit `673d448a2b23528aae4f27faedc0a0f7ad07e85f` and ran the suites on Windows PowerShell:
+
+| Suite | Result |
+|---|---:|
+| `task-worktree-workspace-operation-adapters.test.mjs` | 9 passed, 1 skipped, 0 failed |
+| `task-worktree-test-operation-adapter.test.mjs` | 8 passed, 1 skipped, 0 failed |
+| `git-task-worktree-manager.test.mjs` | 7 passed, 0 skipped, 0 failed |
+| `multi-project-task-worktree-write.integration.test.mjs` | 1 passed, 0 skipped, 0 failed |
+| `runtime/core/*.test.mjs` | 152 passed, 1 skipped, 0 failed (153 total) |
+
+The two symlink skips are explicit: Windows did not grant file-symlink creation permission. Directory-junction checks ran and passed. The synthetic Git fixtures pin `core.autocrlf=false` locally; no global Git setting was changed.
+
+This validates the Windows test harness and synthetic two-project worktree execution. The Docker runner tests use the injected fake host process port; these results do **not** establish execution against a real Docker daemon or a real digest-pinned image. The actual Windows Docker smoke test, production ResourceManager wiring and approved IMMORTAL test profile remain open.
+
+## 7. Explicit gaps
+
+- The adapter is not yet connected to the actual Windows ResourceManager/Resource Provider.
+- No host execution profile has yet been approved for the user's IMMORTAL repository; do not invent an image digest or test selection.
+- No Docker image is automatically pulled or built by this adapter. The host must provision and verify an approved digest-pinned image separately.
+- The test runner supports Node's built-in test runner only. Aiken/Haskell/TypeScript or other project toolchains require separate reviewed, fixed profiles/adapters; do not generalize this into model-selected commands.
+- The real Windows Docker Desktop default context, image digest, non-root bind-mount behavior, lease cancellation and resource limits remain untested on the user's machine.
+- Production signed project mandate, consent broker, key provider, durable anti-rollback revocation anchor, Task Manifest verification and independent evidence writer remain separate gates.
+
+## 8. Next integration
+
+Connect the existing local ResourceManager through the Broker Resource Provider; define a host-reviewed Node test profile only after inspecting the target repository's actual test tooling and selecting exact tests; then run a local Windows smoke test with a disposable synthetic repository before registering the IMMORTAL project. Do not touch IMMORTAL V3, Reveal, PRE-RICH economic semantics or the old Agent `/code` + `APPROVO` compatibility path.
+## Real Windows Docker Desktop smoke result — 2026-11-08
+
+**Operator-run result:** PASS, 5/5 tests, exit code 0, approximately 2.49 seconds.
+
+- Docker context: `default`, endpoint `npipe:////./pipe/docker_engine`.
+- Preloaded image reference: `node@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914`.
+- The smoke script used a disposable workspace under `E:\\AI\\Cormia`, and the runner invoked the real local Docker CLI.
+- Verified: Node 22, UID 1000, writable Windows bind mount, writable bounded `/tmp`, and read-only container root.
+- The invocation used the adapter's default native Node process port and the host image digest; no image pull was requested.
+
+This closes the first real Windows Docker Desktop runner smoke test. It does **not** prove production Broker-to-ResourceManager wiring: the smoke invocation supplied a callback-scoped always-active test lease. It also does not certify Docker as a hardened VM, the IMMORTAL test toolchain, or production project authority. The full integration and an approved fixed IMMORTAL test profile remain open.
+
+## Broker → actual ResourceManager → real Docker smoke harness
+
+`scripts/smoke-broker-resource-manager-docker.mjs` composes the Project Runtime Broker, a synthetic exact-scope Task Manifest/mandate fixture, the real `createImmortalResourceProvider()`, the existing local `withLocalResourceLease()` adapter, the actual ResourceManager imported from the separate Coding Workspace root, a disposable real Git worktree, and the real Docker runner.
+
+PowerShell invocation (no image pull):
+
+```powershell
+$env:CORMIA_DOCKER_TEST_IMAGE = $image
+$env:CORMIA_CODING_ROOT = "E:\\AI\\Immortal-CodingLab\\workspace"
+try {
+    node .\\scripts\\smoke-broker-resource-manager-docker.mjs
+    if ($LASTEXITCODE -ne 0) { throw "Broker/ResourceManager/Docker smoke test failed or was blocked" }
+} finally {
+    Remove-Item Env:CORMIA_DOCKER_TEST_IMAGE -ErrorAction SilentlyContinue
+    Remove-Item Env:CORMIA_CODING_ROOT -ErrorAction SilentlyContinue
+}
+```
+
+The script uses the fixed `workspace-test` → `cpu-heavy` mapping. If the real ResourceManager denies admission, the Broker path fails closed and Docker is not started. If admitted, the real Docker runner uses the exact digest image already present locally and runs only the synthetic host-pinned Node test file in a disposable task worktree.
+
+**Trust boundary:** the ResourceManager instance and Docker daemon are real host components; the task, manifest, project mandate resolver and owner-accepted Resource Offer are synthetic fixtures created by this smoke harness. This is an integration smoke, not activation of the autonomous Agent, not a signed mandate/consent/revocation proof, and not an IMMORTAL production test profile. The existing Agent's `APPROVO`/write-approval behavior is not touched. The temporary source repo/worktree is deleted on exit.
+
+## Broker and ResourceManager composition
+
+`runtime/core/task-worktree-test-resource-broker.integration.test.mjs` composes the real Project Runtime/Plan–Execute Broker, fixed-profile `workspace.test` adapter, `createImmortalResourceProvider()` and `withLocalResourceLease()`. It proves the Broker's required Resource Offer causes the fixed `workspace-test` → `cpu-heavy` ResourceManager operation, the adapter receives an active task-bound lease, the test result returns through the Broker, and the release closure runs once.
+
+CI [run #42457906806](https://github.com/LiberoNuvola/Cormia/actions/runs/42457906806): 153 Core PASS, 7 read-only adapter PASS, 16 worktree/write adapter PASS, 8 test-runner adapter PASS and 4 ResourceManager composition PASS. The ResourceManager and test runner are fake fixtures; no real Docker or Windows host was used.
+
+## Real Docker smoke harness
+
+`scripts/smoke-docker-task-worktree-runner.mjs` exercises the actual adapter against the host Docker CLI. It creates a disposable synthetic workspace under the Cormia repository and checks Node 22, UID 1000, writable task-worktree bind mount, writable bounded `/tmp`, and a read-only container root. The runner itself checks the local `default` context, exact preloaded digest and launches with `--pull=never`, `--network none`, and its fixed resource/security arguments.
+
+PowerShell invocation using a digest already present locally:
+
+```powershell
+$imageInfo = @(docker --context default image inspect node:22-alpine | ConvertFrom-Json)[0]
+if ($LASTEXITCODE -ne 0) { throw "Cannot inspect the local Node image" }
+
+$expectedDigest = "sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914"
+$image = @($imageInfo.RepoDigests) |
+    Where-Object { $_.EndsWith("@$expectedDigest") } |
+    Select-Object -First 1
+if (-not $image) { throw "The expected digest is not present in this local image's RepoDigests" }
+
+$env:CORMIA_DOCKER_TEST_IMAGE = $image
+try {
+    node .\\scripts\\smoke-docker-task-worktree-runner.mjs
+    if ($LASTEXITCODE -ne 0) { throw "Real Docker smoke test failed" }
+} finally {
+    Remove-Item Env:CORMIA_DOCKER_TEST_IMAGE -ErrorAction SilentlyContinue
+}
+```
+
+This script deliberately supplies a callback-scoped always-active test lease. It validates the runner and Docker host boundary only; it does not validate the Project Runtime Broker, production ResourceManager, signed project mandate, or an IMMORTAL Vitest profile. No image is pulled. The Node image remains a smoke-test candidate until the operator reviews the results and approves the host profile.
+
+## First real Broker/ResourceManager/Docker attempt — 2026-11-08
+
+The Windows operator ran `scripts/smoke-broker-resource-manager-docker.mjs` against the actual IMMORTAL ResourceManager module. The Project Runtime accepted the plan, but `executePlan` returned `FAILED / RESOURCE_ADMISSION_DENIED`. The Docker runner was not invoked and no container was started. The temporary synthetic Git repository/worktree is cleaned in the script's `finally` block.
+
+The Broker currently maps a denied Local Resource Provider lease to the generic `RESOURCE_ADMISSION_DENIED` reason, so this result alone does not identify whether the host ResourceManager denied due telemetry/policy/capacity or whether its lease acquisition failed. The next diagnostic is `scripts/diagnose-local-resource-manager.mjs`, which reports a bounded snapshot and performs one `cpu-heavy` acquire/release probe directly against the same ResourceManager. Do not change thresholds or bypass admission based on this generic Broker result.
+
+## Resource denial before adapter dispatch
+
+The Broker now includes `dispatchedStepCount` in failed EXECUTE results. This count increments immediately before the host operation adapter is entered; a Resource Provider rejection that never calls the dispatch callback therefore returns `dispatchedStepCount: 0`. If a provider reports denial only after the adapter was entered, the count is non-zero and the outcome remains uncertain.
+
+The Model Task Planner recognizes only the exact tuple `reason=RESOURCE_ADMISSION_DENIED`, `dispatchedStepCount=0`, `completedStepCount=0`. It then writes a second durable checkpoint with `effectBoundary=no_external_effects` and returns a `blocked` task outcome. Supervisor persists the task as `blocked`, rather than incorrectly placing a proven non-dispatched operation in `recovery_required`. Any dispatch that started, any partial completion, any other failure, or failure to persist the checkpoint continues to follow the existing reconciliation/recovery path.
+
+This does not auto-retry a blocked task. A trusted host must re-evaluate resource availability and explicitly unblock it; this avoids busy retry loops and does not weaken ResourceManager thresholds. Broker, planner and Supervisor regression tests cover both the zero-dispatch denial and the post-dispatch denial case.
+

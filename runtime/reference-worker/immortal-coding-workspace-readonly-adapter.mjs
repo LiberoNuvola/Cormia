@@ -72,6 +72,53 @@ export function createReadOnlyCodingWorkspaceAdapter({
 
   const scope = buildScope({ readableFiles, listableDirectories });
 
+  function validateInput(operation, args) {
+    if (!OPERATION_SET.has(operation)) {
+      throw new Error("Coding Workspace operation is not exposed by the read-only adapter.");
+    }
+    if (!codingWorkspace.isTool(operation)) {
+      throw new Error("CodingWorkspace does not recognize the requested operation.");
+    }
+    if (codingWorkspace.requiresApproval(operation) !== false) {
+      throw new Error("Read-only adapter refuses any operation requiring host approval.");
+    }
+    if (operation === "workspace_list") {
+      requireExactKeys(args ?? {}, ["path"], []);
+      const normalized = args?.path === undefined || args.path === "."
+        ? "."
+        : normalizeRelativePath(args.path);
+      if (!scope.directories.has(normalized)) {
+        throw new Error("Directory is not in the trusted host listableDirectories allowlist.");
+      }
+      return { path: normalized };
+    }
+    if (operation === "workspace_read" || operation === "workspace_diff") {
+      requireExactKeys(args, ["path"], ["path"]);
+      const normalized = normalizeRelativePath(args.path);
+      if (!scope.files.has(normalized)) {
+        throw new Error("File is not in the trusted host readableFiles allowlist.");
+      }
+      return { path: normalized };
+    }
+    if (operation === "workspace_verify") {
+      requireExactKeys(args, ["paths"], ["paths"]);
+      if (!Array.isArray(args.paths) || args.paths.length < 1 || args.paths.length > MAX_VERIFY_PATHS) {
+        throw new Error("verify requires 1-100 explicitly allowlisted paths.");
+      }
+      const normalized = args.paths.map(normalizeRelativePath);
+      if (new Set(normalized).size !== normalized.length) {
+        throw new Error("Duplicate verify paths are prohibited.");
+      }
+      for (const item of normalized) {
+        if (!scope.files.has(item)) {
+          throw new Error("Verify path is not in the trusted host readableFiles allowlist.");
+        }
+      }
+      return { paths: normalized };
+    }
+    throw new Error("Coding Workspace operation is not supported.");
+  }
+
   async function invoke(operation, args) {
     if (!OPERATION_SET.has(operation)) {
       throw new Error("Coding Workspace operation is not exposed by the read-only adapter.");
@@ -87,6 +134,7 @@ export function createReadOnlyCodingWorkspaceAdapter({
 
   return Object.freeze({
     operations: CODING_READ_ONLY_OPERATIONS,
+    validateInput,
 
     async list({ path = "." } = {}) {
       requireExactKeys(arguments[0] ?? {}, ["path"], []);

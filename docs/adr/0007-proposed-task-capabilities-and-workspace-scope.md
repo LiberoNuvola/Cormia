@@ -85,21 +85,21 @@ The effective grant must never exceed any input grant. Unknown capability IDs, u
 | `workspace.read` | Read-only wrapper; exact file allowlist | Candidate-supported by wrapper contract; not yet exercised against the live Windows workspace |
 | `workspace.diff` | Read-only wrapper; exact file allowlist; baseline is in-memory | Candidate-supported only within a live adapter session; do not assume baseline survives restart |
 | `workspace.verify` | Read-only wrapper; explicit exact file allowlist; parser/hash checks | Candidate-supported by wrapper contract; not a semantic test; live Windows path not yet exercised |
-| `workspace.create` | Existing Agent approval required | Unsupported by the new AEP adapter |
-| `workspace.replace` | Existing Agent approval required; full-file replacement with SHA precondition | Unsupported by the new AEP adapter |
-| `workspace.test` | Existing Agent approval plus `cpu-heavy` Resource Manager lease; whole-root test discovery | Unsupported for task-scoped AEP work until isolation and test selection are defined |
+| `workspace.create` | Existing Agent approval required | Candidate task-worktree adapter exists; only host-authorized task worktrees behind the Project Runtime Broker; not active in the legacy Agent |
+| `workspace.replace` | Existing Agent approval required; full-file replacement with SHA precondition | Candidate task-worktree adapter exists; exact worktree-relative path and expected SHA-256 required; not active in the legacy Agent |
+| `workspace.test` | Existing Agent approval plus `cpu-heavy` Resource Manager lease; legacy whole-root test discovery | Candidate task-worktree adapter exists for host-pinned Node test profiles, exact test files and a Broker Resource Lease; not connected to the production Windows ResourceManager |
 
-The separate Cormia read-only Coding Workspace wrapper exposes only list/read/diff/verify. It checks the underlying tool classification but deliberately does not attempt to recreate or bypass the Agent's interactive approval workflow.
+The separate Cormia read-only Coding Workspace wrapper exposes only list/read/diff/verify. The task-worktree create/replace/test adapters are separate candidate adapters, registered only by a trusted host composition behind the Project Runtime Broker; they do not call the legacy mutating tools and do not bypass the Agent's interactive approval workflow.
 
 The existing `APPROVO` prompt remains part of the Agent's current `/code` compatibility path. It is an operation-scoped interactive approval, not a signed task-scoped consent grant. It must not be silently reinterpreted as permission for remote or unattended work. Conversely, the Cormia adapter must not directly call the underlying write/replace/test operations merely because the local class recognizes them.
 
-The project goal of bounded autonomous execution after a task is accepted is addressed by ADR-0010. Until the project mandate, isolated worktree, child-grant engine and consent/revocation lifecycle are implemented and tested, this current read-only adapter must continue to reject mutation/test grants. Do not replace this gap with a human prompt on every edit, and do not simply bypass the legacy Agent approval gate.
+The project goal of bounded autonomous execution after a task is accepted is addressed by ADR-0010. The isolated worktree and create/replace/fixed-profile test adapter code now exists as candidate host components, but production signed mandate, authenticated consent, trusted key bootstrap, durable anti-rollback revocation, real ResourceManager composition and host service integration are still missing. Until those are active and verified, the default read-only Runtime must continue to reject mutation/test grants. Do not replace this gap with a human prompt on every edit, and do not simply bypass the legacy Agent approval gate.
 
 ## 6. Resource and execution separation
 
 A Task Manifest resource requirement is not itself authority to consume host resources. The local Resource Manager wrapper accepts only fixed operation identifiers supplied by trusted Runtime code and maps them to existing lease classes. The model/task text must not select a Resource Manager class.
 
-For `workspace.test`, admission must include the trusted `workspace-test` lease operation, and release must occur on every exit path. This is still in-process admission control, not an OS-level quota or sandbox proof. The current test runner is fixed and network-disabled, but it discovers tests across the full workspace root. That prevents claiming per-task execution isolation.
+For `workspace.test`, admission must include the trusted `workspace-test` lease operation, and release must occur on every exit path. The new candidate adapter accepts only a host-registered Node test profile with exact test files and runs it in the task worktree through a digest-pinned Docker image, local default context, `--pull=never`, no network, non-root identity and bounded resources. It polls the Broker lease and stops on revocation/expiry. This remains in-process admission plus Docker limits, not proof of OS-wide quotas or a hardened VM. The production ResourceManager and approved IMMORTAL profile are not yet wired. The old Agent's whole-root test runner remains a separate compatibility path.
 
 `workspace.verify` must remain distinct from `workspace.test`: the former performs file/hash and parser checks; the latter executes tests in Docker. Evidence must preserve this distinction.
 

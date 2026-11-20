@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cormia:core:project-lifecycle-event:0.1.0",
+  "title": "Cormia Core Project Lifecycle Journal Event",
+  "description": "Append-event data shape for a project lifecycle stream. Sequence ordering, append-only persistence, digest calculation and replay are responsibilities of the journal implementation, not this schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "recordType",
+    "eventId",
+    "projectRef",
+    "sequence",
+    "eventType",
+    "fromState",
+    "toState",
+    "actorRef",
+    "occurredAt",
+    "reasonCode",
+    "evidenceRefs",
+    "previousEventDigest",
+    "recordDigest"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "recordType": {
+      "type": "string",
+      "const": "cormia.core.project-lifecycle-event"
+    },
+    "eventId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "projectRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "project_created",
+        "project_configured",
+        "project_activated",
+        "project_paused",
+        "project_resumed",
+        "project_blocked",
+        "project_unblocked",
+        "project_completed",
+        "project_archived",
+        "project_metadata_updated"
+      ]
+    },
+    "fromState": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        null,
+        "draft",
+        "configured",
+        "active",
+        "paused",
+        "blocked",
+        "completed",
+        "archived"
+      ]
+    },
+    "toState": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "configured",
+        "active",
+        "paused",
+        "blocked",
+        "completed",
+        "archived"
+      ]
+    },
+    "actorRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reasonCode": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "maxItems": 256,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 512
+      }
+    },
+    "causationRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "correlationRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "previousEventDigest": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "recordDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "eventType": {
+            "const": "project_metadata_updated"
+          }
+        },
+        "required": [
+          "eventType"
+        ]
+      },
+      "then": {
+        "properties": {
+          "evidenceRefs": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ]
+}

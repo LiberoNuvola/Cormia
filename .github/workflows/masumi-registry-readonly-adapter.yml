@@ -1,0 +1,55 @@
+name: Masumi Registry Read-only Adapter
+
+on:
+  push:
+    branches: [main, work/exp-generalization-crosswalk]
+    paths:
+      - "runtime/reference-worker/masumi-registry-readonly-adapter.mjs"
+      - "runtime/reference-worker/masumi-registry-readonly-adapter.test.mjs"
+      - "runtime/reference-worker/masumi-payment-registry-readonly-adapter.mjs"
+      - "runtime/reference-worker/masumi-payment-registry-readonly-adapter.test.mjs"
+      - "scripts/probe-masumi-registry-preprod.mjs"
+      - "scripts/probe-masumi-registry-preprod.test.mjs"
+      - "scripts/probe-masumi-payment-registry-preprod.mjs"
+      - "scripts/probe-masumi-payment-registry-preprod.test.mjs"
+      - ".github/workflows/masumi-registry-readonly-adapter.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "runtime/reference-worker/masumi-registry-readonly-adapter.mjs"
+      - "runtime/reference-worker/masumi-registry-readonly-adapter.test.mjs"
+      - "runtime/reference-worker/masumi-payment-registry-readonly-adapter.mjs"
+      - "runtime/reference-worker/masumi-payment-registry-readonly-adapter.test.mjs"
+      - "scripts/probe-masumi-registry-preprod.mjs"
+      - "scripts/probe-masumi-registry-preprod.test.mjs"
+      - "scripts/probe-masumi-payment-registry-preprod.mjs"
+      - "scripts/probe-masumi-payment-registry-preprod.test.mjs"
+      - ".github/workflows/masumi-registry-readonly-adapter.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    name: Masumi Registry read-only contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check adapter and local probe syntax
+        run: |
+          node --check runtime/reference-worker/masumi-registry-readonly-adapter.mjs
+          node --check runtime/reference-worker/masumi-payment-registry-readonly-adapter.mjs
+          node --check scripts/probe-masumi-registry-preprod.mjs
+          node --check scripts/probe-masumi-payment-registry-preprod.mjs
+
+      - name: Run offline contract tests only
+        run: node --test runtime/reference-worker/masumi-registry-readonly-adapter.test.mjs runtime/reference-worker/masumi-payment-registry-readonly-adapter.test.mjs scripts/probe-masumi-registry-preprod.test.mjs scripts/probe-masumi-payment-registry-preprod.test.mjs

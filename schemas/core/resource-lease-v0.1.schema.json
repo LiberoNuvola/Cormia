@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cormia:core:resource-lease:0.1.0",
+  "title": "Cormia Core Resource Lease",
+  "description": "Cormia Core record contract v0.1.0. This schema defines data shape only; trusted Runtime policy and durable storage semantics remain separate.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "recordType",
+    "leaseId",
+    "offerId",
+    "consumerTaskRef",
+    "capabilityProfileRef",
+    "reservedCapacity",
+    "leaseState",
+    "issuedAt",
+    "expiresAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "recordType": {
+      "type": "string",
+      "const": "cormia.core.resource-lease"
+    },
+    "leaseId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "offerId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "consumerTaskRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "capabilityProfileRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "reservedCapacity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quantity",
+        "unit"
+      ],
+      "properties": {
+        "quantity": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      }
+    },
+    "leaseState": {
+      "type": "string",
+      "enum": [
+        "requested",
+        "reserved",
+        "active",
+        "released",
+        "revoked",
+        "expired",
+        "failed"
+      ]
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "activatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "releasedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "terminalReasonRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "leaseState": {
+            "const": "active"
+          }
+        },
+        "required": [
+          "leaseState"
+        ]
+      },
+      "then": {
+        "required": [
+          "activatedAt"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "leaseState": {
+            "const": "released"
+          }
+        },
+        "required": [
+          "leaseState"
+        ]
+      },
+      "then": {
+        "required": [
+          "releasedAt"
+        ]
+      }
+    }
+  ]
+}

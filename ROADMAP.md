@@ -6,6 +6,19 @@
 - Prior-art register and licensing decision.
 - Normative principles, actors, trust model and layer boundaries.
 
+## Gate 0A — Current architecture prior-art composition gate
+
+Before building any newly proposed Core subsystem, map it to an existing standard/system or justify the Cormia-specific residual. The canonical review is [Cormia Prior-Art Composition Review v0.1](docs/research/CORMIA_PRIOR_ART_COMPOSITION_REVIEW_2026-11-03.md).
+
+- Complete PA-01 durable local task execution comparison (Temporal vs LangGraph/current local store) before creating a generic task engine.
+- Complete PA-02 authority/delegation comparison (current mandate + Cedar/OPA; current grant + UCAN/Biscuit) before creating a new policy language or token format.
+- Complete PA-03 host-isolation comparison (Windows/Linux native enforcement, with optional gVisor/Kata/Firecracker tiers) before creating Cormia sandbox code.
+- Complete PA-04 provenance comparison (in-toto/DSSE/SLSA + Orynq + SCITT/Materios) before freezing a new completion-receipt envelope or evidence log.
+- Complete PA-05 only if a real multi-agent workflow needs a chat backend beyond A2A/MCP and Git worktrees.
+- Complete PA-06 before remote compute markets, CRC issuance or project compute rewards.
+- Record exact upstream version, source commit, license, dependency/security review, trust boundary, adapter contract and conformance tests for each adopted implementation.
+- If an upstream system satisfies the requirement, ADOPT/ADAPT it rather than implementing a competing generic subsystem.
+
 ## Gate 0B — Preserve and map the existing nucleus
 
 - Map the IMMORTAL Local Agent v0.8.0, Resource Manager, Evolution Manager, Coding Workspace and persistent task/audit lineage.
@@ -48,11 +61,29 @@
 
 ## Gate 4 — Local reference worker
 
-- protocol client and chain adapter;
-- persistent task engine, checkpoint/resume;
-- deterministic capability engine;
-- resource manager and sandbox;
-- evidence package generation.
+- protocol client and optional chain adapter;
+- selected durable workflow runtime, checkpoint/resume and idempotent side-effect handling (after PA-01; no home-grown generic workflow engine by default);
+- trusted mandate binding and selected policy/capability evaluation (after PA-02);
+- host-owned Resource Broker using native OS/runtime isolation and limits (after PA-03; no custom sandbox);
+- evidence built from standard provenance/attestation formats and existing trace tooling (after PA-04; no custom envelope by default).
+
+## Gate 4A — Team Collaboration and Internal Delivery
+
+- Compose agent interoperability through A2A and tool/resource access through MCP; do not invent a new agent messaging protocol.
+- Start collaboration with isolated Git worktrees, branches/patches, shared artifact references and an explicit integration task; do not build a custom VCS or shared filesystem protocol.
+- Evaluate Matrix or Zulip only if the first two-agent workflow demonstrates a need for a persistent Team Room. Yjs or another CRDT is optional only for proven simultaneous same-document editing.
+- Reuse the selected CI runner, existing Flux Point DoD gates and JEV evidence vocabulary for build/test/review; do not build a parallel CI engine.
+- Keep local actions, artifacts, repository history and optional GitHub publication as separate delivery profiles.
+- Request owner authorization by default before publishing a verified candidate to GitHub; keep protected merge, release and production deploy as separate actions.
+- Prove a solo local-maintenance task can finish without Team Room, repository remote, GitHub or economic adapters.
+- Prove a two-agent team flow with A2A/MCP or local adapters, isolated worktrees, integration, build/test, repair and local candidate delivery before adding a second PC.
+
+Gate 4 also includes the first Cormia Node evidence slice:
+- local Resource Broker remains the host authority for each machine; remote project agents never receive general host access;
+- wrap native Windows or Linux resource/isolation mechanisms behind a task-bound Cormia lease; do not create a new sandbox or claim GPU enforcement where the host cannot provide it;
+- do not freeze a bespoke Work Completion Receipt schema before PA-04. First test in-toto/DSSE/SLSA, Orynq traces/tool receipts and optional SCITT/Materios anchoring; add only a narrow Cormia predicate for mandate/task/attempt/lease/verifier/acceptance binding if needed;
+- meter source, units, interval, precision, host controls and tamper limitations must be explicit;
+- verify local revocation, lease expiry and process/workspace isolation before any remote certification adapter.
 
 ## Gate 5 — Independent verifier network
 
@@ -60,6 +91,8 @@
 - replication, verdict commitments and challenges;
 - proof adapters where justified;
 - liveness and collusion testing.
+
+Gate 5 also requires workload-specific verification requirements to map each claim to a supported upstream format/verifier. Keep trace integrity, artifact provenance, availability, resource metering, execution-environment attestation, task-outcome acceptance, proof of execution and chain finality as separate dimensions; do not assume a universal R0–R4 ladder is an industry standard. A Materios certificate must state the exact claim verified; a receipt hash/Merkle proof or committee availability attestation alone does not establish task completion or semantic correctness. Do not enable CRC mint from unsupported or incomplete evidence profiles.
 
 ## Gate 6 — Testnet public pilot
 
@@ -83,9 +116,12 @@ No gate is passed solely by code compilation, model self-report, or a single hap
 - local-only user experience works without wallet, account, network or model API key;
 - first node can donate only opt-in spare capacity under Resource Manager policy;
 - whole-model serving on one peer is measured before split-model inference;
-- CRC balance can be reconstructed from signed receipts and challenged;
+- CRC balance can be reconstructed from accepted, task-bound contribution receipts and challenged; the receipt includes the required workload-specific verification profile, not merely a worker-signed usage claim;
 - no silent paid/cloud fallback;
 - model identity, prompt privacy disclosure and node revocation are tested;
 - published benchmark compares local inference, peer inference and contribution/consumption fairness.
+- Keep the existing CRC usage-right model distinct from a project-specific compute reward pool.
+- Specify an optional funded reward bucket for accepted useful compute only after contribution receipts, NUWU benchmarking, allocation rules, sponsor custody, dispute handling and anti-Sybil controls are evidenced.
+- Do not pay for advertised capacity or raw uptime; do not promise a share of an unfunded bucket.
 
-Split-model inference, TEE, ZKML and monetary provider payouts are later optional profiles, not prerequisites for the first pilot.
+Split-model inference, TEE, ZKML and monetary provider payouts are later optional profiles, not prerequisites for the first pilot. A project-specific compute reward pool remains a separate optional economic profile and is not a prerequisite for local or team collaboration.
