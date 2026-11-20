@@ -293,7 +293,7 @@ Without all three, the probe exits `NOT_RUN` with `requestSent:false`. It has no
 
 A Payment Service record is authoritative evidence that the identified Payment Service database has a registration row in a confirmed state under that caller's permissions. It is not independent proof that the NFT currently exists on Cardano or that the mint/update transaction matches the reported identifier and selling wallet. For V2, Cormia must still verify the exact `(Preprod, policyId, assetName)`, registration/update transaction, policy/contract version and relevant wallet provenance on chain. Until a self-hosted endpoint, deployed image/version, key scope, redacted fixture and chain comparison are qualified, M1 remains **PARTIAL / BLOCKED** and live discovery remains disabled.
 
-The new adapter and probe have synthetic offline tests wired into the Masumi GitHub Actions workflow. Their results are not yet claimed here; see the latest workflow result linked from the PR after CI completes. No live Payment Service call or credential was used.
+The new adapter and probe have synthetic offline tests wired into the Masumi GitHub Actions workflow. [Run #44682904809](https://github.com/LiberoNuvola/Cormia/actions/runs/44682904809) passed **35/35 tests** on code commit `a00ff5026b7d2d27723176b980d71bc7cd76dd26` (15 Payment Service adapter, 4 Payment Service probe, 12 Registry discovery adapter and 4 Registry probe tests). The run is synthetic/offline only; it does not prove access to a live self-hosted Preprod node or on-chain NFT provenance.
 
 ## 10. Delivery gates
 
