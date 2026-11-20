@@ -166,5 +166,5 @@ The Payment Service credential must be provisioned separately with READ permissi
 
 The API's `Registered` filter maps to `RegistrationConfirmed` and `UpdateConfirmed`. Cursor pagination is inclusive, so page collectors must deduplicate repeated cursor records by row ID. The record's `agentIdentifier`, seller wallet vKey and current transaction hash are authoritative Payment Service claims, not on-chain proof; the exact policy/asset tuple and mint/update transaction must still be checked independently on Cardano.
 
-The dedicated Masumi workflow now includes both Registry Service and Payment Service adapter/probe suites. CI uses only synthetic responses and never contacts either live service. No Payment Service URL, credential, or live Preprod response is configured in this repository.
+The dedicated Masumi workflow now includes both Registry Service and Payment Service adapter/probe suites. [Run #44682904809](https://github.com/LiberoNuvola/Cormia/actions/runs/44682904809) passed **35/35 tests** on code commit `a00ff5026b7d2d27723176b980d71bc7cd76dd26` (15 Payment Service adapter, 4 Payment Service probe, 12 Registry discovery adapter and 4 Registry probe tests). CI uses only synthetic responses and never contacts either live service. No Payment Service URL, credential, or live Preprod response is configured in this repository.
 
