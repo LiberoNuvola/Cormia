@@ -1,6 +1,6 @@
 # Cormia–Masumi Adapter — Proposal v0.1
 
-- **Status:** proposed adapter contract; M2 read-only candidate implemented; 16/16 offline adapter/probe tests pass in GitHub Actions; live Preprod discovery remains disabled pending M1
+- **Status:** proposed adapter contract; Registry discovery adapter and separate Payment Service registration-evidence adapter implemented; Payment Service contract suite pending CI; live Preprod discovery remains disabled pending deployment qualification
 - **Date:** 2026-11-18
 - **Target:** Cormia / IMMORTAL AEP
 - **Scope:** optional external agent discovery, identity evidence and payment/escrow interoperability
@@ -253,6 +253,47 @@ No production adapter is accepted until all of the following pass against a pinn
 8. Publish a redacted evidence packet and pinned dependency/version record.
 
 Mainnet and automatic hiring remain out of scope pending independent security, economic and privacy review.
+
+## Payment Service registration-evidence read — 2026-11-20
+
+### Deployment constraint
+
+The authoritative registration-record route is implemented in the separate Masumi Payment Service, not the Registry Service. The Payment Service exposes `GET /api/v1/registry/`, uses READ permission and the `token` header, and applies the authenticated key's network and wallet scopes.
+
+The official Masumi skills repository explicitly lists `https://payment.masumi.network/api/v1` as the **managed Mainnet** host and states there is no managed Preprod Payment Service host. Preprod therefore requires a self-hosted Payment Service instance. The operator's actual Preprod origin is not known and has not been inferred. Source is pinned to `masumi-network/masumi-skills` commit `3eabe4a243dfd3ee326a105736215eeb0d83c787`.
+
+### Adapter contract
+
+A separate client is implemented at `runtime/reference-worker/masumi-payment-registry-readonly-adapter.mjs`. It performs only `GET /api/v1/registry/` with these fixed filters:
+
+- `network=Preprod`
+- `filterPaymentSourceType=Web3CardanoV2`
+- `filterStatus=Registered`
+- page size capped at 20; optional cursor or exact `filterAgentIdentifier`
+
+It validates the Payment Service response envelope `{status:"success", data:{Assets:[...]}}`, requires registration states `RegistrationConfirmed` or `UpdateConfirmed`, V2 source type, exact identifier format bounds, seller wallet vKey/address and structurally valid transaction reference. It preserves unknown record fields as evidence; it does not convert a Payment Service record into on-chain verification.
+
+The known managed Mainnet hostname `payment.masumi.network` is rejected as a Preprod target. HTTPS is required for remote hosts; HTTP is permitted only for loopback self-hosts. The URL must end exactly at `/api/v1`. The client sends the `token` header, rejects redirects, enforces bounded timeout and streaming response bytes, and never calls payment, purchase, wallet, API-key, registration mutation or chain routes.
+
+**Operator key precondition:** provision a separate Payment Service credential with READ permission, PAY and ADMIN denied, Preprod-only network access, and the narrowest suitable wallet scope. The adapter cannot verify the credential's permissions. A wallet-scope-unrestricted key sees every registration on its allowed network and must not be used without an explicit operator decision.
+
+The optional exact-identifier query is a V2-aware lookup. A list query always includes the V2 source and Registered status filters. In upstream source, Registered includes `RegistrationConfirmed` and `UpdateConfirmed`. Cursor pagination is inclusive; the cursor record is repeated on the next page, so a collector must deduplicate by the Payment Service row ID.
+
+### Guarded operator probe
+
+`scripts/probe-masumi-payment-registry-preprod.mjs` requires all three local environment values:
+
+- `MASUMI_PAYMENT_SERVICE_PREPROD_URL` — operator-configured self-hosted `/api/v1` URL;
+- `MASUMI_PAYMENT_SERVICE_PREPROD_READ_TOKEN` — dedicated read-only token;
+- `MASUMI_PAYMENT_SERVICE_PREPROD_ACK=I_ACKNOWLEDGE_SELF_HOSTED_PREPROD_READ_ONLY`.
+
+Without all three, the probe exits `NOT_RUN` with `requestSent:false`. It has no default hostname, never uses the Mainnet managed hostname, makes one read-only request, and emits aggregate counts only. A custom exact-identifier query can be supplied through `MASUMI_PAYMENT_REGISTRY_AGENT_IDENTIFIER`; the identifier itself is not printed.
+
+### Qualification boundary
+
+A Payment Service record is authoritative evidence that the identified Payment Service database has a registration row in a confirmed state under that caller's permissions. It is not independent proof that the NFT currently exists on Cardano or that the mint/update transaction matches the reported identifier and selling wallet. For V2, Cormia must still verify the exact `(Preprod, policyId, assetName)`, registration/update transaction, policy/contract version and relevant wallet provenance on chain. Until a self-hosted endpoint, deployed image/version, key scope, redacted fixture and chain comparison are qualified, M1 remains **PARTIAL / BLOCKED** and live discovery remains disabled.
+
+The new adapter and probe have synthetic offline tests wired into the Masumi GitHub Actions workflow. Their results are not yet claimed here; see the latest workflow result linked from the PR after CI completes. No live Payment Service call or credential was used.
 
 ## 10. Delivery gates
 
