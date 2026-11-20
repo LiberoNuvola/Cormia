@@ -6,8 +6,12 @@ on:
     paths:
       - "runtime/reference-worker/masumi-registry-readonly-adapter.mjs"
       - "runtime/reference-worker/masumi-registry-readonly-adapter.test.mjs"
+      - "runtime/reference-worker/masumi-payment-registry-readonly-adapter.mjs"
+      - "runtime/reference-worker/masumi-payment-registry-readonly-adapter.test.mjs"
       - "scripts/probe-masumi-registry-preprod.mjs"
       - "scripts/probe-masumi-registry-preprod.test.mjs"
+      - "scripts/probe-masumi-payment-registry-preprod.mjs"
+      - "scripts/probe-masumi-payment-registry-preprod.test.mjs"
       - ".github/workflows/masumi-registry-readonly-adapter.yml"
   pull_request:
     branches: [main]
@@ -39,7 +43,9 @@ jobs:
       - name: Check adapter and local probe syntax
         run: |
           node --check runtime/reference-worker/masumi-registry-readonly-adapter.mjs
+          node --check runtime/reference-worker/masumi-payment-registry-readonly-adapter.mjs
           node --check scripts/probe-masumi-registry-preprod.mjs
+          node --check scripts/probe-masumi-payment-registry-preprod.mjs
 
       - name: Run offline contract tests only
-        run: node --test runtime/reference-worker/masumi-registry-readonly-adapter.test.mjs scripts/probe-masumi-registry-preprod.test.mjs
+        run: node --test runtime/reference-worker/masumi-registry-readonly-adapter.test.mjs runtime/reference-worker/masumi-payment-registry-readonly-adapter.test.mjs scripts/probe-masumi-registry-preprod.test.mjs scripts/probe-masumi-payment-registry-preprod.test.mjs
